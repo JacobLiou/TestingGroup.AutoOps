@@ -83,13 +83,8 @@ public class ThemeService
 
     public void CycleTheme()
     {
-        CurrentMode = CurrentMode switch
-        {
-            AppTheme.Auto => AppTheme.Dark,
-            AppTheme.Dark => AppTheme.Light,
-            AppTheme.Light => AppTheme.Auto,
-            _ => AppTheme.Auto
-        };
+        // Toggle by effective visual state to guarantee one-click dark/light switch.
+        CurrentMode = IsDarkTheme ? AppTheme.Light : AppTheme.Dark;
     }
 
     private void LoadSettings()
