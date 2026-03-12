@@ -46,8 +46,16 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private int _displayScore;
 
+    [ObservableProperty]
+    private string _themeIcon = "🌗";
+
+    [ObservableProperty]
+    private string _themeModeText = "主题: 自动";
+
     public MainViewModel()
     {
+        ThemeService.Instance.ThemeChanged += OnThemeChanged;
+        UpdateThemeProperties(ThemeService.Instance.CurrentMode, ThemeService.Instance.IsDarkTheme);
         ResetState();
     }
 
@@ -185,5 +193,30 @@ public partial class MainViewModel : ObservableObject
     private void StopScan()
     {
         _cts?.Cancel();
+    }
+
+    [RelayCommand]
+    private void ToggleTheme()
+    {
+        ThemeService.Instance.CycleTheme();
+    }
+
+    private void OnThemeChanged(AppTheme mode, bool isDark)
+    {
+        UpdateThemeProperties(mode, isDark);
+    }
+
+    private void UpdateThemeProperties(AppTheme mode, bool isDark)
+    {
+        ThemeIcon = isDark ? "🌙" : "☀️";
+        
+        string modeStr = mode switch
+        {
+            AppTheme.Auto => "自动",
+            AppTheme.Dark => "深色",
+            AppTheme.Light => "浅色",
+            _ => "未知"
+        };
+        ThemeModeText = $"主题: {modeStr}";
     }
 }
