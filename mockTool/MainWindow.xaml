@@ -229,60 +229,85 @@
                 </Border>
 
                 <!-- Item list -->
-                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                    <ItemsControl ItemsSource="{Binding DiagnosticItems}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border Padding="20,10" Margin="0,0,0,1"
-                                        Background="{Binding Status, Converter={StaticResource StatusToBg}}"
-                                        BorderBrush="{DynamicResource ThemeRowBorderBrush}" BorderThickness="0,0,0,1">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="50" />
-                                            <ColumnDefinition Width="180" />
-                                            <ColumnDefinition Width="140" />
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="100" />
-                                        </Grid.ColumnDefinitions>
+                <ListBox x:Name="DiagnosticListBox"
+                         Grid.Row="1"
+                         ItemsSource="{Binding DiagnosticItems}"
+                         SelectedItem="{Binding CurrentDiagnosticItem, Mode=TwoWay}"
+                         BorderThickness="0"
+                         Background="Transparent"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="Margin" Value="0" />
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="Focusable" Value="False" />
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Border Padding="20,10" Margin="0,0,0,1"
+                                    Background="{Binding Status, Converter={StaticResource StatusToBg}}"
+                                    BorderBrush="{DynamicResource ThemeRowBorderBrush}" BorderThickness="0,0,0,1">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                <Setter Property="BorderBrush" Value="{DynamicResource ThemeTextPrimaryBrush}" />
+                                                <Setter Property="BorderThickness" Value="2" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="50" />
+                                        <ColumnDefinition Width="180" />
+                                        <ColumnDefinition Width="140" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="100" />
+                                    </Grid.ColumnDefinitions>
 
-                                        <TextBlock Grid.Column="0" Text="{Binding CategoryIcon}"
-                                                   FontSize="18" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="0" Text="{Binding CategoryIcon}"
+                                               FontSize="18" VerticalAlignment="Center" />
 
-                                        <TextBlock Grid.Column="1" Text="{Binding Name}"
-                                                   FontSize="13" Foreground="{DynamicResource ThemeTextPrimaryBrush}"
-                                                   VerticalAlignment="Center" TextWrapping="Wrap" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Name}"
+                                               FontSize="13" Foreground="{DynamicResource ThemeTextPrimaryBrush}"
+                                               VerticalAlignment="Center" TextWrapping="Wrap" />
 
-                                        <TextBlock Grid.Column="2" Text="{Binding StatusText}"
-                                                   FontSize="13"
-                                                   Foreground="{Binding Status, Converter={StaticResource StatusToColor}}"
-                                                   VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="2" Text="{Binding StatusText}"
+                                               FontSize="13"
+                                               Foreground="{Binding Status, Converter={StaticResource StatusToColor}}"
+                                               VerticalAlignment="Center" />
 
-                                        <TextBlock Grid.Column="3" Text="{Binding Detail}"
-                                                   FontSize="12" Foreground="{DynamicResource ThemeTextSecondaryBrush}"
-                                                   VerticalAlignment="Center" TextWrapping="Wrap"
-                                                   Margin="0,0,10,0" />
+                                    <TextBlock Grid.Column="3" Text="{Binding Detail}"
+                                               FontSize="12" Foreground="{DynamicResource ThemeTextSecondaryBrush}"
+                                               VerticalAlignment="Center" TextWrapping="Wrap"
+                                               Margin="0,0,10,0" />
 
-                                        <Button Grid.Column="4"
-                                                Style="{StaticResource FixButton}"
-                                                Content="修复"
-                                                Command="{Binding DataContext.FixItemCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                CommandParameter="{Binding}"
-                                                VerticalAlignment="Center">
-                                            <Button.Visibility>
-                                                <MultiBinding>
-                                                    <MultiBinding.Converter>
-                                                        <conv:StatusToFixVisibilityConverter />
-                                                    </MultiBinding.Converter>
-                                                    <Binding Path="Status" />
-                                                </MultiBinding>
-                                            </Button.Visibility>
-                                        </Button>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
+                                    <Button Grid.Column="4"
+                                            Style="{StaticResource FixButton}"
+                                            Content="修复"
+                                            Command="{Binding DataContext.FixItemCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                            CommandParameter="{Binding}"
+                                            VerticalAlignment="Center">
+                                        <Button.Visibility>
+                                            <MultiBinding>
+                                                <MultiBinding.Converter>
+                                                    <conv:StatusToFixVisibilityConverter />
+                                                </MultiBinding.Converter>
+                                                <Binding Path="Status" />
+                                            </MultiBinding>
+                                        </Button.Visibility>
+                                    </Button>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
             </Grid>
         </Border>
 

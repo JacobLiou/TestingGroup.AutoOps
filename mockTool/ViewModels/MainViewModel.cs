@@ -26,6 +26,9 @@ public partial class MainViewModel : ObservableObject
     private string _currentScanItem = "就绪";
 
     [ObservableProperty]
+    private DiagnosticItem? _currentDiagnosticItem;
+
+    [ObservableProperty]
     private string _statusText = "点击「开始体检」全面扫描您的电脑";
 
     [ObservableProperty]
@@ -73,6 +76,7 @@ public partial class MainViewModel : ObservableObject
         IsScanning = false;
         ScanComplete = false;
         CurrentScanItem = "就绪";
+        CurrentDiagnosticItem = null;
         StatusText = "点击「开始体检」全面扫描您的电脑";
     }
 
@@ -93,6 +97,7 @@ public partial class MainViewModel : ObservableObject
             {
                 if (_cts.Token.IsCancellationRequested) break;
 
+                CurrentDiagnosticItem = item;
                 CurrentScanItem = $"{item.CategoryIcon} {item.Name}";
                 await DiagnosticEngine.RunCheckAsync(item, _cts.Token);
 
@@ -105,12 +110,14 @@ public partial class MainViewModel : ObservableObject
 
             ScanComplete = true;
             CurrentScanItem = "扫描完成";
+            CurrentDiagnosticItem = null;
             StatusText = $"体检完成！通过 {PassCount} 项 | 风险 {WarningCount} 项 | 异常 {FailCount} 项";
         }
         catch (OperationCanceledException)
         {
             StatusText = "扫描已取消";
             CurrentScanItem = "已取消";
+            CurrentDiagnosticItem = null;
         }
         finally
         {
