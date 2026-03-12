@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option csharp_namespace = "MockDiagTool.Protos";
+
+package mimsmock;
+
+service MimsBridge {
+  rpc SubmitXml (XmlEnvelope) returns (SubmitReply);
+}
+
+message XmlEnvelope {
+  string xml = 1;
+  string source = 2;
+  string message_type = 3;
+}
+
+message SubmitReply {
+  bool success = 1;
+  string code = 2;
+  string message = 3;
+  string received_at = 4;
+}

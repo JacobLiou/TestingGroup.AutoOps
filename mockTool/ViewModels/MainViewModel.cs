@@ -3,12 +3,18 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MockDiagTool.Models;
 using MockDiagTool.Services;
+using MockDiagTool.Services.Abstractions;
 
 namespace MockDiagTool.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
+    private const string DefaultMimsAuthor = "YUD";
+    private const string DefaultMimsSpec = "GUI";
+    private const string DefaultMimsPartNumber = "TEST-001";
+
     private CancellationTokenSource? _cts;
+    private readonly IExternalSystemClient _externalSystemClient;
 
     [ObservableProperty]
     private ObservableCollection<DiagnosticItem> _diagnosticItems = [];
@@ -55,8 +61,12 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private string _themeModeText = "主题: 自动";
 
+    [ObservableProperty]
+    private bool _isReportingToMims;
+
     public MainViewModel()
     {
+        _externalSystemClient = new MimsGrpcClient(new MimsXmlBuilder());
         ThemeService.Instance.ThemeChanged += OnThemeChanged;
         UpdateThemeProperties(ThemeService.Instance.CurrentMode, ThemeService.Instance.IsDarkTheme);
         ResetState();
@@ -77,6 +87,7 @@ public partial class MainViewModel : ObservableObject
         ScanComplete = false;
         CurrentScanItem = "就绪";
         CurrentDiagnosticItem = null;
+        IsReportingToMims = false;
         StatusText = "点击「开始体检」全面扫描您的电脑";
     }
 
@@ -112,6 +123,7 @@ public partial class MainViewModel : ObservableObject
             CurrentScanItem = "扫描完成";
             CurrentDiagnosticItem = null;
             StatusText = $"体检完成！通过 {PassCount} 项 | 风险 {WarningCount} 项 | 异常 {FailCount} 项";
+            await SendToMimsCoreAsync(trigger: "auto", cancellationToken: CancellationToken.None);
         }
         catch (OperationCanceledException)
         {
@@ -208,6 +220,17 @@ public partial class MainViewModel : ObservableObject
         ThemeService.Instance.CycleTheme();
     }
 
+    [RelayCommand(CanExecute = nameof(CanSendToMims))]
+    private async Task SendToMimsAsync()
+    {
+        await SendToMimsCoreAsync(trigger: "manual", cancellationToken: CancellationToken.None);
+    }
+
+    private bool CanSendToMims()
+    {
+        return !IsScanning && !IsReportingToMims && (ScanComplete || ScannedItems > 0);
+    }
+
     private void OnThemeChanged(AppTheme mode, bool isDark)
     {
         UpdateThemeProperties(mode, isDark);
@@ -225,5 +248,77 @@ public partial class MainViewModel : ObservableObject
             _ => "未知"
         };
         ThemeModeText = $"主题: {modeStr}";
+    }
+
+    partial void OnIsScanningChanged(bool value)
+    {
+        SendToMimsCommand.NotifyCanExecuteChanged();
+    }
+
+    partial void OnIsReportingToMimsChanged(bool value)
+    {
+        SendToMimsCommand.NotifyCanExecuteChanged();
+    }
+
+    partial void OnScanCompleteChanged(bool value)
+    {
+        SendToMimsCommand.NotifyCanExecuteChanged();
+    }
+
+    partial void OnScannedItemsChanged(int value)
+    {
+        SendToMimsCommand.NotifyCanExecuteChanged();
+    }
+
+    private async Task SendToMimsCoreAsync(string trigger, CancellationToken cancellationToken)
+    {
+        if (IsReportingToMims)
+        {
+            return;
+        }
+
+        IsReportingToMims = true;
+        try
+        {
+            var request = BuildMimsRequest();
+            var result = await _externalSystemClient.SendAskInfoAsync(request, cancellationToken);
+
+            if (result.Success)
+            {
+                StatusText = trigger == "auto"
+                    ? $"{StatusText} | 已自动上报 MIMS"
+                    : $"手动上报成功: {result.Code} ({result.Endpoint})";
+                return;
+            }
+
+            StatusText = trigger == "auto"
+                ? $"{StatusText} | MIMS 自动上报失败: {result.Code}"
+                : $"手动上报失败: {result.Code} - {result.Message}";
+        }
+        catch (Exception ex)
+        {
+            StatusText = trigger == "auto"
+                ? $"{StatusText} | MIMS 自动上报异常: {ex.Message}"
+                : $"手动上报异常: {ex.Message}";
+        }
+        finally
+        {
+            IsReportingToMims = false;
+        }
+    }
+
+    private MimsAskInfoRequest BuildMimsRequest()
+    {
+        return new MimsAskInfoRequest
+        {
+            Author = DefaultMimsAuthor,
+            Spec = DefaultMimsSpec,
+            PartNumber = DefaultMimsPartNumber,
+            Date = DateTime.Now,
+            TotalItems = TotalItems,
+            PassCount = PassCount,
+            WarningCount = WarningCount,
+            FailCount = FailCount
+        };
     }
 }
