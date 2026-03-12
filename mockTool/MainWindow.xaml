@@ -1,0 +1,312 @@
+<Window x:Class="MockDiagTool.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:MockDiagTool.ViewModels"
+        xmlns:conv="clr-namespace:MockDiagTool.Converters"
+        Title="🛡 电脑安全体检 — Mock Diagnostic Tool"
+        Height="800" Width="1100"
+        MinHeight="700" MinWidth="900"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource ThemeBgBrush}">
+
+    <Window.DataContext>
+        <vm:MainViewModel />
+    </Window.DataContext>
+
+    <Window.Resources>
+        <conv:StatusToColorConverter x:Key="StatusToColor" />
+        <conv:StatusToBgConverter x:Key="StatusToBg" />
+        <conv:ScoreToColorConverter x:Key="ScoreToColor" />
+        <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
+        <conv:InverseBoolToVisibilityConverter x:Key="InvBoolToVis" />
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- ═══════════ HEADER ═══════════ -->
+        <Border Grid.Row="0" Padding="24,16" Background="{DynamicResource ThemeHeaderBgBrush}">
+            <Grid>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="🛡" FontSize="28" VerticalAlignment="Center" />
+                    <TextBlock Text="  电脑安全体检" FontSize="22" FontWeight="Bold"
+                               Foreground="{DynamicResource ThemeTextPrimaryBrush}" VerticalAlignment="Center" />
+                    <TextBlock Text="  Mock Diagnostic Tool" FontSize="13"
+                               Foreground="{DynamicResource ThemeTextSecondaryBrush}" VerticalAlignment="Center" Margin="8,4,0,0" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <!-- Theme toggle button -->
+                    <Button Style="{StaticResource ThemeToggleButton}"
+                            Content="{Binding ThemeIcon}"
+                            Command="{Binding ToggleThemeCommand}"
+                            Margin="0,0,16,0" />
+                    <TextBlock Text="{Binding StatusText}" FontSize="13"
+                               Foreground="{DynamicResource ThemeTextSecondaryBrush}"
+                               VerticalAlignment="Center" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ═══════════ SCORE RING + SCAN AREA ═══════════ -->
+        <Border Grid.Row="1" Padding="0,30,0,20">
+            <Grid HorizontalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Score Circle -->
+                <Grid Grid.Column="0" Width="200" Height="200" Margin="40,0">
+                    <!-- Background ring -->
+                    <Ellipse Stroke="{DynamicResource ThemeRingBgBrush}" StrokeThickness="10" />
+                    <!-- Animated ring -->
+                    <Ellipse Stroke="{Binding DisplayScore, Converter={StaticResource ScoreToColor}}"
+                             StrokeThickness="10" StrokeDashArray="4 1" Opacity="0.7"
+                             RenderTransformOrigin="0.5,0.5">
+                        <Ellipse.RenderTransform>
+                            <RotateTransform x:Name="ringRotation" />
+                        </Ellipse.RenderTransform>
+                        <Ellipse.Style>
+                            <Style TargetType="Ellipse">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsScanning}" Value="True">
+                                        <DataTrigger.EnterActions>
+                                            <BeginStoryboard x:Name="SpinRing">
+                                                <Storyboard RepeatBehavior="Forever">
+                                                    <DoubleAnimation
+                                                        Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                                                        From="0" To="360" Duration="0:0:2" />
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </DataTrigger.EnterActions>
+                                        <DataTrigger.ExitActions>
+                                            <StopStoryboard BeginStoryboardName="SpinRing" />
+                                        </DataTrigger.ExitActions>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Ellipse.Style>
+                    </Ellipse>
+                    <!-- Glow effect when scanning -->
+                    <Ellipse Opacity="0.15" Fill="{Binding DisplayScore, Converter={StaticResource ScoreToColor}}">
+                        <Ellipse.Effect>
+                            <BlurEffect Radius="40" />
+                        </Ellipse.Effect>
+                        <Ellipse.Style>
+                            <Style TargetType="Ellipse">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsScanning}" Value="True">
+                                        <DataTrigger.EnterActions>
+                                            <BeginStoryboard x:Name="PulseGlow">
+                                                <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                     From="0.05" To="0.3" Duration="0:0:1" />
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </DataTrigger.EnterActions>
+                                        <DataTrigger.ExitActions>
+                                            <StopStoryboard BeginStoryboardName="PulseGlow" />
+                                        </DataTrigger.ExitActions>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Ellipse.Style>
+                    </Ellipse>
+                    <!-- Score text -->
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <TextBlock Text="{Binding DisplayScore}" FontSize="56" FontWeight="Bold"
+                                   Foreground="{Binding DisplayScore, Converter={StaticResource ScoreToColor}}"
+                                   HorizontalAlignment="Center" />
+                        <TextBlock Text="健康评分" FontSize="14"
+                                   Foreground="{DynamicResource ThemeTextSecondaryBrush}"
+                                   HorizontalAlignment="Center" />
+                    </StackPanel>
+                </Grid>
+
+                <!-- Center: current scanning item + action buttons -->
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="30,0" MinWidth="280">
+                    <TextBlock Text="{Binding CurrentScanItem}" FontSize="20" FontWeight="SemiBold"
+                               Foreground="{DynamicResource ThemeTextPrimaryBrush}" TextWrapping="Wrap" />
+                    <TextBlock Margin="0,8,0,0" FontSize="13"
+                               Foreground="{DynamicResource ThemeTextSecondaryBrush}">
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="已扫描 {0} / {1} 项">
+                                <Binding Path="ScannedItems" />
+                                <Binding Path="TotalItems" />
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
+                        <!-- Start Scan button -->
+                        <Button Style="{StaticResource PrimaryButton}"
+                                Content="🔍 开始体检"
+                                Command="{Binding StartScanCommand}"
+                                Visibility="{Binding IsScanning, Converter={StaticResource InvBoolToVis}}" />
+                        <!-- Stop button -->
+                        <Button Style="{StaticResource SecondaryButton}"
+                                Content="⏹ 停止"
+                                Command="{Binding StopScanCommand}"
+                                Visibility="{Binding IsScanning, Converter={StaticResource BoolToVis}}"
+                                Margin="8,0,0,0" />
+                        <!-- Fix All button -->
+                        <Button Style="{StaticResource FixButton}"
+                                Content="🔧 一键修复"
+                                Command="{Binding FixAllCommand}"
+                                Visibility="{Binding ScanComplete, Converter={StaticResource BoolToVis}}"
+                                Margin="8,0,0,0" />
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Right: summary cards -->
+                <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="30,0,40,0">
+                    <Border CornerRadius="10" Background="{DynamicResource ThemePassCardBgBrush}" Padding="16,10" Margin="0,4">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="✅" FontSize="18" VerticalAlignment="Center" />
+                            <TextBlock Text="  通过  " FontSize="14" Foreground="{DynamicResource ThemePassCardTextBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding PassCount}" FontSize="22" FontWeight="Bold"
+                                       Foreground="{DynamicResource ThemeAccentGreenBrush}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+                    <Border CornerRadius="10" Background="{DynamicResource ThemeWarnCardBgBrush}" Padding="16,10" Margin="0,4">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="⚠️" FontSize="18" VerticalAlignment="Center" />
+                            <TextBlock Text="  风险  " FontSize="14" Foreground="{DynamicResource ThemeWarnCardTextBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding WarningCount}" FontSize="22" FontWeight="Bold"
+                                       Foreground="{DynamicResource ThemeAccentOrangeBrush}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+                    <Border CornerRadius="10" Background="{DynamicResource ThemeFailCardBgBrush}" Padding="16,10" Margin="0,4">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="❌" FontSize="18" VerticalAlignment="Center" />
+                            <TextBlock Text="  异常  " FontSize="14" Foreground="{DynamicResource ThemeFailCardTextBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding FailCount}" FontSize="22" FontWeight="Bold"
+                                       Foreground="{DynamicResource ThemeAccentRedBrush}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ═══════════ RESULT LIST ═══════════ -->
+        <Border Grid.Row="2" Margin="20,0,20,10" CornerRadius="12"
+                Background="{DynamicResource ThemeCardBgBrush}"
+                BorderBrush="{DynamicResource ThemeCardBorderBrush}" BorderThickness="1">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- List header -->
+                <Border Grid.Row="0" Padding="20,12" Background="{DynamicResource ThemeHeaderBgBrush}"
+                        CornerRadius="12,12,0,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="50" />
+                            <ColumnDefinition Width="180" />
+                            <ColumnDefinition Width="140" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="100" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="类别" FontWeight="SemiBold" FontSize="13"
+                                   Foreground="{DynamicResource ThemeTextSecondaryBrush}" />
+                        <TextBlock Grid.Column="1" Text="检查项" FontWeight="SemiBold" FontSize="13"
+                                   Foreground="{DynamicResource ThemeTextSecondaryBrush}" />
+                        <TextBlock Grid.Column="2" Text="状态" FontWeight="SemiBold" FontSize="13"
+                                   Foreground="{DynamicResource ThemeTextSecondaryBrush}" />
+                        <TextBlock Grid.Column="3" Text="详情" FontWeight="SemiBold" FontSize="13"
+                                   Foreground="{DynamicResource ThemeTextSecondaryBrush}" />
+                        <TextBlock Grid.Column="4" Text="操作" FontWeight="SemiBold" FontSize="13"
+                                   Foreground="{DynamicResource ThemeTextSecondaryBrush}" />
+                    </Grid>
+                </Border>
+
+                <!-- Item list -->
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding DiagnosticItems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Padding="20,10" Margin="0,0,0,1"
+                                        Background="{Binding Status, Converter={StaticResource StatusToBg}}"
+                                        BorderBrush="{DynamicResource ThemeRowBorderBrush}" BorderThickness="0,0,0,1">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="50" />
+                                            <ColumnDefinition Width="180" />
+                                            <ColumnDefinition Width="140" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="100" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Grid.Column="0" Text="{Binding CategoryIcon}"
+                                                   FontSize="18" VerticalAlignment="Center" />
+
+                                        <TextBlock Grid.Column="1" Text="{Binding Name}"
+                                                   FontSize="13" Foreground="{DynamicResource ThemeTextPrimaryBrush}"
+                                                   VerticalAlignment="Center" TextWrapping="Wrap" />
+
+                                        <TextBlock Grid.Column="2" Text="{Binding StatusText}"
+                                                   FontSize="13"
+                                                   Foreground="{Binding Status, Converter={StaticResource StatusToColor}}"
+                                                   VerticalAlignment="Center" />
+
+                                        <TextBlock Grid.Column="3" Text="{Binding Detail}"
+                                                   FontSize="12" Foreground="{DynamicResource ThemeTextSecondaryBrush}"
+                                                   VerticalAlignment="Center" TextWrapping="Wrap"
+                                                   Margin="0,0,10,0" />
+
+                                        <Button Grid.Column="4"
+                                                Style="{StaticResource FixButton}"
+                                                Content="修复"
+                                                Command="{Binding DataContext.FixItemCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                CommandParameter="{Binding}"
+                                                VerticalAlignment="Center">
+                                            <Button.Visibility>
+                                                <MultiBinding>
+                                                    <MultiBinding.Converter>
+                                                        <conv:StatusToFixVisibilityConverter />
+                                                    </MultiBinding.Converter>
+                                                    <Binding Path="Status" />
+                                                </MultiBinding>
+                                            </Button.Visibility>
+                                        </Button>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+
+        <!-- ═══════════ FOOTER ═══════════ -->
+        <Border Grid.Row="3" Padding="24,10" Background="{DynamicResource ThemeHeaderBgBrush}">
+            <Grid>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Foreground="{DynamicResource ThemeTextSecondaryBrush}" FontSize="12">
+                        <Run Text="Auto-Ops Mock Diagnostic Tool v1.0" />
+                        <Run Text="  |  " />
+                        <Run Text="类似 360 安全卫士的电脑体检工具" />
+                    </TextBlock>
+                    <TextBlock Foreground="{DynamicResource ThemeTextSecondaryBrush}" FontSize="12"
+                               Margin="16,0,0,0" Text="{Binding ThemeModeText}" />
+                </StackPanel>
+                <TextBlock HorizontalAlignment="Right" FontSize="12"
+                           Foreground="{DynamicResource ThemeTextSecondaryBrush}" VerticalAlignment="Center">
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="共 {0} 项检查">
+                            <Binding Path="TotalItems" />
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

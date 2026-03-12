@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36414.22 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MockDiagTool", "MockDiagTool.csproj", "{0400A049-1CFF-E2C1-F282-1168D5A5B04F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0400A049-1CFF-E2C1-F282-1168D5A5B04F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0400A049-1CFF-E2C1-F282-1168D5A5B04F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0400A049-1CFF-E2C1-F282-1168D5A5B04F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0400A049-1CFF-E2C1-F282-1168D5A5B04F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F6B06C5E-0245-4BD7-A23B-7FB0A9780712}
+	EndGlobalSection
+EndGlobal
