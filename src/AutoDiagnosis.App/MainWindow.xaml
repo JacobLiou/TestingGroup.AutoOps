@@ -1,0 +1,162 @@
+<Window x:Class="AutoDiagnosis.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="AutoDiagnosis MVP"
+        Height="720"
+        Width="1180"
+        WindowStartupLocation="CenterScreen">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Border Padding="12" CornerRadius="8" BorderThickness="1" BorderBrush="#DDD">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="220" />
+                    <ColumnDefinition Width="220" />
+                    <ColumnDefinition Width="220" />
+                    <ColumnDefinition Width="160" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                    <TextBlock Text="Station ID" />
+                    <TextBox Text="{Binding StationId, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Margin="0,0,12,0">
+                    <TextBlock Text="Station Type" />
+                    <TextBox Text="{Binding StationType, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" Margin="0,0,12,0">
+                    <TextBlock Text="Product Family" />
+                    <TextBox Text="{Binding ProductFamily, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+                <StackPanel Grid.Column="3" Margin="0,0,12,0">
+                    <TextBlock Text="Role" />
+                    <ComboBox SelectedItem="{Binding SelectedRole}" ItemsSource="{Binding RoleOptions}" />
+                </StackPanel>
+                <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Right">
+                    <Button Content="Run Health Check" Padding="14,8" Margin="0,0,8,0" Command="{Binding RunHealthCheckCommand}" />
+                    <Button Content="Run Full Diagnosis" Padding="14,8" Margin="0,0,8,0" Command="{Binding RunDiagnosticCommand}" />
+                    <Button Content="Pause" Padding="14,8" Margin="0,0,8,0" Command="{Binding PauseScanCommand}" />
+                    <Button Content="Resume" Padding="14,8" Margin="0,0,8,0" Command="{Binding ResumeScanCommand}" />
+                    <Button Content="Stop" Padding="14,8" Margin="0,0,8,0" Command="{Binding StopScanCommand}" />
+                    <Button Content="Open Evidence Folder" Padding="14,8" Command="{Binding OpenEvidenceFolderCommand}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1" Margin="0,16,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="200" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Padding="10" CornerRadius="8" BorderThickness="1" BorderBrush="#DDD">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="220" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Grid.Column="0" Width="150" Height="150" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Ellipse Stroke="#E6E6E6" StrokeThickness="12" />
+                        <Ellipse Stroke="#2F80ED" StrokeThickness="12" StrokeDashArray="2 3" RenderTransformOrigin="0.5,0.5">
+                            <Ellipse.RenderTransform>
+                                <RotateTransform />
+                            </Ellipse.RenderTransform>
+                            <Ellipse.Style>
+                                <Style TargetType="Ellipse">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsScanning}" Value="True">
+                                            <DataTrigger.EnterActions>
+                                                <BeginStoryboard x:Name="RotateScanDisk">
+                                                    <Storyboard RepeatBehavior="Forever">
+                                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                                                                         From="0"
+                                                                         To="360"
+                                                                         Duration="0:0:1.1" />
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </DataTrigger.EnterActions>
+                                            <DataTrigger.ExitActions>
+                                                <StopStoryboard BeginStoryboardName="RotateScanDisk" />
+                                            </DataTrigger.ExitActions>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Ellipse.Style>
+                        </Ellipse>
+                        <TextBlock Text="SCAN" FontWeight="Bold" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Grid>
+
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10,0,0,0">
+                        <TextBlock Text="实时扫描状态" FontSize="15" FontWeight="SemiBold" />
+                        <TextBlock Margin="0,8,0,0"
+                                   FontSize="22"
+                                   FontWeight="Bold"
+                                   TextWrapping="Wrap"
+                                   Text="{Binding CurrentScanItem}" />
+                        <TextBlock Margin="0,10,0,0"
+                                   Foreground="#666"
+                                   Text="{Binding StatusText}" />
+                        <TextBlock Margin="0,6,0,0"
+                                   Foreground="#666"
+                                   Text="{Binding IsPaused, StringFormat=Paused: {0}}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <TabControl Grid.Row="1" Margin="0,16,0,0">
+                <TabItem Header="Health Check">
+                    <DataGrid ItemsSource="{Binding HealthResults}" AutoGenerateColumns="False" IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="180" />
+                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="250" />
+                            <DataGridTextColumn Header="Code" Binding="{Binding Code}" Width="120" />
+                            <DataGridTextColumn Header="Message" Binding="{Binding Message}" Width="*" />
+                            <DataGridTextColumn Header="Duration(ms)" Binding="{Binding DurationMs}" Width="120" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+                <TabItem Header="Runbook">
+                    <DataGrid ItemsSource="{Binding RunbookResults}" AutoGenerateColumns="False" IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Step ID" Binding="{Binding StepId}" Width="180" />
+                            <DataGridTextColumn Header="Step Name" Binding="{Binding StepName}" Width="250" />
+                            <DataGridTextColumn Header="Code" Binding="{Binding Code}" Width="120" />
+                            <DataGridTextColumn Header="Message" Binding="{Binding Message}" Width="*" />
+                            <DataGridTextColumn Header="Duration(ms)" Binding="{Binding DurationMs}" Width="120" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+                <TabItem Header="Self-Healing">
+                    <DataGrid ItemsSource="{Binding HealingResults}" AutoGenerateColumns="False" IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Action ID" Binding="{Binding ActionId}" Width="200" />
+                            <DataGridCheckBoxColumn Header="Succeeded" Binding="{Binding Succeeded}" Width="120" />
+                            <DataGridTextColumn Header="Message" Binding="{Binding Message}" Width="*" />
+                            <DataGridTextColumn Header="Executed At" Binding="{Binding ExecutedAt}" Width="220" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+            </TabControl>
+        </Grid>
+
+        <Border Grid.Row="2" Margin="0,12,0,0" Padding="10" CornerRadius="6" BorderThickness="1" BorderBrush="#DDD">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock FontWeight="Bold" Text="{Binding StatusText}" />
+                <TextBlock Margin="20,0,0,0" Text="Health Score:" />
+                <TextBlock FontWeight="SemiBold" Text="{Binding HealthScore}" />
+                <TextBlock Margin="20,0,0,0" Text="Evidence:" />
+                <TextBlock Text="{Binding LatestEvidencePath}" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

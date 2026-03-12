@@ -1,0 +1,52 @@
+{
+  "stationType": "default-station",
+  "hardware": [
+    {
+      "id": "serial-main-controller",
+      "name": "Main Controller UART",
+      "protocol": "serial",
+      "address": "COM3",
+      "timeoutMs": 1000,
+      "baudRate": 115200,
+      "probeCommand": "PING",
+      "expectedContains": "PONG"
+    }
+  ],
+  "dependencies": [
+    {
+      "id": "mes-api",
+      "name": "MES",
+      "type": "Http",
+      "target": "https://mes.example.com",
+      "timeoutMs": 2000,
+      "healthPath": "/health"
+    },
+    {
+      "id": "tms-api",
+      "name": "TMS",
+      "type": "Http",
+      "target": "https://tms.example.com",
+      "timeoutMs": 2000,
+      "healthPath": "/health"
+    },
+    {
+      "id": "tas-api",
+      "name": "TAS",
+      "type": "Http",
+      "target": "https://tas.example.com",
+      "timeoutMs": 2000,
+      "healthPath": "/health"
+    },
+    {
+      "id": "file-server",
+      "name": "File Server",
+      "type": "FileShare",
+      "target": "\\\\fileserver\\testdata",
+      "timeoutMs": 2000
+    }
+  ],
+  "requiredServices": [
+    "TestEngine",
+    "AutoDiagnosisAgent"
+  ]
+}
