@@ -33,4 +33,11 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="MimsMockServer\**\*.cs" />
+    <EmbeddedResource Remove="MimsMockServer\**\*" />
+    <None Remove="MimsMockServer\**\*" />
+    <Content Remove="MimsMockServer\**\*" />
+  </ItemGroup>
+
 </Project>
