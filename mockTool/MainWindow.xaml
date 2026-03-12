@@ -38,6 +38,8 @@
                                Foreground="{DynamicResource ThemeTextPrimaryBrush}" VerticalAlignment="Center" />
                     <TextBlock Text="  Mock Diagnostic Tool" FontSize="13"
                                Foreground="{DynamicResource ThemeTextSecondaryBrush}" VerticalAlignment="Center" Margin="8,4,0,0" />
+                    <TextBlock Text="  · RunBook驱动" FontSize="13"
+                               Foreground="{DynamicResource ThemeTextSecondaryBrush}" VerticalAlignment="Center" Margin="8,4,0,0" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                     <!-- Theme toggle button -->
@@ -218,7 +220,7 @@
                         CornerRadius="12,12,0,0">
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="50" />
+                            <ColumnDefinition Width="150" />
                             <ColumnDefinition Width="180" />
                             <ColumnDefinition Width="140" />
                             <ColumnDefinition Width="*" />
@@ -273,15 +275,20 @@
                                 </Border.Style>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="50" />
+                                        <ColumnDefinition Width="150" />
                                         <ColumnDefinition Width="180" />
                                         <ColumnDefinition Width="140" />
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="100" />
                                     </Grid.ColumnDefinitions>
 
-                                    <TextBlock Grid.Column="0" Text="{Binding CategoryIcon}"
-                                               FontSize="18" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="0"
+                                               Text="{Binding CategoryName}"
+                                               FontSize="13"
+                                               Foreground="{DynamicResource ThemeTextPrimaryBrush}"
+                                               VerticalAlignment="Center"
+                                               TextWrapping="Wrap"
+                                               Margin="0,0,8,0" />
 
                                     <TextBlock Grid.Column="1" Text="{Binding Name}"
                                                FontSize="13" Foreground="{DynamicResource ThemeTextPrimaryBrush}"

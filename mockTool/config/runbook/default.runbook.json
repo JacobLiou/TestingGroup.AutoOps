@@ -1,0 +1,38 @@
+{
+  "id": "default",
+  "title": "mockTool 全量诊断 RunBook",
+  "version": "1.0.0",
+  "steps": [
+    { "stepId": "S001", "checkId": "SYS_01", "displayName": "操作系统版本", "category": "SystemCheck", "timeoutMs": 5000, "enabled": true, "nextOnSuccess": "S002", "nextOnFailure": "S002", "params": {} },
+    { "stepId": "S002", "checkId": "SYS_02", "displayName": "系统运行时长", "category": "SystemCheck", "timeoutMs": 5000, "enabled": true, "nextOnSuccess": "S003", "nextOnFailure": "S003", "params": {} },
+    { "stepId": "S003", "checkId": "SYS_03", "displayName": "Windows 更新状态", "category": "SystemCheck", "timeoutMs": 5000, "enabled": true, "nextOnSuccess": "S004", "nextOnFailure": "S004", "params": {} },
+    { "stepId": "S004", "checkId": "SYS_04", "displayName": "系统时间同步", "category": "SystemCheck", "timeoutMs": 5000, "enabled": true, "nextOnSuccess": "S005", "nextOnFailure": "S005", "params": {} },
+
+    { "stepId": "S005", "checkId": "DSK_01", "displayName": "系统盘可用空间", "category": "HwStatusCheck", "timeoutMs": 5000, "enabled": true, "nextOnSuccess": "S006", "nextOnFailure": "S006", "params": {} },
+    { "stepId": "S006", "checkId": "DSK_02", "displayName": "磁盘剩余空间（所有驱动器）", "category": "HwStatusCheck", "timeoutMs": 5000, "enabled": true, "nextOnSuccess": "S007", "nextOnFailure": "S007", "params": {} },
+    { "stepId": "S007", "checkId": "DSK_03", "displayName": "临时文件夹清理", "category": "HwStatusCheck", "timeoutMs": 5000, "enabled": true, "nextOnSuccess": "S008", "nextOnFailure": "S008", "params": {} },
+
+    { "stepId": "S008", "checkId": "NET_01", "displayName": "网络连接状态", "category": "StationCheck", "timeoutMs": 5000, "enabled": true, "nextOnSuccess": "S009", "nextOnFailure": "S009", "params": {} },
+    { "stepId": "S009", "checkId": "NET_02", "displayName": "DNS 解析", "category": "StationCheck", "timeoutMs": 5000, "enabled": true, "nextOnSuccess": "S010", "nextOnFailure": "S010", "params": {} },
+    { "stepId": "S010", "checkId": "NET_03", "displayName": "互联网连通性", "category": "StationCheck", "timeoutMs": 5000, "enabled": true, "nextOnSuccess": "S011", "nextOnFailure": "S011", "params": {} },
+
+    { "stepId": "S011", "checkId": "EXT_MES", "displayName": "MES 接口连通性", "category": "StationCheck", "timeoutMs": 6000, "enabled": true, "nextOnSuccess": "S012", "nextOnFailure": "S012", "params": { "dependencyId": "EXT_MES" } },
+    { "stepId": "S012", "checkId": "EXT_TMS", "displayName": "TMS 接口连通性", "category": "StationCheck", "timeoutMs": 6000, "enabled": true, "nextOnSuccess": "S013", "nextOnFailure": "S013", "params": { "dependencyId": "EXT_TMS" } },
+    { "stepId": "S013", "checkId": "EXT_TAS", "displayName": "TAS AOI 接口连通性", "category": "StationCheck", "timeoutMs": 6000, "enabled": true, "nextOnSuccess": "S014", "nextOnFailure": "S014", "params": { "dependencyId": "EXT_TAS" } },
+    { "stepId": "S014", "checkId": "EXT_FILE_SERVER", "displayName": "文件服务器接口连通性", "category": "StationCheck", "timeoutMs": 6000, "enabled": true, "nextOnSuccess": "S015", "nextOnFailure": "S015", "params": { "dependencyId": "EXT_FILE_SERVER" } },
+    { "stepId": "S015", "checkId": "EXT_LAN", "displayName": "局域网网关连通性", "category": "StationCheck", "timeoutMs": 6000, "enabled": true, "nextOnSuccess": "S016", "nextOnFailure": "S016", "params": { "dependencyId": "EXT_LAN" } },
+
+    { "stepId": "S016", "checkId": "SEC_01", "displayName": "Windows 防火墙", "category": "HwSwFwCheck", "timeoutMs": 5000, "enabled": true, "nextOnSuccess": "S017", "nextOnFailure": "S017", "params": {} },
+    { "stepId": "S017", "checkId": "SEC_02", "displayName": "杀毒软件状态", "category": "HwSwFwCheck", "timeoutMs": 5000, "enabled": true, "nextOnSuccess": "S018", "nextOnFailure": "S018", "params": {} },
+    { "stepId": "S018", "checkId": "SEC_03", "displayName": "UAC (用户账户控制)", "category": "HwSwFwCheck", "timeoutMs": 5000, "enabled": true, "nextOnSuccess": "S019", "nextOnFailure": "S019", "params": {} },
+    { "stepId": "S019", "checkId": "SEC_04", "displayName": "自动登录安全", "category": "HwSwFwCheck", "timeoutMs": 5000, "enabled": true, "nextOnSuccess": "S020", "nextOnFailure": "S020", "params": {} },
+
+    { "stepId": "S020", "checkId": "SFT_01", "displayName": "开机启动项数量", "category": "HwSwFwCheck", "timeoutMs": 5000, "enabled": true, "nextOnSuccess": "S021", "nextOnFailure": "S021", "params": {} },
+    { "stepId": "S021", "checkId": "SFT_02", "displayName": "已安装程序数量", "category": "HwSwFwCheck", "timeoutMs": 5000, "enabled": true, "nextOnSuccess": "S022", "nextOnFailure": "S022", "params": {} },
+    { "stepId": "S022", "checkId": "SFT_03", "displayName": "COM / 串口枚举", "category": "HwSwFwCheck", "timeoutMs": 5000, "enabled": true, "nextOnSuccess": "S023", "nextOnFailure": "S023", "params": {} },
+
+    { "stepId": "S023", "checkId": "PRF_01", "displayName": "CPU 使用率", "category": "OpticalPerformanceCheck", "timeoutMs": 5000, "enabled": true, "nextOnSuccess": "S024", "nextOnFailure": "S024", "params": {} },
+    { "stepId": "S024", "checkId": "PRF_02", "displayName": "内存使用率", "category": "OpticalPerformanceCheck", "timeoutMs": 5000, "enabled": true, "nextOnSuccess": "S025", "nextOnFailure": "S025", "params": {} },
+    { "stepId": "S025", "checkId": "PRF_03", "displayName": "运行进程数", "category": "OpticalPerformanceCheck", "timeoutMs": 5000, "enabled": true, "nextOnSuccess": "", "nextOnFailure": "", "params": {} }
+  ]
+}

@@ -6,120 +6,148 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using Microsoft.Win32;
 using MockDiagTool.Models;
+using MockDiagTool.Services.Abstractions;
 
 namespace MockDiagTool.Services;
 
-/// <summary>
-/// Performs real Windows PC diagnostic checks.
-/// </summary>
 public static class DiagnosticEngine
 {
+    private static readonly RunbookProvider RunbookProvider = new();
     private static readonly ExternalDependencyHttpChecker ExternalChecker = new();
+    private static readonly CheckExecutorRegistry ExecutorRegistry = BuildExecutorRegistry();
 
-    public static List<DiagnosticItem> BuildCheckList()
+    public static RunbookDefinition LoadRunbook()
     {
-        return
-        [
-            // ── System ──
-            new() { Id = "SYS_01", Name = "操作系统版本", Category = CheckCategory.System },
-            new() { Id = "SYS_02", Name = "系统运行时长", Category = CheckCategory.System },
-            new() { Id = "SYS_03", Name = "Windows 更新状态", Category = CheckCategory.System },
-            new() { Id = "SYS_04", Name = "系统时间同步", Category = CheckCategory.System },
-
-            // ── Disk ──
-            new() { Id = "DSK_01", Name = "系统盘可用空间", Category = CheckCategory.Disk },
-            new() { Id = "DSK_02", Name = "磁盘剩余空间（所有驱动器）", Category = CheckCategory.Disk },
-            new() { Id = "DSK_03", Name = "临时文件夹清理", Category = CheckCategory.Disk },
-
-            // ── Network ──
-            new() { Id = "NET_01", Name = "网络连接状态", Category = CheckCategory.Network },
-            new() { Id = "NET_02", Name = "DNS 解析", Category = CheckCategory.Network },
-            new() { Id = "NET_03", Name = "互联网连通性", Category = CheckCategory.Network },
-
-            // ── External Dependencies (hardcoded mock, Postman-style) ──
-            new() { Id = ExternalDependencyIds.Mes, Name = "MES 接口连通性", Category = CheckCategory.External },
-            new() { Id = ExternalDependencyIds.Tms, Name = "TMS 接口连通性", Category = CheckCategory.External },
-            new() { Id = ExternalDependencyIds.Tas, Name = "TAS AOI 接口连通性", Category = CheckCategory.External },
-            new() { Id = ExternalDependencyIds.FileServer, Name = "文件服务器接口连通性", Category = CheckCategory.External },
-            new() { Id = ExternalDependencyIds.Lan, Name = "局域网网关连通性", Category = CheckCategory.External },
-
-            // ── Security ──
-            new() { Id = "SEC_01", Name = "Windows 防火墙", Category = CheckCategory.Security },
-            new() { Id = "SEC_02", Name = "杀毒软件状态", Category = CheckCategory.Security },
-            new() { Id = "SEC_03", Name = "UAC (用户账户控制)", Category = CheckCategory.Security },
-            new() { Id = "SEC_04", Name = "自动登录安全", Category = CheckCategory.Security },
-
-            // ── Software ──
-            new() { Id = "SFT_01", Name = "开机启动项数量", Category = CheckCategory.Software },
-            new() { Id = "SFT_02", Name = "已安装程序数量", Category = CheckCategory.Software },
-            new() { Id = "SFT_03", Name = "COM / 串口枚举", Category = CheckCategory.Software },
-
-            // ── Performance ──
-            new() { Id = "PRF_01", Name = "CPU 使用率", Category = CheckCategory.Performance },
-            new() { Id = "PRF_02", Name = "内存使用率", Category = CheckCategory.Performance },
-            new() { Id = "PRF_03", Name = "运行进程数", Category = CheckCategory.Performance },
-        ];
+        return RunbookProvider.Load();
     }
 
-    public static Task RunCheckAsync(DiagnosticItem item, CancellationToken ct)
+    public static List<DiagnosticItem> BuildCheckList(RunbookDefinition? runbook = null)
     {
-        return RunCheckAsync(item, null, ct);
+        runbook ??= LoadRunbook();
+        return runbook.Steps
+            .Where(s => s.Enabled)
+            .Select(s => new DiagnosticItem
+            {
+                Id = s.CheckId,
+                Name = s.DisplayName,
+                Category = ParseCategory(s.Category)
+            })
+            .ToList();
     }
 
-    public static async Task RunCheckAsync(DiagnosticItem item, DiagnosticRunContext? runContext, CancellationToken ct)
+    public static async Task<CheckExecutionOutcome> RunCheckAsync(
+        DiagnosticItem item,
+        RunbookStepDefinition step,
+        DiagnosticRunContext? runContext,
+        CancellationToken ct)
     {
         item.Status = CheckStatus.Scanning;
-        // Simulate a small delay to make scanning feel real
-        await Task.Delay(Random.Shared.Next(300, 800), ct);
+        await Task.Delay(Random.Shared.Next(200, 450), ct);
+
+        var executor = ExecutorRegistry.Resolve(step.CheckId);
+        if (executor is null)
+        {
+            item.Status = CheckStatus.Warning;
+            item.Detail = $"未注册的检查项: {step.CheckId}";
+            item.Score = 95;
+            return new CheckExecutionOutcome { Success = false };
+        }
+
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        if (step.TimeoutMs > 0)
+        {
+            linkedCts.CancelAfter(step.TimeoutMs);
+        }
 
         try
         {
-            switch (item.Id)
-            {
-                case "SYS_01": CheckOsVersion(item); break;
-                case "SYS_02": CheckUptime(item); break;
-                case "SYS_03": CheckWindowsUpdate(item); break;
-                case "SYS_04": CheckTimeSync(item); break;
-
-                case "DSK_01": CheckSystemDisk(item); break;
-                case "DSK_02": CheckAllDisks(item); break;
-                case "DSK_03": CheckTempFolder(item); break;
-
-                case "NET_01": CheckNetworkAvailable(item); break;
-                case "NET_02": CheckDns(item); break;
-                case "NET_03": CheckInternet(item); break;
-
-                case ExternalDependencyIds.Mes: await CheckExternalApiAsync(item, ExternalDependencyIds.Mes, runContext, ct); break;
-                case ExternalDependencyIds.Tms: await CheckExternalApiAsync(item, ExternalDependencyIds.Tms, runContext, ct); break;
-                case ExternalDependencyIds.Tas: await CheckExternalApiAsync(item, ExternalDependencyIds.Tas, runContext, ct); break;
-                case ExternalDependencyIds.FileServer: await CheckExternalApiAsync(item, ExternalDependencyIds.FileServer, runContext, ct); break;
-                case ExternalDependencyIds.Lan: await CheckExternalApiAsync(item, ExternalDependencyIds.Lan, runContext, ct); break;
-
-                case "SEC_01": CheckFirewall(item); break;
-                case "SEC_02": CheckAntivirus(item); break;
-                case "SEC_03": CheckUac(item); break;
-                case "SEC_04": CheckAutoLogin(item); break;
-
-                case "SFT_01": CheckStartupItems(item); break;
-                case "SFT_02": CheckInstalledPrograms(item); break;
-                case "SFT_03": CheckComPorts(item); break;
-
-                case "PRF_01": CheckCpu(item); break;
-                case "PRF_02": CheckMemory(item); break;
-                case "PRF_03": CheckProcesses(item); break;
-
-                default:
-                    item.Status = CheckStatus.Pass;
-                    item.Detail = "未知检查项";
-                    break;
-            }
+            return await executor.ExecuteAsync(item, step, runContext, linkedCts.Token);
+        }
+        catch (OperationCanceledException) when (!ct.IsCancellationRequested)
+        {
+            item.Status = CheckStatus.Fail;
+            item.Detail = $"检查超时（>{step.TimeoutMs}ms）";
+            item.Score = 60;
+            return new CheckExecutionOutcome { Success = false };
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
             item.Status = CheckStatus.Warning;
             item.Detail = $"检查时发生异常: {ex.Message}";
             item.Score = 95;
+            return new CheckExecutionOutcome { Success = false };
         }
+    }
+
+    private static CheckExecutorRegistry BuildExecutorRegistry()
+    {
+        var registry = new CheckExecutorRegistry();
+
+        RegisterSync(registry, "SYS_01", CheckOsVersion);
+        RegisterSync(registry, "SYS_02", CheckUptime);
+        RegisterSync(registry, "SYS_03", CheckWindowsUpdate);
+        RegisterSync(registry, "SYS_04", CheckTimeSync);
+        RegisterSync(registry, "DSK_01", CheckSystemDisk);
+        RegisterSync(registry, "DSK_02", CheckAllDisks);
+        RegisterSync(registry, "DSK_03", CheckTempFolder);
+        RegisterSync(registry, "NET_01", CheckNetworkAvailable);
+        RegisterSync(registry, "NET_02", CheckDns);
+        RegisterSync(registry, "NET_03", CheckInternet);
+        RegisterSync(registry, "SEC_01", CheckFirewall);
+        RegisterSync(registry, "SEC_02", CheckAntivirus);
+        RegisterSync(registry, "SEC_03", CheckUac);
+        RegisterSync(registry, "SEC_04", CheckAutoLogin);
+        RegisterSync(registry, "SFT_01", CheckStartupItems);
+        RegisterSync(registry, "SFT_02", CheckInstalledPrograms);
+        RegisterSync(registry, "SFT_03", CheckComPorts);
+        RegisterSync(registry, "PRF_01", CheckCpu);
+        RegisterSync(registry, "PRF_02", CheckMemory);
+        RegisterSync(registry, "PRF_03", CheckProcesses);
+
+        RegisterExternal(registry, ExternalDependencyIds.Mes);
+        RegisterExternal(registry, ExternalDependencyIds.Tms);
+        RegisterExternal(registry, ExternalDependencyIds.Tas);
+        RegisterExternal(registry, ExternalDependencyIds.FileServer);
+        RegisterExternal(registry, ExternalDependencyIds.Lan);
+
+        return registry;
+    }
+
+    private static void RegisterSync(CheckExecutorRegistry registry, string checkId, Action<DiagnosticItem> action)
+    {
+        registry.Register(new DelegateCheckExecutor(checkId, (item, _, _, _) =>
+        {
+            action(item);
+            return Task.FromResult(new CheckExecutionOutcome { Success = IsSuccessful(item.Status) });
+        }));
+    }
+
+    private static void RegisterExternal(CheckExecutorRegistry registry, string dependencyId)
+    {
+        registry.Register(new DelegateCheckExecutor(dependencyId, async (item, step, runContext, ct) =>
+        {
+            var resolvedDependencyId = step.Params.TryGetValue("dependencyId", out var id) && !string.IsNullOrWhiteSpace(id)
+                ? id
+                : dependencyId;
+            await CheckExternalApiAsync(item, resolvedDependencyId, runContext, ct);
+            return new CheckExecutionOutcome { Success = IsSuccessful(item.Status) };
+        }));
+    }
+
+    private static bool IsSuccessful(CheckStatus status)
+    {
+        return status is CheckStatus.Pass or CheckStatus.Fixed;
+    }
+
+    private static CheckCategory ParseCategory(string category)
+    {
+        return Enum.TryParse<CheckCategory>(category, ignoreCase: true, out var parsed)
+            ? parsed
+            : CheckCategory.SystemCheck;
     }
 
     // ────────── System Checks ──────────

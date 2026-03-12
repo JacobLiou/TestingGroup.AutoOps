@@ -14,13 +14,11 @@ public enum CheckStatus
 
 public enum CheckCategory
 {
-    System,
-    Disk,
-    Network,
-    External,
-    Security,
-    Software,
-    Performance
+    SystemCheck,
+    StationCheck,
+    HwSwFwCheck,
+    HwStatusCheck,
+    OpticalPerformanceCheck
 }
 
 public partial class DiagnosticItem : ObservableObject
@@ -30,14 +28,22 @@ public partial class DiagnosticItem : ObservableObject
     public CheckCategory Category { get; set; }
     public string CategoryIcon => Category switch
     {
-        CheckCategory.System => "🖥",
-        CheckCategory.Disk => "💾",
-        CheckCategory.Network => "🌐",
-        CheckCategory.External => "🏭",
-        CheckCategory.Security => "🛡",
-        CheckCategory.Software => "📦",
-        CheckCategory.Performance => "⚡",
+        CheckCategory.SystemCheck => "🖥",
+        CheckCategory.StationCheck => "🏭",
+        CheckCategory.HwSwFwCheck => "🧰",
+        CheckCategory.HwStatusCheck => "🔧",
+        CheckCategory.OpticalPerformanceCheck => "📈",
         _ => "❓"
+    };
+
+    public string CategoryName => Category switch
+    {
+        CheckCategory.SystemCheck => "System Check",
+        CheckCategory.StationCheck => "Station Check",
+        CheckCategory.HwSwFwCheck => "HW/SW/FW Check",
+        CheckCategory.HwStatusCheck => "HW Status Check",
+        CheckCategory.OpticalPerformanceCheck => "Optical Performance Check",
+        _ => "Unknown"
     };
 
     [ObservableProperty]

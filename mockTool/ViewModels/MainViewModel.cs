@@ -18,6 +18,8 @@ public partial class MainViewModel : ObservableObject
     private CancellationTokenSource? _cts;
     private readonly IExternalSystemClient _externalSystemClient;
     private readonly MimsConfigXmlParser _mimsConfigXmlParser;
+    private RunbookDefinition? _activeRunbook;
+    private Dictionary<string, RunbookStepDefinition> _runbookStepsByStepId = new(StringComparer.OrdinalIgnoreCase);
 
     [ObservableProperty]
     private ObservableCollection<DiagnosticItem> _diagnosticItems = [];
@@ -81,7 +83,12 @@ public partial class MainViewModel : ObservableObject
 
     private void ResetState()
     {
-        var items = DiagnosticEngine.BuildCheckList();
+        _activeRunbook = DiagnosticEngine.LoadRunbook();
+        _runbookStepsByStepId = _activeRunbook.Steps
+            .Where(s => s.Enabled)
+            .ToDictionary(s => s.StepId, s => s, StringComparer.OrdinalIgnoreCase);
+
+        var items = DiagnosticEngine.BuildCheckList(_activeRunbook);
         DiagnosticItems = new ObservableCollection<DiagnosticItem>(items);
         TotalItems = items.Count;
         ScannedItems = 0;
@@ -96,7 +103,7 @@ public partial class MainViewModel : ObservableObject
         CurrentDiagnosticItem = null;
         IsReportingToMims = false;
         ExternalConfigStatus = "未获取 MIMS 外部依赖配置";
-        StatusText = "点击「开始体检」全面扫描您的电脑";
+        StatusText = $"点击「开始体检」执行 RunBook：{_activeRunbook.Title}";
     }
 
     [RelayCommand]
@@ -125,19 +132,41 @@ public partial class MainViewModel : ObservableObject
                 StatusText = "MIMS 配置获取失败，外部依赖项将标记为跳过";
             }
 
-            foreach (var item in DiagnosticItems)
+            var currentStep = _activeRunbook?.Steps.FirstOrDefault(s => s.Enabled);
+            var stepGuard = 0;
+            var maxStepGuard = Math.Max(1, _runbookStepsByStepId.Count * 4);
+
+            while (currentStep != null && stepGuard < maxStepGuard)
             {
                 if (_cts.Token.IsCancellationRequested) break;
 
+                var item = DiagnosticItems.FirstOrDefault(i => i.Id.Equals(currentStep.CheckId, StringComparison.OrdinalIgnoreCase));
+                if (item == null)
+                {
+                    break;
+                }
+
                 CurrentDiagnosticItem = item;
                 CurrentScanItem = $"{item.CategoryIcon} {item.Name}";
-                await DiagnosticEngine.RunCheckAsync(item, runContext, _cts.Token);
+                var outcome = await DiagnosticEngine.RunCheckAsync(item, currentStep, runContext, _cts.Token);
 
                 ScannedItems++;
 
                 // live score update
                 CalculateScore();
                 await AnimateScoreAsync(DisplayScore, HealthScore);
+
+                var nextStepId = outcome.Success ? currentStep.NextOnSuccess : currentStep.NextOnFailure;
+                if (string.IsNullOrWhiteSpace(nextStepId))
+                {
+                    currentStep = null;
+                }
+                else
+                {
+                    _runbookStepsByStepId.TryGetValue(nextStepId, out currentStep);
+                }
+
+                stepGuard++;
             }
 
             ScanComplete = true;
