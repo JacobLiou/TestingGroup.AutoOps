@@ -17,6 +17,7 @@ public:
     void SetItems(std::vector<DiagnosticItem>* pItems);
     void RefreshItem(int index);
     void RefreshAll();
+    void EnsureVisible(int index);
 
     int GetHoverFixButton() const { return m_hoverFixBtn; }
 

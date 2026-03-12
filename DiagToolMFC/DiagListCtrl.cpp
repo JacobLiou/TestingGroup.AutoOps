@@ -57,6 +57,36 @@ void CDiagListCtrl::RefreshAll()
     InvalidateRect(nullptr, FALSE);
 }
 
+void CDiagListCtrl::EnsureVisible(int index)
+{
+    if (!m_pItems || !GetSafeHwnd()) return;
+    if (index < 0 || index >= (int)m_pItems->size()) return;
+
+    CRect rc;
+    GetClientRect(&rc);
+    int visibleH = rc.Height();
+
+    int rowTop = HEADER_HEIGHT + index * ROW_HEIGHT;
+    int rowBottom = rowTop + ROW_HEIGHT;
+
+    if (rowTop < m_scrollPos)
+    {
+        m_scrollPos = rowTop;
+    }
+    else if (rowBottom > m_scrollPos + visibleH)
+    {
+        m_scrollPos = rowBottom - visibleH;
+    }
+    else
+    {
+        return;
+    }
+
+    m_scrollPos = max(0, m_scrollPos);
+    SetScrollPos(SB_VERT, m_scrollPos, TRUE);
+    InvalidateRect(nullptr, FALSE);
+}
+
 void CDiagListCtrl::UpdateScrollInfo()
 {
     if (!m_pItems || !GetSafeHwnd()) return;

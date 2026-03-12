@@ -587,6 +587,7 @@ LRESULT CDiagToolDlg::OnCheckComplete(WPARAM wParam, LPARAM)
     int score = CalculateTotalScore();
     AnimateScore(score);
 
+    m_diagList.EnsureVisible(idx);
     m_diagList.RefreshItem(idx);
     InvalidateDialogAreas();
 
