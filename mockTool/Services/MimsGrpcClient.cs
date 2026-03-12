@@ -70,4 +70,55 @@ public sealed class MimsGrpcClient : IExternalSystemClient
             };
         }
     }
+
+    public async Task<MimsEnvironmentConfigResult> GetEnvironmentConfigAsync(MimsEnvironmentConfigRequest request, CancellationToken cancellationToken = default)
+    {
+        using var channel = GrpcChannel.ForAddress(_endpoint);
+        var client = new MimsBridge.MimsBridgeClient(channel);
+
+        var grpcRequest = new EnvironmentConfigRequest
+        {
+            StationId = request.StationId,
+            LineId = request.LineId
+        };
+
+        try
+        {
+            var reply = await client.GetEnvironmentConfigAsync(
+                grpcRequest,
+                deadline: DateTime.UtcNow.Add(_timeout),
+                cancellationToken: cancellationToken);
+
+            return new MimsEnvironmentConfigResult
+            {
+                Success = reply.Success,
+                Code = string.IsNullOrWhiteSpace(reply.Code) ? "OK" : reply.Code,
+                Message = string.IsNullOrWhiteSpace(reply.Message) ? "MIMS 配置获取成功" : reply.Message,
+                Endpoint = _endpoint,
+                ConfigXml = reply.ConfigXml ?? string.Empty
+            };
+        }
+        catch (RpcException ex)
+        {
+            return new MimsEnvironmentConfigResult
+            {
+                Success = false,
+                Code = ex.StatusCode.ToString(),
+                Message = ex.Status.Detail,
+                Endpoint = _endpoint,
+                ConfigXml = string.Empty
+            };
+        }
+        catch (Exception ex)
+        {
+            return new MimsEnvironmentConfigResult
+            {
+                Success = false,
+                Code = "UNEXPECTED_ERROR",
+                Message = ex.Message,
+                Endpoint = _endpoint,
+                ConfigXml = string.Empty
+            };
+        }
+    }
 }

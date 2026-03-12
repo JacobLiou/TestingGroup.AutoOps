@@ -12,10 +12,25 @@ public sealed class MimsAskInfoRequest
     public int FailCount { get; init; }
 }
 
+public sealed class MimsEnvironmentConfigRequest
+{
+    public string StationId { get; init; } = "STATION-001";
+    public string LineId { get; init; } = "LINE-001";
+}
+
 public sealed class ExternalSendResult
 {
     public bool Success { get; init; }
     public string Code { get; init; } = string.Empty;
     public string Message { get; init; } = string.Empty;
     public string Endpoint { get; init; } = string.Empty;
+}
+
+public sealed class MimsEnvironmentConfigResult
+{
+    public bool Success { get; init; }
+    public string Code { get; init; } = string.Empty;
+    public string Message { get; init; } = string.Empty;
+    public string Endpoint { get; init; } = string.Empty;
+    public string ConfigXml { get; init; } = string.Empty;
 }

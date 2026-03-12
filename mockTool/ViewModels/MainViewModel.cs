@@ -12,9 +12,12 @@ public partial class MainViewModel : ObservableObject
     private const string DefaultMimsAuthor = "YUD";
     private const string DefaultMimsSpec = "GUI";
     private const string DefaultMimsPartNumber = "TEST-001";
+    private const string DefaultStationId = "STATION-001";
+    private const string DefaultLineId = "LINE-001";
 
     private CancellationTokenSource? _cts;
     private readonly IExternalSystemClient _externalSystemClient;
+    private readonly MimsConfigXmlParser _mimsConfigXmlParser;
 
     [ObservableProperty]
     private ObservableCollection<DiagnosticItem> _diagnosticItems = [];
@@ -64,9 +67,13 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private bool _isReportingToMims;
 
+    [ObservableProperty]
+    private string _externalConfigStatus = "未获取 MIMS 外部依赖配置";
+
     public MainViewModel()
     {
         _externalSystemClient = new MimsGrpcClient(new MimsXmlBuilder());
+        _mimsConfigXmlParser = new MimsConfigXmlParser();
         ThemeService.Instance.ThemeChanged += OnThemeChanged;
         UpdateThemeProperties(ThemeService.Instance.CurrentMode, ThemeService.Instance.IsDarkTheme);
         ResetState();
@@ -88,6 +95,7 @@ public partial class MainViewModel : ObservableObject
         CurrentScanItem = "就绪";
         CurrentDiagnosticItem = null;
         IsReportingToMims = false;
+        ExternalConfigStatus = "未获取 MIMS 外部依赖配置";
         StatusText = "点击「开始体检」全面扫描您的电脑";
     }
 
@@ -104,13 +112,26 @@ public partial class MainViewModel : ObservableObject
 
         try
         {
+            StatusText = "正在向 MIMS 获取外部系统配置...";
+            var runContext = await BuildRunContextAsync(_cts.Token);
+            if (runContext.ExternalChecksEnabled)
+            {
+                ExternalConfigStatus = $"外部配置来源: {runContext.ConfigSource}";
+                StatusText = "已获取 MIMS 配置，开始执行外部接口与本机诊断...";
+            }
+            else
+            {
+                ExternalConfigStatus = $"外部配置不可用: {runContext.ConfigError}";
+                StatusText = "MIMS 配置获取失败，外部依赖项将标记为跳过";
+            }
+
             foreach (var item in DiagnosticItems)
             {
                 if (_cts.Token.IsCancellationRequested) break;
 
                 CurrentDiagnosticItem = item;
                 CurrentScanItem = $"{item.CategoryIcon} {item.Name}";
-                await DiagnosticEngine.RunCheckAsync(item, _cts.Token);
+                await DiagnosticEngine.RunCheckAsync(item, runContext, _cts.Token);
 
                 ScannedItems++;
 
@@ -319,6 +340,32 @@ public partial class MainViewModel : ObservableObject
             PassCount = PassCount,
             WarningCount = WarningCount,
             FailCount = FailCount
+        };
+    }
+
+    private async Task<DiagnosticRunContext> BuildRunContextAsync(CancellationToken cancellationToken)
+    {
+        var configRequest = new MimsEnvironmentConfigRequest
+        {
+            StationId = DefaultStationId,
+            LineId = DefaultLineId
+        };
+        var configResult = await _externalSystemClient.GetEnvironmentConfigAsync(configRequest, cancellationToken);
+        if (!configResult.Success)
+        {
+            return new DiagnosticRunContext
+            {
+                ExternalChecksEnabled = false,
+                ConfigError = $"{configResult.Code} - {configResult.Message}"
+            };
+        }
+
+        var parsed = _mimsConfigXmlParser.ParseOrDefault(configResult.ConfigXml);
+        return new DiagnosticRunContext
+        {
+            ExternalChecksEnabled = true,
+            ExternalConfig = parsed,
+            ConfigSource = $"MIMS({configResult.Endpoint})"
         };
     }
 }

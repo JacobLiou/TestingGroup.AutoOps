@@ -17,6 +17,7 @@ public enum CheckCategory
     System,
     Disk,
     Network,
+    External,
     Security,
     Software,
     Performance
@@ -32,6 +33,7 @@ public partial class DiagnosticItem : ObservableObject
         CheckCategory.System => "🖥",
         CheckCategory.Disk => "💾",
         CheckCategory.Network => "🌐",
+        CheckCategory.External => "🏭",
         CheckCategory.Security => "🛡",
         CheckCategory.Software => "📦",
         CheckCategory.Performance => "⚡",

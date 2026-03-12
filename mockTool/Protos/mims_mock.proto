@@ -6,6 +6,7 @@ package mimsmock;
 
 service MimsBridge {
   rpc SubmitXml (XmlEnvelope) returns (SubmitReply);
+  rpc GetEnvironmentConfig (EnvironmentConfigRequest) returns (EnvironmentConfigReply);
 }
 
 message XmlEnvelope {
@@ -19,4 +20,16 @@ message SubmitReply {
   string code = 2;
   string message = 3;
   string received_at = 4;
+}
+
+message EnvironmentConfigRequest {
+  string station_id = 1;
+  string line_id = 2;
+}
+
+message EnvironmentConfigReply {
+  bool success = 1;
+  string code = 2;
+  string message = 3;
+  string config_xml = 4;
 }

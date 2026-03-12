@@ -14,6 +14,8 @@ namespace MockDiagTool.Services;
 /// </summary>
 public static class DiagnosticEngine
 {
+    private static readonly ExternalDependencyHttpChecker ExternalChecker = new();
+
     public static List<DiagnosticItem> BuildCheckList()
     {
         return
@@ -34,6 +36,13 @@ public static class DiagnosticEngine
             new() { Id = "NET_02", Name = "DNS 解析", Category = CheckCategory.Network },
             new() { Id = "NET_03", Name = "互联网连通性", Category = CheckCategory.Network },
 
+            // ── External Dependencies (hardcoded mock, Postman-style) ──
+            new() { Id = ExternalDependencyIds.Mes, Name = "MES 接口连通性", Category = CheckCategory.External },
+            new() { Id = ExternalDependencyIds.Tms, Name = "TMS 接口连通性", Category = CheckCategory.External },
+            new() { Id = ExternalDependencyIds.Tas, Name = "TAS AOI 接口连通性", Category = CheckCategory.External },
+            new() { Id = ExternalDependencyIds.FileServer, Name = "文件服务器接口连通性", Category = CheckCategory.External },
+            new() { Id = ExternalDependencyIds.Lan, Name = "局域网网关连通性", Category = CheckCategory.External },
+
             // ── Security ──
             new() { Id = "SEC_01", Name = "Windows 防火墙", Category = CheckCategory.Security },
             new() { Id = "SEC_02", Name = "杀毒软件状态", Category = CheckCategory.Security },
@@ -52,7 +61,12 @@ public static class DiagnosticEngine
         ];
     }
 
-    public static async Task RunCheckAsync(DiagnosticItem item, CancellationToken ct)
+    public static Task RunCheckAsync(DiagnosticItem item, CancellationToken ct)
+    {
+        return RunCheckAsync(item, null, ct);
+    }
+
+    public static async Task RunCheckAsync(DiagnosticItem item, DiagnosticRunContext? runContext, CancellationToken ct)
     {
         item.Status = CheckStatus.Scanning;
         // Simulate a small delay to make scanning feel real
@@ -74,6 +88,12 @@ public static class DiagnosticEngine
                 case "NET_01": CheckNetworkAvailable(item); break;
                 case "NET_02": CheckDns(item); break;
                 case "NET_03": CheckInternet(item); break;
+
+                case ExternalDependencyIds.Mes: await CheckExternalApiAsync(item, ExternalDependencyIds.Mes, runContext, ct); break;
+                case ExternalDependencyIds.Tms: await CheckExternalApiAsync(item, ExternalDependencyIds.Tms, runContext, ct); break;
+                case ExternalDependencyIds.Tas: await CheckExternalApiAsync(item, ExternalDependencyIds.Tas, runContext, ct); break;
+                case ExternalDependencyIds.FileServer: await CheckExternalApiAsync(item, ExternalDependencyIds.FileServer, runContext, ct); break;
+                case ExternalDependencyIds.Lan: await CheckExternalApiAsync(item, ExternalDependencyIds.Lan, runContext, ct); break;
 
                 case "SEC_01": CheckFirewall(item); break;
                 case "SEC_02": CheckAntivirus(item); break;
@@ -344,6 +364,57 @@ public static class DiagnosticEngine
     }
 
     // ────────── Security Checks ──────────
+
+    // ────────── External System Checks ──────────
+
+    private static async Task CheckExternalApiAsync(
+        DiagnosticItem item,
+        string dependencyId,
+        DiagnosticRunContext? runContext,
+        CancellationToken ct)
+    {
+        if (runContext is null || !runContext.ExternalChecksEnabled || runContext.ExternalConfig is null)
+        {
+            item.Status = CheckStatus.Warning;
+            item.Detail = string.IsNullOrWhiteSpace(runContext?.ConfigError)
+                ? "未获取外部系统配置，已跳过该项"
+                : $"外部系统配置不可用: {runContext.ConfigError}";
+            item.Score = 90;
+            return;
+        }
+
+        try
+        {
+            var result = await ExternalChecker.CheckAsync(dependencyId, runContext.ExternalConfig, ct);
+            var statusLabel = result.StatusCode.HasValue ? $"HTTP {result.StatusCode.Value}" : "NO_HTTP_STATUS";
+            if (result.Success)
+            {
+                item.Status = CheckStatus.Pass;
+                item.Detail = $"{result.EndpointName} POST {result.Url} -> {statusLabel} ({result.ElapsedMs}ms)";
+                item.Score = 100;
+            }
+            else
+            {
+                item.Status = CheckStatus.Fail;
+                item.Detail = string.IsNullOrWhiteSpace(result.Error)
+                    ? $"{result.EndpointName} POST {result.Url} -> {statusLabel} ({result.ElapsedMs}ms)"
+                    : $"{result.EndpointName} POST {result.Url} -> {statusLabel} ({result.ElapsedMs}ms) | {result.Error}";
+                item.FixSuggestion = $"检查 {result.EndpointName} 服务状态、网关与路由配置";
+                item.Score = 70;
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            item.Status = CheckStatus.Fail;
+            item.Detail = $"外部接口调用失败: {ex.Message}";
+            item.FixSuggestion = "检查外部系统地址可达性与服务进程";
+            item.Score = 60;
+        }
+    }
 
     private static void CheckFirewall(DiagnosticItem item)
     {
