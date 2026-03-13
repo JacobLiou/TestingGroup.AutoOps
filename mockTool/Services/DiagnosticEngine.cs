@@ -14,6 +14,7 @@ public static class DiagnosticEngine
 {
     private static readonly RunbookProvider RunbookProvider = new();
     private static readonly ExternalDependencyHttpChecker ExternalChecker = new();
+    private static readonly DeviceVersionComplianceChecker VersionComplianceChecker = new();
     private static readonly CheckExecutorRegistry ExecutorRegistry = BuildExecutorRegistry();
 
     public static RunbookDefinition LoadRunbook()
@@ -116,6 +117,7 @@ public static class DiagnosticEngine
         RegisterTp(registry, TpCheckIds.PathAndConfig);
         RegisterTp(registry, TpCheckIds.SerialPorts);
         RegisterTp(registry, TpCheckIds.NetworkEndpoints);
+        RegisterTp(registry, TpCheckIds.VersionCompliance);
 
         return registry;
     }
@@ -143,70 +145,71 @@ public static class DiagnosticEngine
 
     private static void RegisterTp(CheckExecutorRegistry registry, string checkId)
     {
-        registry.Register(new DelegateCheckExecutor(checkId, (item, _, runContext, _) =>
+        registry.Register(new DelegateCheckExecutor(checkId, async (item, step, runContext, ct) =>
         {
             var snapshot = runContext?.TpConnectivity;
-            if (snapshot is null)
+            if (snapshot is null && checkId != TpCheckIds.VersionCompliance)
             {
                 item.Status = CheckStatus.Warning;
                 item.Detail = "未获取 TP 连接检查快照";
                 item.Score = 90;
-                return Task.FromResult(new CheckExecutionOutcome { Success = false });
+                return new CheckExecutionOutcome { Success = false };
             }
+            var tpSnapshot = snapshot!;
 
             if (checkId == TpCheckIds.PathAndConfig)
             {
-                if (!snapshot.TpPathExists)
+                if (!tpSnapshot.TpPathExists)
                 {
                     item.Status = CheckStatus.Fail;
-                    item.Detail = $"TP 路径不可用: {snapshot.TpRootPath}";
+                    item.Detail = $"TP 路径不可用: {tpSnapshot.TpRootPath}";
                     item.FixSuggestion = "确认 TP 路径和目录权限";
                     item.Score = 60;
                 }
                 else
                 {
                     item.Status = CheckStatus.Pass;
-                    item.Detail = $"TP 路径有效，发现配置文件 {snapshot.ConfigFiles.Count} 个";
+                    item.Detail = $"TP 路径有效，发现配置文件 {tpSnapshot.ConfigFiles.Count} 个";
                     item.Score = 100;
                 }
             }
             else if (checkId == TpCheckIds.SerialPorts)
             {
-                if (!snapshot.TpPathExists)
+                if (!tpSnapshot.TpPathExists)
                 {
                     item.Status = CheckStatus.Warning;
                     item.Detail = "TP 路径不可用，跳过串口检查";
                     item.Score = 90;
                 }
-                else if (snapshot.ExpectedSerialPorts.Count == 0)
+                else if (tpSnapshot.ExpectedSerialPorts.Count == 0)
                 {
                     item.Status = CheckStatus.Warning;
                     item.Detail = "未在 TP 配置中识别到串口映射";
                     item.Score = 90;
                 }
-                else if (snapshot.MissingSerialPorts.Count == 0)
+                else if (tpSnapshot.MissingSerialPorts.Count == 0)
                 {
                     item.Status = CheckStatus.Pass;
-                    item.Detail = $"串口映射正常: {string.Join(", ", snapshot.ExpectedSerialPorts)}";
+                    item.Detail = $"串口映射正常: {string.Join(", ", tpSnapshot.ExpectedSerialPorts)}";
                     item.Score = 100;
                 }
                 else
                 {
                     item.Status = CheckStatus.Fail;
-                    item.Detail = $"缺失串口: {string.Join(", ", snapshot.MissingSerialPorts)}";
+                    item.Detail = $"缺失串口: {string.Join(", ", tpSnapshot.MissingSerialPorts)}";
                     item.FixSuggestion = "检查串口设备连接、驱动与 COM 口映射";
                     item.Score = 65;
                 }
             }
             else if (checkId == TpCheckIds.NetworkEndpoints)
             {
-                if (!snapshot.TpPathExists)
+                if (!tpSnapshot.TpPathExists)
                 {
                     item.Status = CheckStatus.Warning;
                     item.Detail = "TP 路径不可用，跳过网口检查";
                     item.Score = 90;
                 }
-                else if (snapshot.NetworkEndpoints.Count == 0)
+                else if (tpSnapshot.NetworkEndpoints.Count == 0)
                 {
                     item.Status = CheckStatus.Warning;
                     item.Detail = "未在 TP 配置中识别到网口目标";
@@ -214,11 +217,11 @@ public static class DiagnosticEngine
                 }
                 else
                 {
-                    var failed = snapshot.NetworkEndpoints.Where(e => !e.Reachable).ToList();
+                    var failed = tpSnapshot.NetworkEndpoints.Where(e => !e.Reachable).ToList();
                     if (failed.Count == 0)
                     {
                         item.Status = CheckStatus.Pass;
-                        item.Detail = $"网口目标全部可达，共 {snapshot.NetworkEndpoints.Count} 个";
+                        item.Detail = $"网口目标全部可达，共 {tpSnapshot.NetworkEndpoints.Count} 个";
                         item.Score = 100;
                     }
                     else
@@ -230,8 +233,39 @@ public static class DiagnosticEngine
                     }
                 }
             }
+            else if (checkId == TpCheckIds.VersionCompliance)
+            {
+                var result = await VersionComplianceChecker.CheckAsync(step, runContext, ct);
+                if (!result.ApiSuccess)
+                {
+                    item.Status = CheckStatus.Fail;
+                    item.Detail = $"TMS 版本要求获取失败: {result.ApiMessage}";
+                    item.FixSuggestion = "检查 TMS API 地址、权限与接口可用性";
+                    item.Score = 60;
+                }
+                else if (result.Requirements.Count == 0)
+                {
+                    item.Status = CheckStatus.Warning;
+                    item.Detail = $"TMS 未返回版本要求: {result.RequirementUrl}";
+                    item.FixSuggestion = "确认 TMS 版本配置是否已维护";
+                    item.Score = 90;
+                }
+                else if (result.Mismatches.Count == 0)
+                {
+                    item.Status = CheckStatus.Pass;
+                    item.Detail = $"版本符合要求: {result.Requirements.Count} 项匹配（TMS: {result.RequirementUrl}）";
+                    item.Score = 100;
+                }
+                else
+                {
+                    item.Status = CheckStatus.Fail;
+                    item.Detail = $"版本不匹配 {result.Mismatches.Count} 项: {string.Join("; ", result.Mismatches.Select(m => m.MissingActual ? $"{m.DeviceKey}:缺少实际版本(要求{m.RequiredVersion})" : $"{m.DeviceKey}:实际{m.ActualVersion}/要求{m.RequiredVersion}"))}";
+                    item.FixSuggestion = "更新设备固件/版本或同步 TMS 目标版本配置";
+                    item.Score = 65;
+                }
+            }
 
-            return Task.FromResult(new CheckExecutionOutcome { Success = IsSuccessful(item.Status) });
+            return new CheckExecutionOutcome { Success = IsSuccessful(item.Status) };
         }));
     }
 

@@ -1,0 +1,8 @@
+{
+  "devices": [
+    { "deviceKey": "powermeter", "actualVersion": "PM-1.3.2" },
+    { "deviceKey": "product_fw", "actualVersion": "FW-2.5.1" },
+    { "deviceKey": "fixture_ctrl", "actualVersion": "FX-0.9.8" },
+    { "deviceKey": "custom_device", "actualVersion": "CD-3.1.0" }
+  ]
+}
