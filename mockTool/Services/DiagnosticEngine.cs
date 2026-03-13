@@ -15,6 +15,7 @@ public static class DiagnosticEngine
     private static readonly RunbookProvider RunbookProvider = new();
     private static readonly ExternalDependencyHttpChecker ExternalChecker = new();
     private static readonly DeviceVersionComplianceChecker VersionComplianceChecker = new();
+    private static readonly StationCapabilityComplianceChecker StationCapabilityComplianceChecker = new();
     private static readonly CheckExecutorRegistry ExecutorRegistry = BuildExecutorRegistry();
 
     public static RunbookDefinition LoadRunbook()
@@ -118,6 +119,7 @@ public static class DiagnosticEngine
         RegisterTp(registry, TpCheckIds.SerialPorts);
         RegisterTp(registry, TpCheckIds.NetworkEndpoints);
         RegisterTp(registry, TpCheckIds.VersionCompliance);
+        RegisterTp(registry, TpCheckIds.StationCapabilityCompliance);
 
         return registry;
     }
@@ -261,6 +263,26 @@ public static class DiagnosticEngine
                     item.Status = CheckStatus.Fail;
                     item.Detail = $"版本不匹配 {result.Mismatches.Count} 项: {string.Join("; ", result.Mismatches.Select(m => m.MissingActual ? $"{m.DeviceKey}:缺少实际版本(要求{m.RequiredVersion})" : $"{m.DeviceKey}:实际{m.ActualVersion}/要求{m.RequiredVersion}"))}";
                     item.FixSuggestion = "更新设备固件/版本或同步 TMS 目标版本配置";
+                    item.Score = 65;
+                }
+            }
+            else if (checkId == TpCheckIds.StationCapabilityCompliance)
+            {
+                var result = StationCapabilityComplianceChecker.Check(runContext);
+                var failed = result.Metrics.Where(m => !m.Pass).ToList();
+                if (result.Success)
+                {
+                    item.Status = CheckStatus.Pass;
+                    item.Detail = $"工位能力指标全部满足要求，共 {result.Metrics.Count} 项（数据源: {result.ActualSource}）";
+                    item.Score = 100;
+                }
+                else
+                {
+                    item.Status = CheckStatus.Fail;
+                    item.Detail = failed.Count == 0
+                        ? $"工位能力要求不可用或数据缺失（数据源: {result.ActualSource}）"
+                        : $"不满足 {failed.Count} 项（数据源: {result.ActualSource}）: {string.Join("; ", failed.Select(f => $"{f.Metric} 实际{f.Actual} / 要求{f.Required}"))}";
+                    item.FixSuggestion = "检查工位实测数据、治具状态与 MIMS 下发要求";
                     item.Score = 65;
                 }
             }

@@ -38,4 +38,5 @@ public sealed class DiagnosticRunContext
     public string ConfigSource { get; init; } = string.Empty;
     public string ConfigError { get; init; } = string.Empty;
     public TpConnectivitySnapshot? TpConnectivity { get; init; }
+    public StationCapabilityRequirements? StationCapabilityRequirements { get; init; }
 }

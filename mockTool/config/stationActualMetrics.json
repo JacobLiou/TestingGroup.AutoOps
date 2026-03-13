@@ -1,0 +1,9 @@
+{
+  "grrPercent": 8.2,
+  "gdsPercent": 93.5,
+  "maxOutputPowerDbm": 7.1,
+  "snrDb": 32.4,
+  "switchRepeatabilityDb": 0.31,
+  "powerStabilityDb": 0.18,
+  "channelPlanActual": "100G-4CH"
+}

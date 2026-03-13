@@ -6,6 +6,7 @@ public static class TpCheckIds
     public const string SerialPorts = "TP_02";
     public const string NetworkEndpoints = "TP_03";
     public const string VersionCompliance = "TP_04";
+    public const string StationCapabilityCompliance = "TP_05";
 }
 
 public sealed class TpConnectivitySnapshot
@@ -56,4 +57,41 @@ public sealed class DeviceVersionComplianceResult
     public List<DeviceVersionRequirement> Requirements { get; init; } = [];
     public List<DeviceVersionActual> Actuals { get; init; } = [];
     public List<DeviceVersionMismatch> Mismatches { get; init; } = [];
+}
+
+public sealed class StationCapabilityRequirements
+{
+    public double GrrMaxPercent { get; init; } = 10.0;
+    public double GdsMinPercent { get; init; } = 90.0;
+    public double MaxOutputPowerMinDbm { get; init; } = 6.0;
+    public double SnrMinDb { get; init; } = 30.0;
+    public double SwitchRepeatabilityMaxDb { get; init; } = 0.5;
+    public double PowerStabilityMaxDb { get; init; } = 0.3;
+    public string ChannelPlanRequired { get; init; } = "100G-4CH";
+}
+
+public sealed class StationCapabilityActual
+{
+    public double GrrPercent { get; init; }
+    public double GdsPercent { get; init; }
+    public double MaxOutputPowerDbm { get; init; }
+    public double SnrDb { get; init; }
+    public double SwitchRepeatabilityDb { get; init; }
+    public double PowerStabilityDb { get; init; }
+    public string ChannelPlanActual { get; init; } = string.Empty;
+}
+
+public sealed class StationCapabilityMetricResult
+{
+    public string Metric { get; init; } = string.Empty;
+    public string Required { get; init; } = string.Empty;
+    public string Actual { get; init; } = string.Empty;
+    public bool Pass { get; init; }
+}
+
+public sealed class StationCapabilityComplianceResult
+{
+    public bool Success { get; init; }
+    public string ActualSource { get; init; } = string.Empty;
+    public List<StationCapabilityMetricResult> Metrics { get; init; } = [];
 }

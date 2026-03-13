@@ -24,7 +24,8 @@
     { "stepId": "S015_TP_01", "checkId": "TP_01", "displayName": "TP 路径与配置可读性", "category": "StationCheck", "timeoutMs": 4000, "enabled": true, "nextOnSuccess": "S015_TP_02", "nextOnFailure": "S015_TP_02", "params": {} },
     { "stepId": "S015_TP_02", "checkId": "TP_02", "displayName": "TP 串口映射连通性", "category": "HwStatusCheck", "timeoutMs": 5000, "enabled": true, "nextOnSuccess": "S015_TP_03", "nextOnFailure": "S015_TP_03", "params": {} },
     { "stepId": "S015_TP_03", "checkId": "TP_03", "displayName": "TP 网口目标连通性", "category": "StationCheck", "timeoutMs": 6000, "enabled": true, "nextOnSuccess": "S015_TP_04", "nextOnFailure": "S015_TP_04", "params": {} },
-    { "stepId": "S015_TP_04", "checkId": "TP_04", "displayName": "HW/FW 版本符合性（TMS 对比）", "category": "HwSwFwCheck", "timeoutMs": 7000, "enabled": true, "nextOnSuccess": "S016", "nextOnFailure": "S016", "params": { "requirementPath": "/api/tms/version-requirements", "stationId": "STATION-001", "lineId": "LINE-001" } },
+    { "stepId": "S015_TP_04", "checkId": "TP_04", "displayName": "HW/FW 版本符合性（TMS 对比）", "category": "HwSwFwCheck", "timeoutMs": 7000, "enabled": true, "nextOnSuccess": "S015_TP_05", "nextOnFailure": "S015_TP_05", "params": { "requirementPath": "/api/tms/version-requirements", "stationId": "STATION-001", "lineId": "LINE-001" } },
+    { "stepId": "S015_TP_05", "checkId": "TP_05", "displayName": "GR&R/GDS/光学性能符合性（MIMS 对比）", "category": "OpticalPerformanceCheck", "timeoutMs": 7000, "enabled": true, "nextOnSuccess": "S016", "nextOnFailure": "S016", "params": {} },
 
     { "stepId": "S016", "checkId": "SEC_01", "displayName": "Windows 防火墙", "category": "HwSwFwCheck", "timeoutMs": 5000, "enabled": true, "nextOnSuccess": "S017", "nextOnFailure": "S017", "params": {} },
     { "stepId": "S017", "checkId": "SEC_02", "displayName": "杀毒软件状态", "category": "HwSwFwCheck", "timeoutMs": 5000, "enabled": true, "nextOnSuccess": "S018", "nextOnFailure": "S018", "params": {} },
