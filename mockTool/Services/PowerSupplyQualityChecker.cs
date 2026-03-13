@@ -1,5 +1,6 @@
 using System.IO;
 using System.Net.Http;
+using System.Text;
 using System.Text.Json;
 using MockDiagTool.Models;
 
@@ -9,6 +10,7 @@ public sealed class PowerSupplyQualityChecker
 {
     private const string TpConnectivityConfigRelativePath = @"config\tpConnectivity.json";
     private const string FallbackPowerMockRelativePath = @"config\powerSupplyMock.json";
+    private const string CurveOutputRelativeDir = @"logs\power-curves";
     private static readonly HttpClient HttpClient = new() { Timeout = TimeSpan.FromSeconds(3) };
 
     private sealed class TpConnectivityConfig
@@ -36,6 +38,18 @@ public sealed class PowerSupplyQualityChecker
         public List<double> SamplesV { get; set; } = [];
         public double CurrentVoltageV { get; set; }
         public double CurrentVoltage { get; set; }
+    }
+
+    private sealed class CurveArchivePayload
+    {
+        public DateTime GeneratedAt { get; set; }
+        public string Source { get; set; } = string.Empty;
+        public double MeanV { get; set; }
+        public double StdDevV { get; set; }
+        public double MinV { get; set; }
+        public double MaxV { get; set; }
+        public double RippleV { get; set; }
+        public List<PowerVoltageSample> Samples { get; set; } = [];
     }
 
     public async Task<PowerSupplyQualityResult> CheckAsync(DiagnosticRunContext? runContext, CancellationToken ct)
@@ -67,7 +81,22 @@ public sealed class PowerSupplyQualityChecker
             }
         }
 
-        return Evaluate(samples, requirements, source);
+        var result = Evaluate(samples, requirements, source);
+        var (jsonPath, csvPath) = PersistCurveArtifacts(result);
+        return new PowerSupplyQualityResult
+        {
+            Success = result.Success,
+            Source = result.Source,
+            Samples = result.Samples,
+            CurveJsonPath = jsonPath,
+            CurveCsvPath = csvPath,
+            MeanV = result.MeanV,
+            StdDevV = result.StdDevV,
+            MinV = result.MinV,
+            MaxV = result.MaxV,
+            RippleV = result.RippleV,
+            FailReasons = result.FailReasons
+        };
     }
 
     private static async Task<(double Voltage, string Source)> AcquireVoltageAsync(
@@ -277,6 +306,56 @@ public sealed class PowerSupplyQualityChecker
         catch
         {
             return new FallbackPowerMock();
+        }
+    }
+
+    private static (string JsonPath, string CsvPath) PersistCurveArtifacts(PowerSupplyQualityResult result)
+    {
+        if (result.Samples.Count == 0)
+        {
+            return (string.Empty, string.Empty);
+        }
+
+        try
+        {
+            var outputDir = Path.Combine(AppContext.BaseDirectory, CurveOutputRelativeDir);
+            Directory.CreateDirectory(outputDir);
+
+            var stamp = DateTime.Now.ToString("yyyyMMdd_HHmmss_fff");
+            var baseName = $"power_curve_{stamp}";
+            var jsonPath = Path.Combine(outputDir, $"{baseName}.json");
+            var csvPath = Path.Combine(outputDir, $"{baseName}.csv");
+
+            var archive = new CurveArchivePayload
+            {
+                GeneratedAt = DateTime.Now,
+                Source = result.Source,
+                MeanV = result.MeanV,
+                StdDevV = result.StdDevV,
+                MinV = result.MinV,
+                MaxV = result.MaxV,
+                RippleV = result.RippleV,
+                Samples = result.Samples
+            };
+
+            var json = JsonSerializer.Serialize(archive, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(jsonPath, json, Encoding.UTF8);
+
+            var csvBuilder = new StringBuilder();
+            csvBuilder.AppendLine("timestamp,voltageV");
+            foreach (var s in result.Samples)
+            {
+                csvBuilder.Append(s.Timestamp.ToString("yyyy-MM-dd HH:mm:ss.fff"));
+                csvBuilder.Append(',');
+                csvBuilder.AppendLine(s.VoltageV.ToString("F6", System.Globalization.CultureInfo.InvariantCulture));
+            }
+            File.WriteAllText(csvPath, csvBuilder.ToString(), Encoding.UTF8);
+
+            return (jsonPath, csvPath);
+        }
+        catch
+        {
+            return (string.Empty, string.Empty);
         }
     }
 }

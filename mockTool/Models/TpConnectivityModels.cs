@@ -120,6 +120,8 @@ public sealed class PowerSupplyQualityResult
     public bool Success { get; init; }
     public string Source { get; init; } = string.Empty;
     public List<PowerVoltageSample> Samples { get; init; } = [];
+    public string CurveJsonPath { get; init; } = string.Empty;
+    public string CurveCsvPath { get; init; } = string.Empty;
     public double MeanV { get; init; }
     public double StdDevV { get; init; }
     public double MinV { get; init; }

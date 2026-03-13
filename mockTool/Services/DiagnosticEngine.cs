@@ -292,16 +292,19 @@ public static class DiagnosticEngine
             {
                 var result = await PowerSupplyQualityChecker.CheckAsync(runContext, ct);
                 var curve = string.Join(", ", result.Samples.Select(s => s.VoltageV.ToString("F3")));
+                var curveFiles = string.IsNullOrWhiteSpace(result.CurveJsonPath) && string.IsNullOrWhiteSpace(result.CurveCsvPath)
+                    ? "未落盘"
+                    : $"JSON={result.CurveJsonPath}, CSV={result.CurveCsvPath}";
                 if (result.Success)
                 {
                     item.Status = CheckStatus.Pass;
-                    item.Detail = $"电源电压质量合格（{result.Source}）| 均值{result.MeanV:F3}V 标准差{result.StdDevV:F4}V 纹波{result.RippleV:F4}V | 曲线: [{curve}]";
+                    item.Detail = $"电源电压质量合格（{result.Source}）| 均值{result.MeanV:F3}V 标准差{result.StdDevV:F4}V 纹波{result.RippleV:F4}V | 曲线: [{curve}] | 文件: {curveFiles}";
                     item.Score = 100;
                 }
                 else
                 {
                     item.Status = CheckStatus.Fail;
-                    item.Detail = $"电源电压质量不满足要求（{result.Source}）| 均值{result.MeanV:F3}V 标准差{result.StdDevV:F4}V 纹波{result.RippleV:F4}V | {string.Join(" | ", result.FailReasons)} | 曲线: [{curve}]";
+                    item.Detail = $"电源电压质量不满足要求（{result.Source}）| 均值{result.MeanV:F3}V 标准差{result.StdDevV:F4}V 纹波{result.RippleV:F4}V | {string.Join(" | ", result.FailReasons)} | 曲线: [{curve}] | 文件: {curveFiles}";
                     item.FixSuggestion = "检查电源模块、负载波动、采样链路和 TP 采集接口";
                     item.Score = 60;
                 }
