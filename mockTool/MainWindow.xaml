@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:MockDiagTool.ViewModels"
         xmlns:conv="clr-namespace:MockDiagTool.Converters"
+        xmlns:model="clr-namespace:MockDiagTool.Models"
         Title="🛡 自动诊断工具"
         Height="800" Width="1100"
         MinHeight="700" MinWidth="900"
@@ -26,11 +27,25 @@
             <Setter Property="Margin" Value="0,4" />
             <Setter Property="BorderBrush" Value="{DynamicResource ThemeCardBorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <TranslateTransform Y="0" />
+                </Setter.Value>
+            </Setter>
             <Setter Property="Effect">
                 <Setter.Value>
                     <DropShadowEffect BlurRadius="10" ShadowDepth="1" Opacity="0.18" />
                 </Setter.Value>
             </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="RenderTransform">
+                        <Setter.Value>
+                            <TranslateTransform Y="-1" />
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
         </Style>
     </Window.Resources>
 
@@ -292,12 +307,45 @@
                                     Background="{Binding Status, Converter={StaticResource StatusToBg}}"
                                     BorderBrush="{DynamicResource ThemeRowBorderBrush}" BorderThickness="1"
                                     CornerRadius="8">
+                                <Border.RenderTransform>
+                                    <TranslateTransform Y="0" />
+                                </Border.RenderTransform>
+                                <Border.Effect>
+                                    <DropShadowEffect BlurRadius="8" ShadowDepth="1" Opacity="0.12" />
+                                </Border.Effect>
                                 <Border.Style>
                                     <Style TargetType="Border">
                                         <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                <Setter Property="RenderTransform">
+                                                    <Setter.Value>
+                                                        <TranslateTransform Y="-1" />
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </DataTrigger>
                                             <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
                                                 <Setter Property="BorderBrush" Value="{DynamicResource ThemeTextPrimaryBrush}" />
                                                 <Setter Property="BorderThickness" Value="2" />
+                                                <Setter Property="Effect">
+                                                    <Setter.Value>
+                                                        <DropShadowEffect BlurRadius="12" ShadowDepth="1" Opacity="0.2" />
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Status}" Value="{x:Static model:CheckStatus.Scanning}">
+                                                <DataTrigger.EnterActions>
+                                                    <BeginStoryboard x:Name="PulseCurrentRow">
+                                                        <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                             From="0.78"
+                                                                             To="1"
+                                                                             Duration="0:0:0.55" />
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </DataTrigger.EnterActions>
+                                                <DataTrigger.ExitActions>
+                                                    <StopStoryboard BeginStoryboardName="PulseCurrentRow" />
+                                                </DataTrigger.ExitActions>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
