@@ -173,6 +173,11 @@
                                 Content="📡 上报到MIMS"
                                 Command="{Binding SendToMimsCommand}"
                                 Margin="8,0,0,0" />
+                        <Button Style="{StaticResource SecondaryButton}"
+                                Content="🧩 RunBook 快速编辑"
+                                Command="{Binding OpenRunbookEditorCommand}"
+                                Visibility="{Binding IsScanning, Converter={StaticResource InvBoolToVis}}"
+                                Margin="8,0,0,0" />
                     </StackPanel>
                 </StackPanel>
 

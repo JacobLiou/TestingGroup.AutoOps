@@ -27,29 +27,7 @@ public sealed class RunbookProvider
             throw new InvalidOperationException("RunBook 配置解析失败");
         }
 
-        Validate(runbook);
+        RunbookFileService.Validate(runbook);
         return runbook;
-    }
-
-    private static void Validate(RunbookDefinition runbook)
-    {
-        if (runbook.Steps.Count == 0)
-        {
-            throw new InvalidOperationException("RunBook 至少需要一个步骤");
-        }
-
-        var enabledSteps = runbook.Steps.Where(s => s.Enabled).ToList();
-        if (enabledSteps.Count == 0)
-        {
-            throw new InvalidOperationException("RunBook 至少需要一个启用步骤");
-        }
-
-        var duplicated = enabledSteps
-            .GroupBy(s => s.StepId, StringComparer.OrdinalIgnoreCase)
-            .FirstOrDefault(g => g.Count() > 1);
-        if (duplicated != null)
-        {
-            throw new InvalidOperationException($"RunBook 存在重复 StepId: {duplicated.Key}");
-        }
     }
 }

@@ -78,6 +78,8 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private string _currentRunbookName = "default";
 
+    public event EventHandler? RunbookEditorRequested;
+
     public MainViewModel()
     {
         _externalSystemClient = new MimsGrpcClient(new MimsXmlBuilder());
@@ -280,6 +282,17 @@ public partial class MainViewModel : ObservableObject
         ThemeService.Instance.CycleTheme();
     }
 
+    [RelayCommand(CanExecute = nameof(CanOpenRunbookEditor))]
+    private void OpenRunbookEditor()
+    {
+        RunbookEditorRequested?.Invoke(this, EventArgs.Empty);
+    }
+
+    private bool CanOpenRunbookEditor()
+    {
+        return !IsScanning;
+    }
+
     [RelayCommand(CanExecute = nameof(CanSendToMims))]
     private async Task SendToMimsAsync()
     {
@@ -313,6 +326,7 @@ public partial class MainViewModel : ObservableObject
     partial void OnIsScanningChanged(bool value)
     {
         SendToMimsCommand.NotifyCanExecuteChanged();
+        OpenRunbookEditorCommand.NotifyCanExecuteChanged();
     }
 
     partial void OnIsReportingToMimsChanged(bool value)
@@ -413,5 +427,15 @@ public partial class MainViewModel : ObservableObject
             StationCapabilityRequirements = capabilityRequirements,
             PowerSupplyRequirements = powerRequirements
         };
+    }
+
+    public void ReloadRunbook()
+    {
+        if (IsScanning)
+        {
+            return;
+        }
+
+        ResetState();
     }
 }

@@ -1,0 +1,135 @@
+<Window x:Class="MockDiagTool.Views.RunbookEditorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="RunBook 快速编辑器"
+        Height="760"
+        Width="1180"
+        MinHeight="680"
+        MinWidth="1080"
+        WindowStartupLocation="CenterOwner">
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <DockPanel Grid.Row="0" LastChildFill="False" Margin="0,0,0,10">
+            <TextBlock DockPanel.Dock="Left"
+                       Text="快速维护 RunBook：启用/禁用、排序、新增删除、自动重连、保存/另存"
+                       VerticalAlignment="Center"
+                       FontSize="13" />
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <Button Content="重新加载 default" Command="{Binding LoadDefaultCommand}" Margin="0,0,6,0" />
+                <Button Content="自动重连链路" Command="{Binding AutoRelinkCommand}" Margin="0,0,6,0" />
+                <Button Content="新增步骤" Command="{Binding AddStepCommand}" Margin="0,0,6,0" />
+                <Button Content="删除当前" Command="{Binding RemoveStepCommand}" CommandParameter="{Binding SelectedStep}" />
+            </StackPanel>
+        </DockPanel>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="14" />
+                <ColumnDefinition Width="1.4*" />
+            </Grid.ColumnDefinitions>
+
+            <DataGrid Grid.Column="0"
+                      ItemsSource="{Binding Steps}"
+                      SelectedItem="{Binding SelectedStep, Mode=TwoWay}"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      IsReadOnly="False">
+                <DataGrid.Columns>
+                    <DataGridCheckBoxColumn Binding="{Binding Enabled, Mode=TwoWay}" Header="启用" Width="56" />
+                    <DataGridTextColumn Binding="{Binding StepId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="StepId" Width="120" />
+                    <DataGridTextColumn Binding="{Binding CheckId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="CheckId" Width="120" />
+                    <DataGridTextColumn Binding="{Binding DisplayName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="显示名" Width="210" />
+                    <DataGridTextColumn Binding="{Binding Category, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="分类" Width="120" />
+                    <DataGridTextColumn Binding="{Binding TimeoutMs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="超时(ms)" Width="90" />
+                    <DataGridTextColumn Binding="{Binding NextOnSuccess, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="成功->" Width="130" />
+                    <DataGridTextColumn Binding="{Binding NextOnFailure, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="失败->" Width="130" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="10" />
+
+            <Border Grid.Column="2" BorderBrush="#DDD" BorderThickness="1" CornerRadius="6" Padding="10">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="当前步骤详情" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,10" />
+
+                        <TextBlock Text="StepId" />
+                        <TextBox Text="{Binding SelectedStep.StepId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,8" />
+
+                        <TextBlock Text="CheckId" />
+                        <TextBox Text="{Binding SelectedStep.CheckId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,8" />
+
+                        <TextBlock Text="DisplayName" />
+                        <TextBox Text="{Binding SelectedStep.DisplayName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,8" />
+
+                        <TextBlock Text="Category" />
+                        <ComboBox ItemsSource="{Binding CategoryOptions}"
+                                  SelectedItem="{Binding SelectedStep.Category, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Margin="0,2,0,8" />
+
+                        <TextBlock Text="TimeoutMs" />
+                        <TextBox Text="{Binding SelectedStep.TimeoutMs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,8" />
+
+                        <CheckBox Content="Enabled" IsChecked="{Binding SelectedStep.Enabled, Mode=TwoWay}" Margin="0,4,0,8" />
+
+                        <TextBlock Text="NextOnSuccess" />
+                        <TextBox Text="{Binding SelectedStep.NextOnSuccess, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,8" />
+
+                        <TextBlock Text="NextOnFailure" />
+                        <TextBox Text="{Binding SelectedStep.NextOnFailure, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,8" />
+
+                        <TextBlock Text="Params (JSON)" />
+                        <TextBox Text="{Binding SelectedStep.ParamsJson, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="0,2,0,10"
+                                 AcceptsReturn="True"
+                                 Height="170"
+                                 VerticalScrollBarVisibility="Auto"
+                                 TextWrapping="Wrap" />
+
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="上移" Command="{Binding MoveUpCommand}" CommandParameter="{Binding SelectedStep}" Margin="0,0,6,0" />
+                            <Button Content="下移" Command="{Binding MoveDownCommand}" CommandParameter="{Binding SelectedStep}" />
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="2" Margin="0,10,0,0" Padding="10" BorderBrush="#DDD" BorderThickness="1" CornerRadius="6">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="RunBook Id" VerticalAlignment="Center" Width="90" />
+                        <TextBox Text="{Binding RunbookId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="160" Margin="0,0,14,0" />
+                        <TextBlock Text="Title" VerticalAlignment="Center" Width="50" />
+                        <TextBox Text="{Binding RunbookTitle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="300" Margin="0,0,14,0" />
+                        <TextBlock Text="Version" VerticalAlignment="Center" Width="60" />
+                        <TextBox Text="{Binding RunbookVersion, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="120" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                        <TextBlock Text="另存Id" VerticalAlignment="Center" Width="90" />
+                        <TextBox Text="{Binding SaveAsRunbookId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="220" Margin="0,0,12,0" />
+                        <TextBlock Text="{Binding StatusMessage}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="保存到 default" Command="{Binding SaveDefaultCommand}" Margin="0,0,8,0" />
+                    <Button Content="另存新 RunBook" Command="{Binding SaveAsCommand}" Margin="0,0,8,0" />
+                    <Button Content="关闭" Click="OnCloseClick" />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

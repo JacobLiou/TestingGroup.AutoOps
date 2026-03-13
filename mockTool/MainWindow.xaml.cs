@@ -1,6 +1,8 @@
 using System.ComponentModel;
 using System.Windows;
+using MockDiagTool.Services;
 using MockDiagTool.ViewModels;
+using MockDiagTool.Views;
 
 namespace MockDiagTool;
 
@@ -31,12 +33,14 @@ public partial class MainWindow : Window
         if (_viewModel != null)
         {
             _viewModel.PropertyChanged -= OnViewModelPropertyChanged;
+            _viewModel.RunbookEditorRequested -= OnRunbookEditorRequested;
         }
 
         _viewModel = vm;
         if (_viewModel != null)
         {
             _viewModel.PropertyChanged += OnViewModelPropertyChanged;
+            _viewModel.RunbookEditorRequested += OnRunbookEditorRequested;
         }
     }
 
@@ -64,5 +68,20 @@ public partial class MainWindow : Window
         Loaded -= OnLoaded;
         DataContextChanged -= OnDataContextChanged;
         Closed -= OnClosed;
+    }
+
+    private void OnRunbookEditorRequested(object? sender, EventArgs e)
+    {
+        var editorVm = new RunbookEditorViewModel(new RunbookFileService(), "default");
+        var window = new RunbookEditorWindow(editorVm)
+        {
+            Owner = this
+        };
+
+        var saved = window.ShowDialog() == true;
+        if (saved)
+        {
+            _viewModel?.ReloadRunbook();
+        }
     }
 }
