@@ -59,7 +59,7 @@
 
         <!-- ═══════════ HEADER ═══════════ -->
         <Border Grid.Row="0"
-                Margin="16,14,16,10"
+                Margin="6,18,6,10"
                 Style="{StaticResource SurfaceCardBorder}"
                 Padding="24,16"
                 Background="{DynamicResource ThemeHeaderBgBrush}">
@@ -88,9 +88,9 @@
 
         <!-- ═══════════ SCORE RING + SCAN AREA ═══════════ -->
         <Border Grid.Row="1"
-                Margin="16,0,16,10"
+                Margin="6,0,6,10"
                 Style="{StaticResource SurfaceCardBorder}"
-                Padding="0,26,0,16">
+                Padding="0,6,0,6">
             <Grid HorizontalAlignment="Center">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="300" />
@@ -99,7 +99,7 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Score Circle -->
-                <Grid Grid.Column="0" Width="200" Height="200">
+                <Grid Grid.Column="0" Width="180" Height="180">
                     <!-- Background ring -->
                     <Ellipse Stroke="{DynamicResource ThemeRingBgBrush}" StrokeThickness="10" />
                     <!-- Animated ring -->
@@ -185,18 +185,11 @@
                                FontWeight="SemiBold"
                                Foreground="{DynamicResource ThemeTextPrimaryBrush}"
                                TextWrapping="Wrap"
+                               Width="500"
                                Opacity="1">
                         <TextBlock.RenderTransform>
                             <TranslateTransform Y="0" />
                         </TextBlock.RenderTransform>
-                    </TextBlock>
-                    <TextBlock Foreground="{DynamicResource ThemeTextSecondaryBrush}"
-    VerticalAlignment="Center">
-                        <TextBlock.Text>
-                            <MultiBinding StringFormat="共 {0} 项检查">
-                                <Binding Path="TotalItems" />
-                            </MultiBinding>
-                        </TextBlock.Text>
                     </TextBlock>
                     <TextBlock Margin="0,8,0,0" FontSize="13"
                                Foreground="{DynamicResource ThemeTextSecondaryBrush}">
@@ -270,7 +263,7 @@
 
         <!-- ═══════════ RESULT LIST ═══════════ -->
         <Border Grid.Row="2"
-                Margin="16,0,16,10"
+                Margin="6,0,6,10"
                 Style="{StaticResource SurfaceCardBorder}"
                 CornerRadius="14">
             <Grid>

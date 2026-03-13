@@ -417,7 +417,8 @@ public partial class MainViewModel : ObservableObject
             ConfigSource = $"MIMS({configResult.Endpoint})",
             TpConnectivity = tpSnapshot,
             StationCapabilityRequirements = capabilityRequirements,
-            PowerSupplyRequirements = powerRequirements
+            PowerSupplyRequirements = powerRequirements,
+            RawMimsConfigXml = configResult.ConfigXml
         };
     }
 

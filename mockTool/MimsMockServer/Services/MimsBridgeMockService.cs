@@ -42,6 +42,8 @@ public sealed class MimsBridgeMockService : MimsBridge.MimsBridgeBase
         sb.Append("<TAS_AOI_API>http://127.0.0.1:7003/api/tas/aoi/health</TAS_AOI_API>");
         sb.Append("<FILE_SERVER_API>http://127.0.0.1:7004/api/fileserver/health</FILE_SERVER_API>");
         sb.Append("<LAN_API>http://127.0.0.1:7005/api/lan/health</LAN_API>");
+        sb.Append("<DEFAULT_INFO_API>http://127.0.0.1:7002/api/tms/default-info</DEFAULT_INFO_API>");
+        sb.Append("<LUT_DOWNLOAD_API>http://127.0.0.1:7002/api/tms/lut/download/default</LUT_DOWNLOAD_API>");
         sb.Append("<STATION_CAPABILITY_REQUIREMENTS>");
         sb.Append("<GRR_MAX_PERCENT>10.0</GRR_MAX_PERCENT>");
         sb.Append("<GDS_MIN_PERCENT>90.0</GDS_MIN_PERCENT>");

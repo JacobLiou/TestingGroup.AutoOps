@@ -8,6 +8,7 @@ public static class TpCheckIds
     public const string VersionCompliance = "TP_04";
     public const string StationCapabilityCompliance = "TP_05";
     public const string PowerSupplyQuality = "TP_06";
+    public const string DefaultInfoAndLut = "TP_07";
 }
 
 public sealed class TpConnectivitySnapshot
@@ -128,5 +129,16 @@ public sealed class PowerSupplyQualityResult
     public double MinV { get; init; }
     public double MaxV { get; init; }
     public double RippleV { get; init; }
+    public List<string> FailReasons { get; init; } = [];
+}
+
+public sealed class DefaultInfoAndLutResult
+{
+    public bool Success { get; init; }
+    public string Source { get; init; } = string.Empty;
+    public string DefaultInfoUrl { get; init; } = string.Empty;
+    public string LutDownloadUrl { get; init; } = string.Empty;
+    public string DefaultInfoSummary { get; init; } = string.Empty;
+    public string LutSummary { get; init; } = string.Empty;
     public List<string> FailReasons { get; init; } = [];
 }

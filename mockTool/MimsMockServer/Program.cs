@@ -48,6 +48,29 @@ app.MapPost("/api/tms/version-requirements", () => Results.Json(new
     }
 }));
 
+app.MapGet("/api/tms/default-info", () => Results.Json(new
+{
+    stationId = "STATION-001",
+    lineId = "LINE-001",
+    partNumber = "TEST-001",
+    author = "YUD",
+    spec = "GUI"
+}));
+
+app.MapGet("/api/tms/lut/download/default", () => Results.Text(
+    """
+    # LUT_VERSION=1.0.3
+    # STATION_ID=STATION-001
+    # LINE_ID=LINE-001
+    TABLE_BEGIN
+    CH001,0.985,0.012
+    CH002,0.988,0.011
+    CH003,0.991,0.010
+    CH004,0.987,0.012
+    TABLE_END
+    """,
+    "text/plain"));
+
 app.MapGet("/", () => "Mock MIMS gRPC server is running on http://127.0.0.1:50051");
 
 app.Run();

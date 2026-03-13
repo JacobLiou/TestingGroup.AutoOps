@@ -40,4 +40,5 @@ public sealed class DiagnosticRunContext
     public TpConnectivitySnapshot? TpConnectivity { get; init; }
     public StationCapabilityRequirements? StationCapabilityRequirements { get; init; }
     public PowerSupplyRequirements? PowerSupplyRequirements { get; init; }
+    public string RawMimsConfigXml { get; init; } = string.Empty;
 }

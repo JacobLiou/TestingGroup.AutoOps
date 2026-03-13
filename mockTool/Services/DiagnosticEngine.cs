@@ -17,6 +17,7 @@ public static class DiagnosticEngine
     private static readonly DeviceVersionComplianceChecker VersionComplianceChecker = new();
     private static readonly StationCapabilityComplianceChecker StationCapabilityComplianceChecker = new();
     private static readonly PowerSupplyQualityChecker PowerSupplyQualityChecker = new();
+    private static readonly DefaultInfoAndLutChecker DefaultInfoAndLutChecker = new();
     private static readonly CheckExecutorRegistry ExecutorRegistry = BuildExecutorRegistry();
 
     public static RunbookDefinition LoadRunbook()
@@ -127,6 +128,7 @@ public static class DiagnosticEngine
         RegisterTp(registry, TpCheckIds.VersionCompliance);
         RegisterTp(registry, TpCheckIds.StationCapabilityCompliance);
         RegisterTp(registry, TpCheckIds.PowerSupplyQuality);
+        RegisterTp(registry, TpCheckIds.DefaultInfoAndLut);
 
         return registry;
     }
@@ -157,7 +159,7 @@ public static class DiagnosticEngine
         registry.Register(new DelegateCheckExecutor(checkId, async (item, step, runContext, ct) =>
         {
             var snapshot = runContext?.TpConnectivity;
-            if (snapshot is null && checkId != TpCheckIds.VersionCompliance && checkId != TpCheckIds.StationCapabilityCompliance && checkId != TpCheckIds.PowerSupplyQuality)
+            if (snapshot is null && checkId != TpCheckIds.VersionCompliance && checkId != TpCheckIds.StationCapabilityCompliance && checkId != TpCheckIds.PowerSupplyQuality && checkId != TpCheckIds.DefaultInfoAndLut)
             {
                 item.Status = CheckStatus.Warning;
                 item.Detail = "未获取 TP 连接检查快照";
@@ -316,6 +318,23 @@ public static class DiagnosticEngine
                     item.Status = CheckStatus.Fail;
                     item.Detail = $"电源电压质量不满足要求（{result.Source}）| 均值{result.MeanV:F3}V 标准差{result.StdDevV:F4}V 纹波{result.RippleV:F4}V | {string.Join(" | ", result.FailReasons)} | 曲线: [{curve}] | 文件: {curveFiles}";
                     item.FixSuggestion = "检查电源模块、负载波动、采样链路和 TP 采集接口";
+                    item.Score = 60;
+                }
+            }
+            else if (checkId == TpCheckIds.DefaultInfoAndLut)
+            {
+                var result = await DefaultInfoAndLutChecker.CheckAsync(step, runContext, ct);
+                if (result.Success)
+                {
+                    item.Status = CheckStatus.Pass;
+                    item.Detail = $"默认信息与LUT校验通过（{result.Source}）| 默认信息: {result.DefaultInfoSummary} | LUT: {result.LutSummary}";
+                    item.Score = 100;
+                }
+                else
+                {
+                    item.Status = CheckStatus.Fail;
+                    item.Detail = $"默认信息与LUT校验失败（{result.Source}）| 默认信息URL: {result.DefaultInfoUrl} | LUT URL: {result.LutDownloadUrl} | {string.Join(" | ", result.FailReasons)}";
+                    item.FixSuggestion = "检查 MIMS 下发默认信息、LUT 下载地址和内容完整性";
                     item.Score = 60;
                 }
             }
