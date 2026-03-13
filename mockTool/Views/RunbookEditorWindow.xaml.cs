@@ -1,5 +1,5 @@
-using System.Windows;
 using MockDiagTool.ViewModels;
+using System.Windows;
 
 namespace MockDiagTool.Views;
 

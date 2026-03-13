@@ -1,19 +1,17 @@
+using MockDiagTool.Services;
+using MockDiagTool.ViewModels;
+using MockDiagTool.Views;
 using System.ComponentModel;
-using System.IO;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
-using MockDiagTool.Services;
-using MockDiagTool.ViewModels;
-using MockDiagTool.Views;
 
 namespace MockDiagTool;
 
 public partial class MainWindow : Window
 {
     private MainViewModel? _viewModel;
-    private const string DebugLogFilePath = @"C:\Users\menghl2\OneDrive - kochind.com\Desktop\自动诊断项目\debug-0eaba0.log";
 
     public MainWindow()
     {
@@ -26,63 +24,6 @@ public partial class MainWindow : Window
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         AttachViewModel(DataContext as MainViewModel);
-
-        // #region agent log
-        AppendDebugLog(
-            runId: "initial",
-            hypothesisId: "H1",
-            location: "MainWindow.xaml.cs:OnLoaded",
-            message: "Window loaded with theme mode snapshot",
-            data: new
-            {
-                ThemeMode = _viewModel?.ThemeModeText,
-                IsScanning = _viewModel?.IsScanning
-            });
-        // #endregion
-
-        // #region agent log
-        AppendDebugLog(
-            runId: "initial",
-            hypothesisId: "H2",
-            location: "MainWindow.xaml.cs:OnLoaded",
-            message: "Theme secondary/background resource colors",
-            data: new
-            {
-                SecondaryButtonBg = BrushToHex(TryFindResource("ThemeSecondaryButtonBg")),
-                CardBg = BrushToHex(TryFindResource("ThemeCardBgBrush")),
-                TextPrimary = BrushToHex(TryFindResource("ThemeTextPrimaryBrush"))
-            });
-        // #endregion
-
-        // #region agent log
-        AppendDebugLog(
-            runId: "initial",
-            hypothesisId: "H3",
-            location: "MainWindow.xaml.cs:OnLoaded",
-            message: "Action buttons visual states",
-            data: new
-            {
-                Start = DumpButtonState(StartScanButton),
-                SendToMims = DumpButtonState(SendToMimsButton),
-                RunbookEditor = DumpButtonState(RunbookEditorButton)
-            });
-        // #endregion
-
-        // #region agent log
-        AppendDebugLog(
-            runId: "initial",
-            hypothesisId: "H4",
-            location: "MainWindow.xaml.cs:OnLoaded",
-            message: "Computed style key for visibility issue check",
-            data: new
-            {
-                StartStyle = StartScanButton.Style?.ToString(),
-                SendToMimsStyle = SendToMimsButton.Style?.ToString(),
-                RunbookEditorStyle = RunbookEditorButton.Style?.ToString(),
-                SendToMimsVisible = SendToMimsButton.Visibility.ToString(),
-                RunbookEditorVisible = RunbookEditorButton.Visibility.ToString()
-            });
-        // #endregion
     }
 
     private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -217,54 +158,6 @@ public partial class MainWindow : Window
         if (saved)
         {
             _viewModel?.ReloadRunbook();
-        }
-    }
-
-    private static string BrushToHex(object? resource)
-    {
-        if (resource is SolidColorBrush solid)
-        {
-            var c = solid.Color;
-            return $"#{c.A:X2}{c.R:X2}{c.G:X2}{c.B:X2}";
-        }
-
-        return resource?.ToString() ?? "null";
-    }
-
-    private static object DumpButtonState(System.Windows.Controls.Button button)
-    {
-        return new
-        {
-            button.Name,
-            button.Content,
-            button.IsEnabled,
-            Visibility = button.Visibility.ToString(),
-            Opacity = button.Opacity,
-            Foreground = BrushToHex(button.Foreground),
-            Background = BrushToHex(button.Background)
-        };
-    }
-
-    private static void AppendDebugLog(string runId, string hypothesisId, string location, string message, object data)
-    {
-        var payload = new
-        {
-            sessionId = "0eaba0",
-            runId,
-            hypothesisId,
-            location,
-            message,
-            data,
-            timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
-        };
-
-        try
-        {
-            File.AppendAllText(DebugLogFilePath, System.Text.Json.JsonSerializer.Serialize(payload) + Environment.NewLine);
-        }
-        catch
-        {
-            // Keep app flow unaffected if debug logging fails.
         }
     }
 }

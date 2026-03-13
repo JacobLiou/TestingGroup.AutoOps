@@ -55,6 +55,7 @@ public sealed class DeviceVersionComplianceResult
     public bool ApiSuccess { get; init; }
     public string ApiMessage { get; init; } = string.Empty;
     public string RequirementUrl { get; init; } = string.Empty;
+    public string RequirementSource { get; init; } = string.Empty;
     public List<DeviceVersionRequirement> Requirements { get; init; } = [];
     public List<DeviceVersionActual> Actuals { get; init; } = [];
     public List<DeviceVersionMismatch> Mismatches { get; init; } = [];

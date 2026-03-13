@@ -1,10 +1,9 @@
 <Window x:Class="MockDiagTool.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="clr-namespace:MockDiagTool.ViewModels"
         xmlns:conv="clr-namespace:MockDiagTool.Converters"
         xmlns:model="clr-namespace:MockDiagTool.Models"
-        xmlns:hc="https://handyorg.github.io/handycontrol"
+        xmlns:vm="clr-namespace:MockDiagTool.ViewModels"
         Title="🛡 自动诊断工具"
         Height="800" Width="1100"
         MinHeight="700" MinWidth="900"
@@ -100,7 +99,7 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Score Circle -->
-                <Grid Grid.Column="0" Width="200" Height="200" Margin="40,0">
+                <Grid Grid.Column="0" Width="200" Height="200">
                     <!-- Background ring -->
                     <Ellipse Stroke="{DynamicResource ThemeRingBgBrush}" StrokeThickness="10" />
                     <!-- Animated ring -->
@@ -158,13 +157,15 @@
                         </Ellipse.Style>
                     </Ellipse>
                     <!-- Score text -->
-                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Width="200">
                         <TextBlock x:Name="ScoreValueText"
                                    Text="{Binding DisplayScore}"
                                    FontSize="56"
                                    FontWeight="Bold"
                                    Foreground="{Binding DisplayScore, Converter={StaticResource ScoreToColor}}"
                                    HorizontalAlignment="Center"
+                                   TextAlignment="Center"
+                                   Width="120"
                                    RenderTransformOrigin="0.5,0.5">
                             <TextBlock.RenderTransform>
                                 <ScaleTransform ScaleX="1" ScaleY="1" />
@@ -177,7 +178,7 @@
                 </Grid>
 
                 <!-- Center: current scanning item + action buttons -->
-                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="30,0" MinWidth="280">
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="30,0">
                     <TextBlock x:Name="CurrentScanText"
                                Text="{Binding CurrentScanItem}"
                                FontSize="20"
@@ -188,6 +189,14 @@
                         <TextBlock.RenderTransform>
                             <TranslateTransform Y="0" />
                         </TextBlock.RenderTransform>
+                    </TextBlock>
+                    <TextBlock Foreground="{DynamicResource ThemeTextSecondaryBrush}"
+    VerticalAlignment="Center">
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="共 {0} 项检查">
+                                <Binding Path="TotalItems" />
+                            </MultiBinding>
+                        </TextBlock.Text>
                     </TextBlock>
                     <TextBlock Margin="0,8,0,0" FontSize="13"
                                Foreground="{DynamicResource ThemeTextSecondaryBrush}">
@@ -201,8 +210,7 @@
 
                     <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
                         <!-- Start Scan button -->
-                        <Button x:Name="StartScanButton"
-                                Style="{StaticResource PrimaryButton}"
+                        <Button Style="{StaticResource PrimaryButton}"
                                 Content="🔍 开始体检"
                                 Command="{Binding StartScanCommand}"
                                 Visibility="{Binding IsScanning, Converter={StaticResource InvBoolToVis}}" />
@@ -218,13 +226,11 @@
                                 Command="{Binding FixAllCommand}"
                                 Visibility="{Binding ScanComplete, Converter={StaticResource BoolToVis}}"
                                 Margin="8,0,0,0" />
-                        <Button x:Name="SendToMimsButton"
-                                Style="{StaticResource ButtonDefault}"
+                        <Button Style="{StaticResource ButtonDefault}"
                                 Content="📡 上报到MIMS"
                                 Command="{Binding SendToMimsCommand}"
                                 Margin="8,0,0,0" />
-                        <Button x:Name="RunbookEditorButton"
-                                Style="{StaticResource ButtonDefault}"
+                        <Button Style="{StaticResource ButtonDefault}"
                                 Content="🧩 RunBook 快速编辑"
                                 Command="{Binding OpenRunbookEditorCommand}"
                                 Visibility="{Binding IsScanning, Converter={StaticResource InvBoolToVis}}"
@@ -418,31 +424,6 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
-            </Grid>
-        </Border>
-
-        <!-- ═══════════ FOOTER ═══════════ -->
-        <Border Grid.Row="3"
-                Margin="16,0,16,14"
-                Padding="20,12"
-                Style="{StaticResource SoftPanelBorder}"
-                Background="{DynamicResource ThemeHeaderBgBrush}">
-            <Grid>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Foreground="{DynamicResource ThemeTextSecondaryBrush}" FontSize="12">
-                        <Run Text="Auto-Ops 自动诊断工具 v1.0" />
-                    </TextBlock>
-                    <TextBlock Foreground="{DynamicResource ThemeTextSecondaryBrush}" FontSize="12"
-                               Margin="16,0,0,0" Text="{Binding ThemeModeText}" />
-                </StackPanel>
-                <TextBlock HorizontalAlignment="Right" FontSize="12"
-                           Foreground="{DynamicResource ThemeTextSecondaryBrush}" VerticalAlignment="Center">
-                    <TextBlock.Text>
-                        <MultiBinding StringFormat="共 {0} 项检查">
-                            <Binding Path="TotalItems" />
-                        </MultiBinding>
-                    </TextBlock.Text>
-                </TextBlock>
             </Grid>
         </Border>
     </Grid>

@@ -245,30 +245,35 @@ public static class DiagnosticEngine
             else if (checkId == TpCheckIds.VersionCompliance)
             {
                 var result = await VersionComplianceChecker.CheckAsync(step, runContext, ct);
+                var sourceLabel = string.IsNullOrWhiteSpace(result.RequirementSource) ? "tms" : result.RequirementSource;
+                var totalCount = result.Requirements.Count;
+                var mismatchCount = result.Mismatches.Count;
+                var missingCount = result.Mismatches.Count(m => m.MissingActual);
+                var matchCount = Math.Max(0, totalCount - mismatchCount);
                 if (!result.ApiSuccess)
                 {
                     item.Status = CheckStatus.Fail;
-                    item.Detail = $"TMS 版本要求获取失败: {result.ApiMessage}";
+                    item.Detail = $"版本要求获取失败（source: {sourceLabel}）: {result.ApiMessage}";
                     item.FixSuggestion = "检查 TMS API 地址、权限与接口可用性";
                     item.Score = 60;
                 }
                 else if (result.Requirements.Count == 0)
                 {
                     item.Status = CheckStatus.Warning;
-                    item.Detail = $"TMS 未返回版本要求: {result.RequirementUrl}";
+                    item.Detail = $"未返回版本要求（source: {sourceLabel}, path: {result.RequirementUrl}）";
                     item.FixSuggestion = "确认 TMS 版本配置是否已维护";
                     item.Score = 90;
                 }
                 else if (result.Mismatches.Count == 0)
                 {
                     item.Status = CheckStatus.Pass;
-                    item.Detail = $"版本符合要求: {result.Requirements.Count} 项匹配（TMS: {result.RequirementUrl}）";
+                    item.Detail = $"版本符合要求（source: {sourceLabel}）: 总计 {totalCount}，匹配 {matchCount}，不匹配 0，缺失 0（path: {result.RequirementUrl}）";
                     item.Score = 100;
                 }
                 else
                 {
                     item.Status = CheckStatus.Fail;
-                    item.Detail = $"版本不匹配 {result.Mismatches.Count} 项: {string.Join("; ", result.Mismatches.Select(m => m.MissingActual ? $"{m.DeviceKey}:缺少实际版本(要求{m.RequiredVersion})" : $"{m.DeviceKey}:实际{m.ActualVersion}/要求{m.RequiredVersion}"))}";
+                    item.Detail = $"版本不匹配（source: {sourceLabel}）: 总计 {totalCount}，匹配 {matchCount}，不匹配 {mismatchCount}，缺失 {missingCount}；明细: {string.Join("; ", result.Mismatches.Select(m => m.MissingActual ? $"{m.DeviceKey}:缺少实际版本(要求{m.RequiredVersion})" : $"{m.DeviceKey}:实际{m.ActualVersion}/要求{m.RequiredVersion}"))}";
                     item.FixSuggestion = "更新设备固件/版本或同步 TMS 目标版本配置";
                     item.Score = 65;
                 }

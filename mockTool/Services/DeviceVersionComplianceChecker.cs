@@ -9,6 +9,7 @@ namespace MockDiagTool.Services;
 public sealed class DeviceVersionComplianceChecker
 {
     private const string ActualVersionsConfigRelativePath = @"config\deviceActualVersions.json";
+    private const string RequirementFallbackConfigRelativePath = @"config\deviceVersionRequirements.mock.json";
     private static readonly HttpClient HttpClient = new()
     {
         Timeout = TimeSpan.FromSeconds(6)
@@ -54,13 +55,11 @@ public sealed class DeviceVersionComplianceChecker
             var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
-                return new DeviceVersionComplianceResult
-                {
-                    ApiSuccess = false,
-                    ApiMessage = $"TMS 返回 HTTP {(int)response.StatusCode}",
-                    RequirementUrl = requirementUrl,
-                    Actuals = actuals
-                };
+                return TryBuildFallbackResult(
+                    step,
+                    actuals,
+                    requirementUrl,
+                    $"TMS 返回 HTTP {(int)response.StatusCode}");
             }
 
             var requirements = ParseRequirements(responseBody);
@@ -70,6 +69,7 @@ public sealed class DeviceVersionComplianceChecker
                 ApiSuccess = true,
                 ApiMessage = "TMS 版本要求获取成功",
                 RequirementUrl = requirementUrl,
+                RequirementSource = "tms",
                 Requirements = requirements,
                 Actuals = actuals,
                 Mismatches = mismatches
@@ -77,13 +77,11 @@ public sealed class DeviceVersionComplianceChecker
         }
         catch (Exception ex)
         {
-            return new DeviceVersionComplianceResult
-            {
-                ApiSuccess = false,
-                ApiMessage = $"TMS 请求异常: {ex.Message}",
-                RequirementUrl = requirementUrl,
-                Actuals = actuals
-            };
+            return TryBuildFallbackResult(
+                step,
+                actuals,
+                requirementUrl,
+                $"TMS 请求异常: {ex.Message}");
         }
     }
 
@@ -193,6 +191,71 @@ public sealed class DeviceVersionComplianceChecker
                     ActualVersion = d.ActualVersion?.Trim() ?? string.Empty
                 })
                 .ToList() ?? [];
+        }
+        catch
+        {
+            return [];
+        }
+    }
+
+    private static DeviceVersionComplianceResult TryBuildFallbackResult(
+        RunbookStepDefinition step,
+        List<DeviceVersionActual> actuals,
+        string requirementUrl,
+        string tmsFailureMessage)
+    {
+        var fallbackFile = ResolveFallbackFile(step);
+        var fallbackRequirements = LoadFallbackRequirements(fallbackFile);
+        if (fallbackRequirements.Count == 0)
+        {
+            return new DeviceVersionComplianceResult
+            {
+                ApiSuccess = false,
+                ApiMessage = $"{tmsFailureMessage}；本地兜底要求不可用",
+                RequirementUrl = requirementUrl,
+                RequirementSource = "none",
+                Actuals = actuals
+            };
+        }
+
+        var mismatches = Compare(fallbackRequirements, actuals);
+        return new DeviceVersionComplianceResult
+        {
+            ApiSuccess = true,
+            ApiMessage = $"{tmsFailureMessage}；已切换本地兜底要求",
+            RequirementUrl = fallbackFile,
+            RequirementSource = "local-fallback",
+            Requirements = fallbackRequirements,
+            Actuals = actuals,
+            Mismatches = mismatches
+        };
+    }
+
+    private static string ResolveFallbackFile(RunbookStepDefinition step)
+    {
+        if (step.Params.TryGetValue("requirementFallbackFile", out var fallbackFile) &&
+            !string.IsNullOrWhiteSpace(fallbackFile))
+        {
+            return fallbackFile;
+        }
+
+        return RequirementFallbackConfigRelativePath;
+    }
+
+    private static List<DeviceVersionRequirement> LoadFallbackRequirements(string fallbackFile)
+    {
+        try
+        {
+            var path = Path.IsPathRooted(fallbackFile)
+                ? fallbackFile
+                : Path.Combine(AppContext.BaseDirectory, fallbackFile);
+            if (!File.Exists(path))
+            {
+                return [];
+            }
+
+            var json = File.ReadAllText(path);
+            return ParseRequirements(json);
         }
         catch
         {
