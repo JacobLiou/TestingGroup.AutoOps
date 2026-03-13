@@ -7,6 +7,7 @@ public static class TpCheckIds
     public const string NetworkEndpoints = "TP_03";
     public const string VersionCompliance = "TP_04";
     public const string StationCapabilityCompliance = "TP_05";
+    public const string PowerSupplyQuality = "TP_06";
 }
 
 public sealed class TpConnectivitySnapshot
@@ -94,4 +95,35 @@ public sealed class StationCapabilityComplianceResult
     public bool Success { get; init; }
     public string ActualSource { get; init; } = string.Empty;
     public List<StationCapabilityMetricResult> Metrics { get; init; } = [];
+}
+
+public sealed class PowerSupplyRequirements
+{
+    public double TargetVoltageV { get; init; } = 12.0;
+    public double MinVoltageV { get; init; } = 11.4;
+    public double MaxVoltageV { get; init; } = 12.6;
+    public double MaxStdDevV { get; init; } = 0.06;
+    public double MaxRippleV { get; init; } = 0.25;
+    public int SampleIntervalMs { get; init; } = 500;
+    public int SampleCount { get; init; } = 12;
+    public string TpVoltageApiUrl { get; init; } = string.Empty;
+}
+
+public sealed class PowerVoltageSample
+{
+    public DateTime Timestamp { get; init; }
+    public double VoltageV { get; init; }
+}
+
+public sealed class PowerSupplyQualityResult
+{
+    public bool Success { get; init; }
+    public string Source { get; init; } = string.Empty;
+    public List<PowerVoltageSample> Samples { get; init; } = [];
+    public double MeanV { get; init; }
+    public double StdDevV { get; init; }
+    public double MinV { get; init; }
+    public double MaxV { get; init; }
+    public double RippleV { get; init; }
+    public List<string> FailReasons { get; init; } = [];
 }

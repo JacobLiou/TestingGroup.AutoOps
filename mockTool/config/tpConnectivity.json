@@ -1,5 +1,7 @@
 {
   "tpRootPath": "C:\\Users\\menghl2\\WorkSpace\\Projects\\Test Program\\cal_fts_fvs_fqc\\RELEASE",
   "stationMetricsApiUrl": "",
-  "stationMetricsRelativePath": "config\\station_metrics.json"
+  "stationMetricsRelativePath": "config\\station_metrics.json",
+  "voltageAcquisitionApiUrl": "",
+  "voltageDataRelativePath": "config\\voltage_samples.json"
 }

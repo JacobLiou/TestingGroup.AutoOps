@@ -16,6 +16,7 @@ public static class DiagnosticEngine
     private static readonly ExternalDependencyHttpChecker ExternalChecker = new();
     private static readonly DeviceVersionComplianceChecker VersionComplianceChecker = new();
     private static readonly StationCapabilityComplianceChecker StationCapabilityComplianceChecker = new();
+    private static readonly PowerSupplyQualityChecker PowerSupplyQualityChecker = new();
     private static readonly CheckExecutorRegistry ExecutorRegistry = BuildExecutorRegistry();
 
     public static RunbookDefinition LoadRunbook()
@@ -120,6 +121,7 @@ public static class DiagnosticEngine
         RegisterTp(registry, TpCheckIds.NetworkEndpoints);
         RegisterTp(registry, TpCheckIds.VersionCompliance);
         RegisterTp(registry, TpCheckIds.StationCapabilityCompliance);
+        RegisterTp(registry, TpCheckIds.PowerSupplyQuality);
 
         return registry;
     }
@@ -150,7 +152,7 @@ public static class DiagnosticEngine
         registry.Register(new DelegateCheckExecutor(checkId, async (item, step, runContext, ct) =>
         {
             var snapshot = runContext?.TpConnectivity;
-            if (snapshot is null && checkId != TpCheckIds.VersionCompliance)
+            if (snapshot is null && checkId != TpCheckIds.VersionCompliance && checkId != TpCheckIds.StationCapabilityCompliance && checkId != TpCheckIds.PowerSupplyQuality)
             {
                 item.Status = CheckStatus.Warning;
                 item.Detail = "未获取 TP 连接检查快照";
@@ -284,6 +286,24 @@ public static class DiagnosticEngine
                         : $"不满足 {failed.Count} 项（数据源: {result.ActualSource}）: {string.Join("; ", failed.Select(f => $"{f.Metric} 实际{f.Actual} / 要求{f.Required}"))}";
                     item.FixSuggestion = "检查工位实测数据、治具状态与 MIMS 下发要求";
                     item.Score = 65;
+                }
+            }
+            else if (checkId == TpCheckIds.PowerSupplyQuality)
+            {
+                var result = await PowerSupplyQualityChecker.CheckAsync(runContext, ct);
+                var curve = string.Join(", ", result.Samples.Select(s => s.VoltageV.ToString("F3")));
+                if (result.Success)
+                {
+                    item.Status = CheckStatus.Pass;
+                    item.Detail = $"电源电压质量合格（{result.Source}）| 均值{result.MeanV:F3}V 标准差{result.StdDevV:F4}V 纹波{result.RippleV:F4}V | 曲线: [{curve}]";
+                    item.Score = 100;
+                }
+                else
+                {
+                    item.Status = CheckStatus.Fail;
+                    item.Detail = $"电源电压质量不满足要求（{result.Source}）| 均值{result.MeanV:F3}V 标准差{result.StdDevV:F4}V 纹波{result.RippleV:F4}V | {string.Join(" | ", result.FailReasons)} | 曲线: [{curve}]";
+                    item.FixSuggestion = "检查电源模块、负载波动、采样链路和 TP 采集接口";
+                    item.Score = 60;
                 }
             }
 

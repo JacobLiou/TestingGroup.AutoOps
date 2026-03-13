@@ -19,6 +19,7 @@ public partial class MainViewModel : ObservableObject
     private readonly IExternalSystemClient _externalSystemClient;
     private readonly MimsConfigXmlParser _mimsConfigXmlParser;
     private readonly MimsStationCapabilityParser _mimsStationCapabilityParser;
+    private readonly MimsPowerSupplyParser _mimsPowerSupplyParser;
     private readonly TpConnectivityInspector _tpConnectivityInspector;
     private RunbookDefinition? _activeRunbook;
     private Dictionary<string, RunbookStepDefinition> _runbookStepsByStepId = new(StringComparer.OrdinalIgnoreCase);
@@ -82,6 +83,7 @@ public partial class MainViewModel : ObservableObject
         _externalSystemClient = new MimsGrpcClient(new MimsXmlBuilder());
         _mimsConfigXmlParser = new MimsConfigXmlParser();
         _mimsStationCapabilityParser = new MimsStationCapabilityParser();
+        _mimsPowerSupplyParser = new MimsPowerSupplyParser();
         _tpConnectivityInspector = new TpConnectivityInspector();
         ThemeService.Instance.ThemeChanged += OnThemeChanged;
         UpdateThemeProperties(ThemeService.Instance.CurrentMode, ThemeService.Instance.IsDarkTheme);
@@ -401,13 +403,15 @@ public partial class MainViewModel : ObservableObject
 
         var parsed = _mimsConfigXmlParser.ParseOrDefault(configResult.ConfigXml);
         var capabilityRequirements = _mimsStationCapabilityParser.ParseOrDefault(configResult.ConfigXml);
+        var powerRequirements = _mimsPowerSupplyParser.ParseOrDefault(configResult.ConfigXml);
         return new DiagnosticRunContext
         {
             ExternalChecksEnabled = true,
             ExternalConfig = parsed,
             ConfigSource = $"MIMS({configResult.Endpoint})",
             TpConnectivity = tpSnapshot,
-            StationCapabilityRequirements = capabilityRequirements
+            StationCapabilityRequirements = capabilityRequirements,
+            PowerSupplyRequirements = powerRequirements
         };
     }
 }

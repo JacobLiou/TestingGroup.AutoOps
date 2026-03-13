@@ -51,6 +51,16 @@ public sealed class MimsBridgeMockService : MimsBridge.MimsBridgeBase
         sb.Append("<POWER_STABILITY_MAX_DB>0.3</POWER_STABILITY_MAX_DB>");
         sb.Append("<CHANNEL_PLAN_REQUIRED>100G-4CH</CHANNEL_PLAN_REQUIRED>");
         sb.Append("</STATION_CAPABILITY_REQUIREMENTS>");
+        sb.Append("<POWER_SUPPLY_REQUIREMENTS>");
+        sb.Append("<POWER_TARGET_VOLTAGE_V>12.0</POWER_TARGET_VOLTAGE_V>");
+        sb.Append("<POWER_MIN_VOLTAGE_V>11.7</POWER_MIN_VOLTAGE_V>");
+        sb.Append("<POWER_MAX_VOLTAGE_V>12.3</POWER_MAX_VOLTAGE_V>");
+        sb.Append("<POWER_MAX_STDDEV_V>0.060</POWER_MAX_STDDEV_V>");
+        sb.Append("<POWER_MAX_RIPPLE_V>0.220</POWER_MAX_RIPPLE_V>");
+        sb.Append("<POWER_SAMPLE_INTERVAL_MS>350</POWER_SAMPLE_INTERVAL_MS>");
+        sb.Append("<POWER_SAMPLE_COUNT>12</POWER_SAMPLE_COUNT>");
+        sb.Append("<TP_VOLTAGE_API></TP_VOLTAGE_API>");
+        sb.Append("</POWER_SUPPLY_REQUIREMENTS>");
         sb.Append("</MIMS_ENV_CONFIG>");
         return sb.ToString();
     }
