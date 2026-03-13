@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Protobuf Include="Protos\mims_mock.proto" GrpcServices="Client" />
+    <Protobuf Include="Protos\mims_mock.proto" GrpcServices="Client" ProtoRoot="Protos" />
   </ItemGroup>
 
   <ItemGroup>
@@ -51,6 +51,15 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="config\lut\default_station.lut">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config\hwSwFwConfigIntegrity.mock.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config\hwStatusGrouped.mock.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config\opticalResidualRisk.mock.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

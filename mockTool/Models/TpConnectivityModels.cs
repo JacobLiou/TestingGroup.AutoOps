@@ -9,6 +9,11 @@ public static class TpCheckIds
     public const string StationCapabilityCompliance = "TP_05";
     public const string PowerSupplyQuality = "TP_06";
     public const string DefaultInfoAndLut = "TP_07";
+    public const string HwSwFwConfigIntegrity = "TP_08";
+    public const string HwStatusOpticalGroup = "TP_09";
+    public const string HwStatusControlStorageGroup = "TP_10";
+    public const string HwStatusInterfaceCommGroup = "TP_11";
+    public const string OpticalResidualRisk = "TP_12";
 }
 
 public sealed class TpConnectivitySnapshot
@@ -140,5 +145,38 @@ public sealed class DefaultInfoAndLutResult
     public string LutDownloadUrl { get; init; } = string.Empty;
     public string DefaultInfoSummary { get; init; } = string.Empty;
     public string LutSummary { get; init; } = string.Empty;
+    public List<string> FailReasons { get; init; } = [];
+}
+
+public sealed class GroupedCheckMetric
+{
+    public string Name { get; init; } = string.Empty;
+    public string Expected { get; init; } = string.Empty;
+    public string Actual { get; init; } = string.Empty;
+    public bool Pass { get; init; }
+}
+
+public sealed class HwSwFwConfigIntegrityResult
+{
+    public bool Success { get; init; }
+    public string Source { get; init; } = string.Empty;
+    public List<GroupedCheckMetric> Metrics { get; init; } = [];
+    public List<string> FailReasons { get; init; } = [];
+}
+
+public sealed class HwStatusGroupedResult
+{
+    public bool Success { get; init; }
+    public string Source { get; init; } = string.Empty;
+    public string GroupKey { get; init; } = string.Empty;
+    public List<GroupedCheckMetric> Metrics { get; init; } = [];
+    public List<string> FailReasons { get; init; } = [];
+}
+
+public sealed class OpticalResidualRiskResult
+{
+    public bool Success { get; init; }
+    public string Source { get; init; } = string.Empty;
+    public List<GroupedCheckMetric> Metrics { get; init; } = [];
     public List<string> FailReasons { get; init; } = [];
 }

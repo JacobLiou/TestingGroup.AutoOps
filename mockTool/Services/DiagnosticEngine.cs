@@ -18,6 +18,9 @@ public static class DiagnosticEngine
     private static readonly StationCapabilityComplianceChecker StationCapabilityComplianceChecker = new();
     private static readonly PowerSupplyQualityChecker PowerSupplyQualityChecker = new();
     private static readonly DefaultInfoAndLutChecker DefaultInfoAndLutChecker = new();
+    private static readonly HwSwFwConfigIntegrityChecker HwSwFwConfigIntegrityChecker = new();
+    private static readonly HwStatusGroupedChecker HwStatusGroupedChecker = new();
+    private static readonly OpticalPathResidualRiskChecker OpticalPathResidualRiskChecker = new();
     private static readonly CheckExecutorRegistry ExecutorRegistry = BuildExecutorRegistry();
 
     public static RunbookDefinition LoadRunbook()
@@ -129,6 +132,11 @@ public static class DiagnosticEngine
         RegisterTp(registry, TpCheckIds.StationCapabilityCompliance);
         RegisterTp(registry, TpCheckIds.PowerSupplyQuality);
         RegisterTp(registry, TpCheckIds.DefaultInfoAndLut);
+        RegisterTp(registry, TpCheckIds.HwSwFwConfigIntegrity);
+        RegisterTp(registry, TpCheckIds.HwStatusOpticalGroup);
+        RegisterTp(registry, TpCheckIds.HwStatusControlStorageGroup);
+        RegisterTp(registry, TpCheckIds.HwStatusInterfaceCommGroup);
+        RegisterTp(registry, TpCheckIds.OpticalResidualRisk);
 
         return registry;
     }
@@ -159,7 +167,16 @@ public static class DiagnosticEngine
         registry.Register(new DelegateCheckExecutor(checkId, async (item, step, runContext, ct) =>
         {
             var snapshot = runContext?.TpConnectivity;
-            if (snapshot is null && checkId != TpCheckIds.VersionCompliance && checkId != TpCheckIds.StationCapabilityCompliance && checkId != TpCheckIds.PowerSupplyQuality && checkId != TpCheckIds.DefaultInfoAndLut)
+            if (snapshot is null &&
+                checkId != TpCheckIds.VersionCompliance &&
+                checkId != TpCheckIds.StationCapabilityCompliance &&
+                checkId != TpCheckIds.PowerSupplyQuality &&
+                checkId != TpCheckIds.DefaultInfoAndLut &&
+                checkId != TpCheckIds.HwSwFwConfigIntegrity &&
+                checkId != TpCheckIds.HwStatusOpticalGroup &&
+                checkId != TpCheckIds.HwStatusControlStorageGroup &&
+                checkId != TpCheckIds.HwStatusInterfaceCommGroup &&
+                checkId != TpCheckIds.OpticalResidualRisk)
             {
                 item.Status = CheckStatus.Warning;
                 item.Detail = "未获取 TP 连接检查快照";
@@ -336,6 +353,77 @@ public static class DiagnosticEngine
                     item.Detail = $"默认信息与LUT校验失败（{result.Source}）| 默认信息URL: {result.DefaultInfoUrl} | LUT URL: {result.LutDownloadUrl} | {string.Join(" | ", result.FailReasons)}";
                     item.FixSuggestion = "检查 MIMS 下发默认信息、LUT 下载地址和内容完整性";
                     item.Score = 60;
+                }
+            }
+            else if (checkId == TpCheckIds.HwSwFwConfigIntegrity)
+            {
+                var result = await HwSwFwConfigIntegrityChecker.CheckAsync(step, runContext, ct);
+                var total = result.Metrics.Count;
+                var failed = result.Metrics.Count(m => !m.Pass);
+                if (result.Success)
+                {
+                    item.Status = CheckStatus.Pass;
+                    item.Detail = $"配置/损坏数据检查通过（{result.Source}）: 总计 {total}，失败 0";
+                    item.Score = 100;
+                }
+                else if (total == 0)
+                {
+                    item.Status = CheckStatus.Warning;
+                    item.Detail = $"配置/损坏数据检查无有效结果（{result.Source}）: {string.Join("; ", result.FailReasons)}";
+                    item.Score = 88;
+                }
+                else
+                {
+                    item.Status = CheckStatus.Fail;
+                    item.Detail = $"配置/损坏数据检查失败（{result.Source}）: 总计 {total}，失败 {failed}；{string.Join("; ", result.FailReasons)}";
+                    item.FixSuggestion = "修复损坏数据、校准默认配置并同步 MIMS/TMS 配置";
+                    item.Score = 62;
+                }
+            }
+            else if (checkId == TpCheckIds.HwStatusOpticalGroup ||
+                     checkId == TpCheckIds.HwStatusControlStorageGroup ||
+                     checkId == TpCheckIds.HwStatusInterfaceCommGroup)
+            {
+                var result = await HwStatusGroupedChecker.CheckAsync(step, runContext, ct);
+                var total = result.Metrics.Count;
+                var failed = result.Metrics.Count(m => !m.Pass);
+                if (result.Success)
+                {
+                    item.Status = CheckStatus.Pass;
+                    item.Detail = $"HW 状态分组检查通过（{result.GroupKey}, {result.Source}）: 总计 {total}，失败 0";
+                    item.Score = 100;
+                }
+                else if (total == 0)
+                {
+                    item.Status = CheckStatus.Warning;
+                    item.Detail = $"HW 状态分组无有效结果（{result.GroupKey}, {result.Source}）: {string.Join("; ", result.FailReasons)}";
+                    item.Score = 86;
+                }
+                else
+                {
+                    item.Status = CheckStatus.Fail;
+                    item.Detail = $"HW 状态分组检查失败（{result.GroupKey}, {result.Source}）: 总计 {total}，失败 {failed}；{string.Join("; ", result.FailReasons)}";
+                    item.FixSuggestion = "检查设备连接逻辑稳定性、指令链路和 I/O / DAC/ADC / SPI/I2C 通信";
+                    item.Score = 60;
+                }
+            }
+            else if (checkId == TpCheckIds.OpticalResidualRisk)
+            {
+                var result = await OpticalPathResidualRiskChecker.CheckAsync(step, runContext, ct);
+                var total = result.Metrics.Count;
+                var failed = result.Metrics.Count(m => !m.Pass);
+                if (result.Success)
+                {
+                    item.Status = CheckStatus.Pass;
+                    item.Detail = $"光路残留风险分析通过（{result.Source}）: 总计 {total}，失败 0";
+                    item.Score = 100;
+                }
+                else
+                {
+                    item.Status = failed == 0 ? CheckStatus.Warning : CheckStatus.Fail;
+                    item.Detail = $"光路残留风险分析未通过（{result.Source}）: 总计 {total}，失败 {failed}；{string.Join("; ", result.FailReasons)}";
+                    item.FixSuggestion = "重点排查纤芯、熔接点、RTS 后残留异常与盘盒异常";
+                    item.Score = failed == 0 ? 84 : 58;
                 }
             }
 

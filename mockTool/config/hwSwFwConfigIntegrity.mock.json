@@ -1,0 +1,8 @@
+{
+  "items": [
+    { "name": "HW/FW/FPGA/CPLD版本匹配", "expected": "all_match", "actual": "all_match", "pass": true },
+    { "name": "默认配置签名校验", "expected": "valid", "actual": "valid", "pass": true },
+    { "name": "损坏数据块数量", "expected": "0", "actual": "1", "pass": false },
+    { "name": "错误配置项数量", "expected": "0", "actual": "0", "pass": true }
+  ]
+}

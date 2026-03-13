@@ -1,0 +1,37 @@
+{
+  "groups": [
+    {
+      "groupKey": "optical",
+      "items": [
+        { "name": "PD通信", "expected": "ok", "actual": "ok", "pass": true },
+        { "name": "VOA调节", "expected": "ok", "actual": "ok", "pass": true },
+        { "name": "SW切换", "expected": "ok", "actual": "ok", "pass": true },
+        { "name": "Pump驱动", "expected": "ok", "actual": "warn", "pass": false },
+        { "name": "DFB激光器", "expected": "ok", "actual": "ok", "pass": true },
+        { "name": "TEC控温", "expected": "ok", "actual": "ok", "pass": true },
+        { "name": "Heater控制", "expected": "ok", "actual": "ok", "pass": true }
+      ]
+    },
+    {
+      "groupKey": "control_storage",
+      "items": [
+        { "name": "MCU状态", "expected": "ok", "actual": "ok", "pass": true },
+        { "name": "EEPROM读写", "expected": "ok", "actual": "ok", "pass": true },
+        { "name": "Flash校验", "expected": "ok", "actual": "ok", "pass": true },
+        { "name": "温度传感器", "expected": "ok", "actual": "ok", "pass": true },
+        { "name": "Watchdog心跳", "expected": "ok", "actual": "ok", "pass": true }
+      ]
+    },
+    {
+      "groupKey": "interface_comm",
+      "items": [
+        { "name": "I/O线状态", "expected": "ok", "actual": "ok", "pass": true },
+        { "name": "IO Port映射", "expected": "ok", "actual": "ok", "pass": true },
+        { "name": "DAC输出", "expected": "ok", "actual": "ok", "pass": true },
+        { "name": "ADC采样", "expected": "ok", "actual": "ok", "pass": true },
+        { "name": "SPI通信压力测试", "expected": "ok", "actual": "ok", "pass": true },
+        { "name": "I2C通信压力测试", "expected": "ok", "actual": "ok", "pass": true }
+      ]
+    }
+  ]
+}

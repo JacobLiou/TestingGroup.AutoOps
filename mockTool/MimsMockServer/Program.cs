@@ -71,6 +71,83 @@ app.MapGet("/api/tms/lut/download/default", () => Results.Text(
     """,
     "text/plain"));
 
+app.MapGet("/api/tms/hw-config-integrity", () => Results.Json(new
+{
+    items = new[]
+    {
+        new { name = "HW/FW/FPGA/CPLD版本匹配", expected = "all_match", actual = "all_match", pass = true },
+        new { name = "默认配置签名校验", expected = "valid", actual = "valid", pass = true },
+        new { name = "损坏数据块数量", expected = "0", actual = "0", pass = true },
+        new { name = "错误配置项数量", expected = "0", actual = "1", pass = false }
+    }
+}));
+
+app.MapGet("/api/tms/hw-status-groups", (string? group) =>
+{
+    var key = (group ?? "optical").Trim().ToLowerInvariant();
+    var groups = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
+    {
+        ["optical"] = new
+        {
+            groupKey = "optical",
+            items = new[]
+            {
+                new { name = "PD通信", expected = "ok", actual = "ok", pass = true },
+                new { name = "VOA调节", expected = "ok", actual = "ok", pass = true },
+                new { name = "SW切换", expected = "ok", actual = "ok", pass = true },
+                new { name = "Pump驱动", expected = "ok", actual = "warn", pass = false },
+                new { name = "DFB激光器", expected = "ok", actual = "ok", pass = true },
+                new { name = "TEC控温", expected = "ok", actual = "ok", pass = true },
+                new { name = "Heater控制", expected = "ok", actual = "ok", pass = true }
+            }
+        },
+        ["control_storage"] = new
+        {
+            groupKey = "control_storage",
+            items = new[]
+            {
+                new { name = "MCU状态", expected = "ok", actual = "ok", pass = true },
+                new { name = "EEPROM读写", expected = "ok", actual = "ok", pass = true },
+                new { name = "Flash校验", expected = "ok", actual = "ok", pass = true },
+                new { name = "温度传感器", expected = "ok", actual = "ok", pass = true },
+                new { name = "Watchdog心跳", expected = "ok", actual = "ok", pass = true }
+            }
+        },
+        ["interface_comm"] = new
+        {
+            groupKey = "interface_comm",
+            items = new[]
+            {
+                new { name = "I/O线状态", expected = "ok", actual = "ok", pass = true },
+                new { name = "IO Port映射", expected = "ok", actual = "ok", pass = true },
+                new { name = "DAC输出", expected = "ok", actual = "ok", pass = true },
+                new { name = "ADC采样", expected = "ok", actual = "ok", pass = true },
+                new { name = "SPI通信压力测试", expected = "ok", actual = "ok", pass = true },
+                new { name = "I2C通信压力测试", expected = "ok", actual = "ok", pass = true }
+            }
+        }
+    };
+
+    if (!groups.TryGetValue(key, out var payload))
+    {
+        return Results.NotFound(new { message = $"group not found: {key}" });
+    }
+
+    return Results.Json(payload);
+});
+
+app.MapGet("/api/tms/optical-risk", () => Results.Json(new
+{
+    rtsCompleted = true,
+    items = new[]
+    {
+        new { name = "FiberBreaksResidual", expected = "0", actual = "0", pass = true },
+        new { name = "MaxInsertionLoss", expected = "<= 1.20 dB", actual = "1.09 dB", pass = true },
+        new { name = "TrayAnomalyResidual", expected = "0", actual = "1", pass = false }
+    },
+    residualIssues = new[] { "盘盒轻微异常" }
+}));
+
 app.MapGet("/", () => "Mock MIMS gRPC server is running on http://127.0.0.1:50051");
 
 app.Run();

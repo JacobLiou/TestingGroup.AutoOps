@@ -44,6 +44,9 @@ public sealed class MimsBridgeMockService : MimsBridge.MimsBridgeBase
         sb.Append("<LAN_API>http://127.0.0.1:7005/api/lan/health</LAN_API>");
         sb.Append("<DEFAULT_INFO_API>http://127.0.0.1:7002/api/tms/default-info</DEFAULT_INFO_API>");
         sb.Append("<LUT_DOWNLOAD_API>http://127.0.0.1:7002/api/tms/lut/download/default</LUT_DOWNLOAD_API>");
+        sb.Append("<HW_CONFIG_CHECK_API>http://127.0.0.1:7002/api/tms/hw-config-integrity</HW_CONFIG_CHECK_API>");
+        sb.Append("<HW_STATUS_GROUPS_API>http://127.0.0.1:7002/api/tms/hw-status-groups</HW_STATUS_GROUPS_API>");
+        sb.Append("<OPTICAL_RISK_API>http://127.0.0.1:7002/api/tms/optical-risk</OPTICAL_RISK_API>");
         sb.Append("<STATION_CAPABILITY_REQUIREMENTS>");
         sb.Append("<GRR_MAX_PERCENT>10.0</GRR_MAX_PERCENT>");
         sb.Append("<GDS_MIN_PERCENT>90.0</GDS_MIN_PERCENT>");
