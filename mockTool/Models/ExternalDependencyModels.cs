@@ -37,4 +37,5 @@ public sealed class DiagnosticRunContext
     public ExternalDependencyConfig? ExternalConfig { get; init; }
     public string ConfigSource { get; init; } = string.Empty;
     public string ConfigError { get; init; } = string.Empty;
+    public TpConnectivitySnapshot? TpConnectivity { get; init; }
 }

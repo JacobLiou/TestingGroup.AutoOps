@@ -20,7 +20,10 @@
     { "stepId": "S012", "checkId": "EXT_TMS", "displayName": "TMS 接口连通性", "category": "StationCheck", "timeoutMs": 6000, "enabled": true, "nextOnSuccess": "S013", "nextOnFailure": "S013", "params": { "dependencyId": "EXT_TMS" } },
     { "stepId": "S013", "checkId": "EXT_TAS", "displayName": "TAS AOI 接口连通性", "category": "StationCheck", "timeoutMs": 6000, "enabled": true, "nextOnSuccess": "S014", "nextOnFailure": "S014", "params": { "dependencyId": "EXT_TAS" } },
     { "stepId": "S014", "checkId": "EXT_FILE_SERVER", "displayName": "文件服务器接口连通性", "category": "StationCheck", "timeoutMs": 6000, "enabled": true, "nextOnSuccess": "S015", "nextOnFailure": "S015", "params": { "dependencyId": "EXT_FILE_SERVER" } },
-    { "stepId": "S015", "checkId": "EXT_LAN", "displayName": "局域网网关连通性", "category": "StationCheck", "timeoutMs": 6000, "enabled": true, "nextOnSuccess": "S016", "nextOnFailure": "S016", "params": { "dependencyId": "EXT_LAN" } },
+    { "stepId": "S015", "checkId": "EXT_LAN", "displayName": "局域网网关连通性", "category": "StationCheck", "timeoutMs": 6000, "enabled": true, "nextOnSuccess": "S015_TP_01", "nextOnFailure": "S015_TP_01", "params": { "dependencyId": "EXT_LAN" } },
+    { "stepId": "S015_TP_01", "checkId": "TP_01", "displayName": "TP 路径与配置可读性", "category": "StationCheck", "timeoutMs": 4000, "enabled": true, "nextOnSuccess": "S015_TP_02", "nextOnFailure": "S015_TP_02", "params": {} },
+    { "stepId": "S015_TP_02", "checkId": "TP_02", "displayName": "TP 串口映射连通性", "category": "HwStatusCheck", "timeoutMs": 5000, "enabled": true, "nextOnSuccess": "S015_TP_03", "nextOnFailure": "S015_TP_03", "params": {} },
+    { "stepId": "S015_TP_03", "checkId": "TP_03", "displayName": "TP 网口目标连通性", "category": "StationCheck", "timeoutMs": 6000, "enabled": true, "nextOnSuccess": "S016", "nextOnFailure": "S016", "params": {} },
 
     { "stepId": "S016", "checkId": "SEC_01", "displayName": "Windows 防火墙", "category": "HwSwFwCheck", "timeoutMs": 5000, "enabled": true, "nextOnSuccess": "S017", "nextOnFailure": "S017", "params": {} },
     { "stepId": "S017", "checkId": "SEC_02", "displayName": "杀毒软件状态", "category": "HwSwFwCheck", "timeoutMs": 5000, "enabled": true, "nextOnSuccess": "S018", "nextOnFailure": "S018", "params": {} },

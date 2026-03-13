@@ -113,6 +113,9 @@ public static class DiagnosticEngine
         RegisterExternal(registry, ExternalDependencyIds.Tas);
         RegisterExternal(registry, ExternalDependencyIds.FileServer);
         RegisterExternal(registry, ExternalDependencyIds.Lan);
+        RegisterTp(registry, TpCheckIds.PathAndConfig);
+        RegisterTp(registry, TpCheckIds.SerialPorts);
+        RegisterTp(registry, TpCheckIds.NetworkEndpoints);
 
         return registry;
     }
@@ -135,6 +138,100 @@ public static class DiagnosticEngine
                 : dependencyId;
             await CheckExternalApiAsync(item, resolvedDependencyId, runContext, ct);
             return new CheckExecutionOutcome { Success = IsSuccessful(item.Status) };
+        }));
+    }
+
+    private static void RegisterTp(CheckExecutorRegistry registry, string checkId)
+    {
+        registry.Register(new DelegateCheckExecutor(checkId, (item, _, runContext, _) =>
+        {
+            var snapshot = runContext?.TpConnectivity;
+            if (snapshot is null)
+            {
+                item.Status = CheckStatus.Warning;
+                item.Detail = "未获取 TP 连接检查快照";
+                item.Score = 90;
+                return Task.FromResult(new CheckExecutionOutcome { Success = false });
+            }
+
+            if (checkId == TpCheckIds.PathAndConfig)
+            {
+                if (!snapshot.TpPathExists)
+                {
+                    item.Status = CheckStatus.Fail;
+                    item.Detail = $"TP 路径不可用: {snapshot.TpRootPath}";
+                    item.FixSuggestion = "确认 TP 路径和目录权限";
+                    item.Score = 60;
+                }
+                else
+                {
+                    item.Status = CheckStatus.Pass;
+                    item.Detail = $"TP 路径有效，发现配置文件 {snapshot.ConfigFiles.Count} 个";
+                    item.Score = 100;
+                }
+            }
+            else if (checkId == TpCheckIds.SerialPorts)
+            {
+                if (!snapshot.TpPathExists)
+                {
+                    item.Status = CheckStatus.Warning;
+                    item.Detail = "TP 路径不可用，跳过串口检查";
+                    item.Score = 90;
+                }
+                else if (snapshot.ExpectedSerialPorts.Count == 0)
+                {
+                    item.Status = CheckStatus.Warning;
+                    item.Detail = "未在 TP 配置中识别到串口映射";
+                    item.Score = 90;
+                }
+                else if (snapshot.MissingSerialPorts.Count == 0)
+                {
+                    item.Status = CheckStatus.Pass;
+                    item.Detail = $"串口映射正常: {string.Join(", ", snapshot.ExpectedSerialPorts)}";
+                    item.Score = 100;
+                }
+                else
+                {
+                    item.Status = CheckStatus.Fail;
+                    item.Detail = $"缺失串口: {string.Join(", ", snapshot.MissingSerialPorts)}";
+                    item.FixSuggestion = "检查串口设备连接、驱动与 COM 口映射";
+                    item.Score = 65;
+                }
+            }
+            else if (checkId == TpCheckIds.NetworkEndpoints)
+            {
+                if (!snapshot.TpPathExists)
+                {
+                    item.Status = CheckStatus.Warning;
+                    item.Detail = "TP 路径不可用，跳过网口检查";
+                    item.Score = 90;
+                }
+                else if (snapshot.NetworkEndpoints.Count == 0)
+                {
+                    item.Status = CheckStatus.Warning;
+                    item.Detail = "未在 TP 配置中识别到网口目标";
+                    item.Score = 90;
+                }
+                else
+                {
+                    var failed = snapshot.NetworkEndpoints.Where(e => !e.Reachable).ToList();
+                    if (failed.Count == 0)
+                    {
+                        item.Status = CheckStatus.Pass;
+                        item.Detail = $"网口目标全部可达，共 {snapshot.NetworkEndpoints.Count} 个";
+                        item.Score = 100;
+                    }
+                    else
+                    {
+                        item.Status = CheckStatus.Fail;
+                        item.Detail = $"不可达目标 {failed.Count} 个: {string.Join("; ", failed.Select(f => $"{f.Endpoint}({f.Error})"))}";
+                        item.FixSuggestion = "检查网络连通、防火墙、交换机/VLAN 与目标服务状态";
+                        item.Score = 65;
+                    }
+                }
+            }
+
+            return Task.FromResult(new CheckExecutionOutcome { Success = IsSuccessful(item.Status) });
         }));
     }
 

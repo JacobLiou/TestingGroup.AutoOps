@@ -18,6 +18,7 @@ public partial class MainViewModel : ObservableObject
     private CancellationTokenSource? _cts;
     private readonly IExternalSystemClient _externalSystemClient;
     private readonly MimsConfigXmlParser _mimsConfigXmlParser;
+    private readonly TpConnectivityInspector _tpConnectivityInspector;
     private RunbookDefinition? _activeRunbook;
     private Dictionary<string, RunbookStepDefinition> _runbookStepsByStepId = new(StringComparer.OrdinalIgnoreCase);
 
@@ -79,6 +80,7 @@ public partial class MainViewModel : ObservableObject
     {
         _externalSystemClient = new MimsGrpcClient(new MimsXmlBuilder());
         _mimsConfigXmlParser = new MimsConfigXmlParser();
+        _tpConnectivityInspector = new TpConnectivityInspector();
         ThemeService.Instance.ThemeChanged += OnThemeChanged;
         UpdateThemeProperties(ThemeService.Instance.CurrentMode, ThemeService.Instance.IsDarkTheme);
         ResetState();
@@ -384,12 +386,14 @@ public partial class MainViewModel : ObservableObject
             LineId = DefaultLineId
         };
         var configResult = await _externalSystemClient.GetEnvironmentConfigAsync(configRequest, cancellationToken);
+        var tpSnapshot = await _tpConnectivityInspector.InspectAsync(cancellationToken);
         if (!configResult.Success)
         {
             return new DiagnosticRunContext
             {
                 ExternalChecksEnabled = false,
-                ConfigError = $"{configResult.Code} - {configResult.Message}"
+                ConfigError = $"{configResult.Code} - {configResult.Message}",
+                TpConnectivity = tpSnapshot
             };
         }
 
@@ -398,7 +402,8 @@ public partial class MainViewModel : ObservableObject
         {
             ExternalChecksEnabled = true,
             ExternalConfig = parsed,
-            ConfigSource = $"MIMS({configResult.Endpoint})"
+            ConfigSource = $"MIMS({configResult.Endpoint})",
+            TpConnectivity = tpSnapshot
         };
     }
 }
