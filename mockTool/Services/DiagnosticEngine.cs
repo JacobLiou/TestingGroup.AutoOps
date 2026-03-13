@@ -24,6 +24,11 @@ public static class DiagnosticEngine
         return RunbookProvider.Load();
     }
 
+    public static IReadOnlyList<string> GetRegisteredCheckIds()
+    {
+        return ExecutorRegistry.GetAllCheckIds();
+    }
+
     public static List<DiagnosticItem> BuildCheckList(RunbookDefinition? runbook = null)
     {
         runbook ??= LoadRunbook();

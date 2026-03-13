@@ -64,10 +64,10 @@ public partial class MainViewModel : ObservableObject
     private int _displayScore;
 
     [ObservableProperty]
-    private string _themeIcon = "🌗";
+    private string _themeIcon = "☀️";
 
     [ObservableProperty]
-    private string _themeModeText = "主题: 自动";
+    private string _themeModeText = "主题: 浅色";
 
     [ObservableProperty]
     private bool _isReportingToMims;
@@ -311,16 +311,8 @@ public partial class MainViewModel : ObservableObject
 
     private void UpdateThemeProperties(AppTheme mode, bool isDark)
     {
-        ThemeIcon = isDark ? "🌙" : "☀️";
-        
-        string modeStr = mode switch
-        {
-            AppTheme.Auto => "自动",
-            AppTheme.Dark => "深色",
-            AppTheme.Light => "浅色",
-            _ => "未知"
-        };
-        ThemeModeText = $"主题: {modeStr}";
+        ThemeIcon = "☀️";
+        ThemeModeText = "主题: 浅色";
     }
 
     partial void OnIsScanningChanged(bool value)

@@ -17,6 +17,13 @@ public sealed class CheckExecutorRegistry
         _executors.TryGetValue(checkId, out var executor);
         return executor;
     }
+
+    public IReadOnlyList<string> GetAllCheckIds()
+    {
+        return _executors.Keys
+            .OrderBy(k => k, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
 }
 
 public sealed class DelegateCheckExecutor : ICheckExecutor

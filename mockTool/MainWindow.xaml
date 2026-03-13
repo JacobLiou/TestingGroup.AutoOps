@@ -4,6 +4,7 @@
         xmlns:vm="clr-namespace:MockDiagTool.ViewModels"
         xmlns:conv="clr-namespace:MockDiagTool.Converters"
         xmlns:model="clr-namespace:MockDiagTool.Models"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
         Title="🛡 自动诊断工具"
         Height="800" Width="1100"
         MinHeight="700" MinWidth="900"
@@ -74,11 +75,6 @@
                                Foreground="{DynamicResource ThemeTextSecondaryBrush}" VerticalAlignment="Center" Margin="8,4,0,0" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <!-- Theme toggle button -->
-                    <Button Style="{StaticResource ThemeToggleButton}"
-                            Content="{Binding ThemeIcon}"
-                            Command="{Binding ToggleThemeCommand}"
-                            Margin="0,0,16,0" />
                     <StackPanel>
                         <TextBlock Text="{Binding StatusText}" FontSize="13"
                                    Foreground="{DynamicResource ThemeTextSecondaryBrush}"
@@ -98,9 +94,9 @@
                 Padding="0,26,0,16">
             <Grid HorizontalAlignment="Center">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="300" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="200" />
                 </Grid.ColumnDefinitions>
 
                 <!-- Score Circle -->
@@ -108,7 +104,8 @@
                     <!-- Background ring -->
                     <Ellipse Stroke="{DynamicResource ThemeRingBgBrush}" StrokeThickness="10" />
                     <!-- Animated ring -->
-                    <Ellipse Stroke="{Binding DisplayScore, Converter={StaticResource ScoreToColor}}"
+                    <Ellipse x:Name="ScoreRing"
+                             Stroke="{Binding DisplayScore, Converter={StaticResource ScoreToColor}}"
                              StrokeThickness="10" StrokeDashArray="4 1" Opacity="0.7"
                              RenderTransformOrigin="0.5,0.5">
                         <Ellipse.RenderTransform>
@@ -162,9 +159,17 @@
                     </Ellipse>
                     <!-- Score text -->
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <TextBlock Text="{Binding DisplayScore}" FontSize="56" FontWeight="Bold"
+                        <TextBlock x:Name="ScoreValueText"
+                                   Text="{Binding DisplayScore}"
+                                   FontSize="56"
+                                   FontWeight="Bold"
                                    Foreground="{Binding DisplayScore, Converter={StaticResource ScoreToColor}}"
-                                   HorizontalAlignment="Center" />
+                                   HorizontalAlignment="Center"
+                                   RenderTransformOrigin="0.5,0.5">
+                            <TextBlock.RenderTransform>
+                                <ScaleTransform ScaleX="1" ScaleY="1" />
+                            </TextBlock.RenderTransform>
+                        </TextBlock>
                         <TextBlock Text="健康评分" FontSize="14"
                                    Foreground="{DynamicResource ThemeTextSecondaryBrush}"
                                    HorizontalAlignment="Center" />
@@ -173,8 +178,17 @@
 
                 <!-- Center: current scanning item + action buttons -->
                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="30,0" MinWidth="280">
-                    <TextBlock Text="{Binding CurrentScanItem}" FontSize="20" FontWeight="SemiBold"
-                               Foreground="{DynamicResource ThemeTextPrimaryBrush}" TextWrapping="Wrap" />
+                    <TextBlock x:Name="CurrentScanText"
+                               Text="{Binding CurrentScanItem}"
+                               FontSize="20"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource ThemeTextPrimaryBrush}"
+                               TextWrapping="Wrap"
+                               Opacity="1">
+                        <TextBlock.RenderTransform>
+                            <TranslateTransform Y="0" />
+                        </TextBlock.RenderTransform>
+                    </TextBlock>
                     <TextBlock Margin="0,8,0,0" FontSize="13"
                                Foreground="{DynamicResource ThemeTextSecondaryBrush}">
                         <TextBlock.Text>
@@ -187,12 +201,13 @@
 
                     <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
                         <!-- Start Scan button -->
-                        <Button Style="{StaticResource PrimaryButton}"
+                        <Button x:Name="StartScanButton"
+                                Style="{StaticResource PrimaryButton}"
                                 Content="🔍 开始体检"
                                 Command="{Binding StartScanCommand}"
                                 Visibility="{Binding IsScanning, Converter={StaticResource InvBoolToVis}}" />
                         <!-- Stop button -->
-                        <Button Style="{StaticResource SecondaryButton}"
+                        <Button Style="{StaticResource ButtonDefault}"
                                 Content="⏹ 停止"
                                 Command="{Binding StopScanCommand}"
                                 Visibility="{Binding IsScanning, Converter={StaticResource BoolToVis}}"
@@ -203,11 +218,13 @@
                                 Command="{Binding FixAllCommand}"
                                 Visibility="{Binding ScanComplete, Converter={StaticResource BoolToVis}}"
                                 Margin="8,0,0,0" />
-                        <Button Style="{StaticResource SecondaryButton}"
+                        <Button x:Name="SendToMimsButton"
+                                Style="{StaticResource ButtonDefault}"
                                 Content="📡 上报到MIMS"
                                 Command="{Binding SendToMimsCommand}"
                                 Margin="8,0,0,0" />
-                        <Button Style="{StaticResource SecondaryButton}"
+                        <Button x:Name="RunbookEditorButton"
+                                Style="{StaticResource ButtonDefault}"
                                 Content="🧩 RunBook 快速编辑"
                                 Command="{Binding OpenRunbookEditorCommand}"
                                 Visibility="{Binding IsScanning, Converter={StaticResource InvBoolToVis}}"

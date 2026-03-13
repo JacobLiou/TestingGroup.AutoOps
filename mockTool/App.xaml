@@ -8,8 +8,8 @@
                 <!-- HandyControl global style resources -->
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml" />
-                <!-- Theme dictionary (will be swapped at runtime by ThemeService) -->
-                <ResourceDictionary Source="Themes/DarkTheme.xaml" />
+                <!-- Project light theme baseline -->
+                <ResourceDictionary Source="Themes/LightTheme.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <!-- Shared global tuning -->

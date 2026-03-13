@@ -40,6 +40,8 @@ public partial class RunbookEditorViewModel : ObservableObject
         nameof(CheckCategory.OpticalPerformanceCheck)
     ];
 
+    public IReadOnlyList<string> CheckIdOptions { get; } = DiagnosticEngine.GetRegisteredCheckIds();
+
     public bool SavedChanges { get; private set; }
 
     public RunbookEditorViewModel(RunbookFileService? runbookFileService = null, string runbookId = "default")
@@ -132,10 +134,17 @@ public partial class RunbookEditorViewModel : ObservableObject
     [RelayCommand]
     private void AutoRelink()
     {
-        var definitions = Steps.Select(s => s.ToDefinition()).ToList();
-        _runbookFileService.AutoRelinkByEnabledOrder(definitions);
-        ReplaceStepsFromDefinitions(definitions);
-        StatusMessage = "已按启用顺序自动重连 nextOnSuccess/nextOnFailure";
+        try
+        {
+            var definitions = Steps.Select(s => s.ToDefinition()).ToList();
+            _runbookFileService.AutoRelinkByEnabledOrder(definitions);
+            ReplaceStepsFromDefinitions(definitions);
+            StatusMessage = "已按启用顺序自动重连 nextOnSuccess/nextOnFailure";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"自动重连失败: {ex.Message}";
+        }
     }
 
     [RelayCommand]
@@ -160,6 +169,14 @@ public partial class RunbookEditorViewModel : ObservableObject
     {
         try
         {
+            var invalid = Steps.FirstOrDefault(s => !s.IsParamsJsonValid);
+            if (invalid is not null)
+            {
+                SelectedStep = invalid;
+                StatusMessage = $"保存失败: 步骤 {invalid.StepId} 的 ParamsJson 不是有效 JSON";
+                return;
+            }
+
             var runbook = BuildRunbook(runbookId);
             _runbookFileService.Save(runbook, runbookId);
             RunbookId = runbookId;
@@ -254,6 +271,12 @@ public partial class RunbookStepEditorItem : ObservableObject
     [ObservableProperty]
     private string _paramsJson = "{}";
 
+    [ObservableProperty]
+    private bool _isParamsJsonValid = true;
+
+    [ObservableProperty]
+    private string _paramsJsonError = string.Empty;
+
     public static RunbookStepEditorItem FromDefinition(RunbookStepDefinition def)
     {
         return new RunbookStepEditorItem
@@ -272,10 +295,20 @@ public partial class RunbookStepEditorItem : ObservableObject
 
     public RunbookStepDefinition ToDefinition()
     {
-        Dictionary<string, string>? parsed = null;
-        if (!string.IsNullOrWhiteSpace(ParamsJson))
+        if (!IsParamsJsonValid)
         {
-            parsed = JsonSerializer.Deserialize<Dictionary<string, string>>(ParamsJson);
+            throw new InvalidOperationException($"步骤 {StepId} 的 ParamsJson 非法: {ParamsJsonError}");
+        }
+
+        Dictionary<string, string> parsed;
+        if (string.IsNullOrWhiteSpace(ParamsJson))
+        {
+            parsed = [];
+        }
+        else
+        {
+            parsed = JsonSerializer.Deserialize<Dictionary<string, string>>(ParamsJson)
+                ?? [];
         }
 
         return new RunbookStepDefinition
@@ -288,7 +321,34 @@ public partial class RunbookStepEditorItem : ObservableObject
             Enabled = Enabled,
             NextOnSuccess = NextOnSuccess.Trim(),
             NextOnFailure = NextOnFailure.Trim(),
-            Params = parsed ?? []
+            Params = parsed
         };
+    }
+
+    partial void OnParamsJsonChanged(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            IsParamsJsonValid = true;
+            ParamsJsonError = string.Empty;
+            return;
+        }
+
+        try
+        {
+            JsonSerializer.Deserialize<Dictionary<string, string>>(value);
+            IsParamsJsonValid = true;
+            ParamsJsonError = string.Empty;
+        }
+        catch (JsonException ex)
+        {
+            IsParamsJsonValid = false;
+            ParamsJsonError = $"JSON 格式错误: {ex.Message}";
+        }
+        catch (Exception ex)
+        {
+            IsParamsJsonValid = false;
+            ParamsJsonError = $"JSON 校验失败: {ex.Message}";
+        }
     }
 }
