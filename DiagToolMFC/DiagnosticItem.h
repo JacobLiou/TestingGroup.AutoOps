@@ -76,33 +76,34 @@ struct DiagnosticItem
 
 namespace ThemeColors
 {
-    inline COLORREF BgMain()        { return RGB(0x1A, 0x1A, 0x2E); }
-    inline COLORREF BgHeader()      { return RGB(0x16, 0x21, 0x3E); }
-    inline COLORREF BgDarker()      { return RGB(0x0D, 0x1B, 0x2A); }
-    inline COLORREF BgCard()        { return RGB(0x1E, 0x25, 0x40); }
-    inline COLORREF BgRow()         { return RGB(0x14, 0x1C, 0x33); }
-    inline COLORREF BgRowAlt()      { return RGB(0x18, 0x22, 0x3A); }
-    inline COLORREF Border()        { return RGB(0x2A, 0x35, 0x55); }
+    // Light Theme Colors
+    inline COLORREF BgMain()        { return RGB(0xF5, 0xF7, 0xFA); } // ThemeBg
+    inline COLORREF BgHeader()      { return RGB(0xFF, 0xFF, 0xFF); } // ThemeHeaderBg
+    inline COLORREF BgDarker()      { return RGB(0xE4, 0xE7, 0xEB); } // ThemeCardBorder
+    inline COLORREF BgCard()        { return RGB(0xFF, 0xFF, 0xFF); } // ThemeCardBg
+    inline COLORREF BgRow()         { return RGB(0xFF, 0xFF, 0xFF); }
+    inline COLORREF BgRowAlt()      { return RGB(0xF7, 0xFA, 0xFC); }
+    inline COLORREF Border()        { return RGB(0xE4, 0xE7, 0xEB); } // ThemeCardBorder
 
-    inline COLORREF TextPrimary()   { return RGB(0xE8, 0xEA, 0xED); }
-    inline COLORREF TextSecondary() { return RGB(0x8A, 0x92, 0xA8); }
+    inline COLORREF TextPrimary()   { return RGB(0x2D, 0x37, 0x48); } // ThemeTextPrimary
+    inline COLORREF TextSecondary() { return RGB(0x71, 0x80, 0x96); } // ThemeTextSecondary
 
-    inline COLORREF AccentGreen()   { return RGB(0x00, 0xC8, 0x53); }
-    inline COLORREF AccentOrange()  { return RGB(0xFF, 0x98, 0x00); }
-    inline COLORREF AccentRed()     { return RGB(0xF4, 0x43, 0x36); }
-    inline COLORREF AccentBlue()    { return RGB(0x42, 0xA5, 0xF5); }
+    inline COLORREF AccentGreen()   { return RGB(0x38, 0xA1, 0x69); } // ThemeAccentGreen
+    inline COLORREF AccentOrange()  { return RGB(0xDD, 0x6B, 0x20); } // ThemeAccentOrange
+    inline COLORREF AccentRed()     { return RGB(0xE5, 0x3E, 0x3E); } // ThemeAccentRed
+    inline COLORREF AccentBlue()    { return RGB(0x31, 0x82, 0xCE); } 
 
-    inline COLORREF BtnPrimary()    { return RGB(0x00, 0xC8, 0x53); }
-    inline COLORREF BtnPrimaryHov() { return RGB(0x00, 0xE6, 0x76); }
-    inline COLORREF BtnFix()        { return RGB(0xFF, 0x98, 0x00); }
-    inline COLORREF BtnFixHov()     { return RGB(0xFF, 0xB3, 0x00); }
-    inline COLORREF BtnStop()       { return RGB(0xF4, 0x43, 0x36); }
-    inline COLORREF BtnStopHov()    { return RGB(0xEF, 0x53, 0x50); }
+    inline COLORREF BtnPrimary()    { return RGB(0x38, 0xA1, 0x69); } // ThemeAccentGreen
+    inline COLORREF BtnPrimaryHov() { return RGB(0x2F, 0x85, 0x5A); }
+    inline COLORREF BtnFix()        { return RGB(0xDD, 0x6B, 0x20); } // ThemeAccentOrange
+    inline COLORREF BtnFixHov()     { return RGB(0xC0, 0x56, 0x21); }
+    inline COLORREF BtnStop()       { return RGB(0xE5, 0x3E, 0x3E); } // ThemeAccentRed
+    inline COLORREF BtnStopHov()    { return RGB(0xC5, 0x30, 0x30); }
 
-    inline COLORREF PassBg()        { return RGB(0x0A, 0x2E, 0x1A); }
-    inline COLORREF WarnBg()        { return RGB(0x2E, 0x24, 0x0A); }
-    inline COLORREF FailBg()        { return RGB(0x2E, 0x0A, 0x0A); }
-    inline COLORREF FixedBg()       { return RGB(0x0A, 0x1E, 0x2E); }
+    inline COLORREF PassBg()        { return RGB(0xE6, 0xFF, 0xED); } // ThemePassCardBg
+    inline COLORREF WarnBg()        { return RGB(0xFF, 0xF8, 0xD6); } // ThemeWarnCardBg
+    inline COLORREF FailBg()        { return RGB(0xFF, 0xEB, 0xEB); } // ThemeFailCardBg
+    inline COLORREF FixedBg()       { return RGB(0xE1, 0xF5, 0xFE); }
 
     inline COLORREF StatusColor(CheckStatus s)
     {

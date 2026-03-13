@@ -99,7 +99,7 @@
     <ClCompile Include="DiagnosticEngine.cpp" />
     <ClCompile Include="ScoreRingCtrl.cpp" />
     <ClCompile Include="DiagListCtrl.cpp" />
-    <ClCompile Include="DarkButton.cpp" />
+    <ClCompile Include="ThemedButton.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -112,7 +112,7 @@
     <ClInclude Include="DiagnosticEngine.h" />
     <ClInclude Include="ScoreRingCtrl.h" />
     <ClInclude Include="DiagListCtrl.h" />
-    <ClInclude Include="DarkButton.h" />
+    <ClInclude Include="ThemedButton.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="DiagToolMFC.rc" />

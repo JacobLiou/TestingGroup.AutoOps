@@ -68,11 +68,11 @@ BOOL CDiagToolDlg::OnInitDialog()
 
     m_btnStop.Create(_T("停止"), WS_CHILD | BS_OWNERDRAW,
                       CRect(390, HEADER_H + 150, 480, HEADER_H + 186), this, IDC_BTN_STOP);
-    m_btnStop.SetColors(ThemeColors::BtnStop(), ThemeColors::BtnStopHov());
+    m_btnStop.SetColors(ThemeColors::BtnStop(), ThemeColors::BtnStopHov(), RGB(255, 255, 255));
 
     m_btnFixAll.Create(_T("一键修复"), WS_CHILD | BS_OWNERDRAW,
                         CRect(390, HEADER_H + 150, 510, HEADER_H + 186), this, IDC_BTN_FIXALL);
-    m_btnFixAll.SetColors(ThemeColors::BtnFix(), ThemeColors::BtnFixHov());
+    m_btnFixAll.SetColors(ThemeColors::BtnFix(), ThemeColors::BtnFixHov(), RGB(255, 255, 255));
 
     // Size to a good default
     MoveWindow(0, 0, 1100, 800, FALSE);
@@ -196,9 +196,7 @@ void CDiagToolDlg::OnPaint()
 
     DrawFooter(g, w, h);
 
-    // Draw owner-draw buttons on our buffer
-    DrawButton(g, CRect(m_btnStart.IsWindowVisible() ? 1 : 0, 0, 0, 0), nullptr,
-               ThemeColors::BtnPrimary(), false);
+
 
     Graphics dcG(dc.GetSafeHdc());
     dcG.DrawImage(&bmp, 0, 0);
@@ -380,11 +378,7 @@ void CDiagToolDlg::DrawFooter(Graphics& g, int w, int h)
     g.DrawString(countStr, -1, &footFont, rightRect, &sfRight, &txtBrush);
 }
 
-void CDiagToolDlg::DrawButton(Graphics&, CRect&, LPCTSTR, COLORREF, bool)
-{
-    // Buttons are actually MFC owner-draw buttons; they draw themselves.
-    // This is a placeholder for the paint pipeline.
-}
+
 
 // ─────────── Status / Counts ───────────
 

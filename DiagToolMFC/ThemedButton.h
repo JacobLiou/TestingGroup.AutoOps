@@ -1,14 +1,14 @@
 #pragma once
 #include "DiagnosticItem.h"
 
-class CDarkButton : public CButton
+class CThemedButton : public CButton
 {
-    DECLARE_DYNAMIC(CDarkButton)
+    DECLARE_DYNAMIC(CThemedButton)
 
 public:
-    CDarkButton();
+    CThemedButton();
 
-    void SetColors(COLORREF bg, COLORREF bgHover, COLORREF text = RGB(255,255,255));
+    void SetColors(COLORREF bg, COLORREF bgHover, COLORREF text = RGB(0,0,0));
 
 protected:
     DECLARE_MESSAGE_MAP()

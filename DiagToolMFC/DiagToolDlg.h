@@ -5,7 +5,8 @@
 #include "DiagnosticEngine.h"
 #include "ScoreRingCtrl.h"
 #include "DiagListCtrl.h"
-#include "DarkButton.h"
+#include "ThemedButton.h"
+
 #include <vector>
 #include <atomic>
 
@@ -49,8 +50,6 @@ private:
     void DrawSummaryCards(Gdiplus::Graphics& g, int x, int y);
     void DrawScanInfo(Gdiplus::Graphics& g, int x, int y);
     void DrawFooter(Gdiplus::Graphics& g, int w, int h);
-    void DrawButton(Gdiplus::Graphics& g, CRect& btnRect, LPCTSTR text,
-                    COLORREF bgColor, bool visible);
 
     static UINT ScanThreadProc(LPVOID pParam);
     static UINT FixAllThreadProc(LPVOID pParam);
@@ -60,9 +59,9 @@ private:
     CScoreRingCtrl m_scoreRing;
     CDiagListCtrl m_diagList;
 
-    CDarkButton m_btnStart;
-    CDarkButton m_btnStop;
-    CDarkButton m_btnFixAll;
+    CThemedButton m_btnStart;
+    CThemedButton m_btnStop;
+    CThemedButton m_btnFixAll;
 
     bool m_bScanning = false;
     bool m_bScanComplete = false;

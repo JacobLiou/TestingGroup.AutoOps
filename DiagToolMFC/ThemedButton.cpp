@@ -1,24 +1,24 @@
 #include "stdafx.h"
-#include "DarkButton.h"
+#include "ThemedButton.h"
 
 using namespace Gdiplus;
 typedef Gdiplus::Font GdipFont;
 
-IMPLEMENT_DYNAMIC(CDarkButton, CButton)
+IMPLEMENT_DYNAMIC(CThemedButton, CButton)
 
-CDarkButton::CDarkButton()
+CThemedButton::CThemedButton()
     : m_bgColor(ThemeColors::BtnPrimary())
     , m_bgHoverColor(ThemeColors::BtnPrimaryHov())
-    , m_textColor(RGB(255, 255, 255))
+    , m_textColor(RGB(0, 0, 0))
 {
 }
 
-BEGIN_MESSAGE_MAP(CDarkButton, CButton)
+BEGIN_MESSAGE_MAP(CThemedButton, CButton)
     ON_WM_MOUSEMOVE()
     ON_WM_MOUSELEAVE()
 END_MESSAGE_MAP()
 
-void CDarkButton::SetColors(COLORREF bg, COLORREF bgHover, COLORREF text)
+void CThemedButton::SetColors(COLORREF bg, COLORREF bgHover, COLORREF text)
 {
     m_bgColor = bg;
     m_bgHoverColor = bgHover;
@@ -27,7 +27,7 @@ void CDarkButton::SetColors(COLORREF bg, COLORREF bgHover, COLORREF text)
         InvalidateRect(nullptr, FALSE);
 }
 
-void CDarkButton::OnMouseMove(UINT nFlags, CPoint point)
+void CThemedButton::OnMouseMove(UINT nFlags, CPoint point)
 {
     if (!m_bTracking)
     {
@@ -46,7 +46,7 @@ void CDarkButton::OnMouseMove(UINT nFlags, CPoint point)
     CButton::OnMouseMove(nFlags, point);
 }
 
-void CDarkButton::OnMouseLeave()
+void CThemedButton::OnMouseLeave()
 {
     m_bTracking = false;
     m_bHover = false;
@@ -54,7 +54,7 @@ void CDarkButton::OnMouseLeave()
     CButton::OnMouseLeave();
 }
 
-void CDarkButton::DrawItem(LPDRAWITEMSTRUCT lpDIS)
+void CThemedButton::DrawItem(LPDRAWITEMSTRUCT lpDIS)
 {
     CDC* pDC = CDC::FromHandle(lpDIS->hDC);
     CRect rc = lpDIS->rcItem;
