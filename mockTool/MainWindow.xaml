@@ -3,11 +3,12 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:MockDiagTool.ViewModels"
         xmlns:conv="clr-namespace:MockDiagTool.Converters"
-        Title="🛡 电脑安全体检 — Mock Diagnostic Tool"
+        Title="🛡 自动诊断工具"
         Height="800" Width="1100"
         MinHeight="700" MinWidth="900"
         WindowStartupLocation="CenterScreen"
-        Background="{DynamicResource ThemeBgBrush}">
+        Background="{DynamicResource ThemeBgBrush}"
+        WindowState="Maximized">
 
     <Window.DataContext>
         <vm:MainViewModel />
@@ -34,11 +35,11 @@
             <Grid>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="🛡" FontSize="28" VerticalAlignment="Center" />
-                    <TextBlock Text="  电脑安全体检" FontSize="22" FontWeight="Bold"
+                    <TextBlock Text="  自动诊断工具" FontSize="22" FontWeight="Bold"
                                Foreground="{DynamicResource ThemeTextPrimaryBrush}" VerticalAlignment="Center" />
-                    <TextBlock Text="  Mock Diagnostic Tool" FontSize="13"
-                               Foreground="{DynamicResource ThemeTextSecondaryBrush}" VerticalAlignment="Center" Margin="8,4,0,0" />
                     <TextBlock Text="  · RunBook驱动" FontSize="13"
+                               Foreground="{DynamicResource ThemeTextSecondaryBrush}" VerticalAlignment="Center" Margin="8,4,0,0" />
+                    <TextBlock Text="{Binding CurrentRunbookName, StringFormat=  · RunBook: {0}}" FontSize="13"
                                Foreground="{DynamicResource ThemeTextSecondaryBrush}" VerticalAlignment="Center" Margin="8,4,0,0" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
@@ -332,9 +333,7 @@
             <Grid>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Foreground="{DynamicResource ThemeTextSecondaryBrush}" FontSize="12">
-                        <Run Text="Auto-Ops Mock Diagnostic Tool v1.0" />
-                        <Run Text="  |  " />
-                        <Run Text="类似 360 安全卫士的电脑体检工具" />
+                        <Run Text="Auto-Ops 自动诊断工具 v1.0" />
                     </TextBlock>
                     <TextBlock Foreground="{DynamicResource ThemeTextSecondaryBrush}" FontSize="12"
                                Margin="16,0,0,0" Text="{Binding ThemeModeText}" />

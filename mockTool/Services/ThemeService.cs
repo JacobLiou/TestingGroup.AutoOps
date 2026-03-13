@@ -77,7 +77,9 @@ public class ThemeService
 
     public void Initialize()
     {
-        LoadSettings();
+        // Always start in Auto mode so theme follows OS at launch.
+        _currentMode = AppTheme.Auto;
+        SaveSettings();
         ApplyTheme();
     }
 

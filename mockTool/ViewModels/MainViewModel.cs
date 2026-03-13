@@ -72,6 +72,9 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private string _externalConfigStatus = "未获取 MIMS 外部依赖配置";
 
+    [ObservableProperty]
+    private string _currentRunbookName = "default";
+
     public MainViewModel()
     {
         _externalSystemClient = new MimsGrpcClient(new MimsXmlBuilder());
@@ -90,6 +93,7 @@ public partial class MainViewModel : ObservableObject
 
         var items = DiagnosticEngine.BuildCheckList(_activeRunbook);
         DiagnosticItems = new ObservableCollection<DiagnosticItem>(items);
+        CurrentRunbookName = string.IsNullOrWhiteSpace(_activeRunbook.Id) ? "default" : _activeRunbook.Id;
         TotalItems = items.Count;
         ScannedItems = 0;
         HealthScore = 0;
@@ -103,7 +107,7 @@ public partial class MainViewModel : ObservableObject
         CurrentDiagnosticItem = null;
         IsReportingToMims = false;
         ExternalConfigStatus = "未获取 MIMS 外部依赖配置";
-        StatusText = $"点击「开始体检」执行 RunBook：{_activeRunbook.Title}";
+        StatusText = $"点击「开始体检」执行 RunBook：{CurrentRunbookName}";
     }
 
     [RelayCommand]
