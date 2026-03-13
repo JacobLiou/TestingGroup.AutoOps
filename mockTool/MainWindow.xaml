@@ -20,6 +20,18 @@
         <conv:ScoreToColorConverter x:Key="ScoreToColor" />
         <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
         <conv:InverseBoolToVisibilityConverter x:Key="InvBoolToVis" />
+        <Style x:Key="SummaryCardBorderStyle" TargetType="Border">
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="Padding" Value="16,12" />
+            <Setter Property="Margin" Value="0,4" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeCardBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="10" ShadowDepth="1" Opacity="0.18" />
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
     <Grid>
@@ -31,7 +43,11 @@
         </Grid.RowDefinitions>
 
         <!-- ═══════════ HEADER ═══════════ -->
-        <Border Grid.Row="0" Padding="24,16" Background="{DynamicResource ThemeHeaderBgBrush}">
+        <Border Grid.Row="0"
+                Margin="16,14,16,10"
+                Style="{StaticResource SurfaceCardBorder}"
+                Padding="24,16"
+                Background="{DynamicResource ThemeHeaderBgBrush}">
             <Grid>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="🛡" FontSize="28" VerticalAlignment="Center" />
@@ -61,7 +77,10 @@
         </Border>
 
         <!-- ═══════════ SCORE RING + SCAN AREA ═══════════ -->
-        <Border Grid.Row="1" Padding="0,30,0,20">
+        <Border Grid.Row="1"
+                Margin="16,0,16,10"
+                Style="{StaticResource SurfaceCardBorder}"
+                Padding="0,26,0,16">
             <Grid HorizontalAlignment="Center">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -183,7 +202,7 @@
 
                 <!-- Right: summary cards -->
                 <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="30,0,40,0">
-                    <Border CornerRadius="10" Background="{DynamicResource ThemePassCardBgBrush}" Padding="16,10" Margin="0,4">
+                    <Border Style="{StaticResource SummaryCardBorderStyle}" Background="{DynamicResource ThemePassCardBgBrush}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="✅" FontSize="18" VerticalAlignment="Center" />
                             <TextBlock Text="  通过  " FontSize="14" Foreground="{DynamicResource ThemePassCardTextBrush}" VerticalAlignment="Center" />
@@ -191,7 +210,7 @@
                                        Foreground="{DynamicResource ThemeAccentGreenBrush}" VerticalAlignment="Center" />
                         </StackPanel>
                     </Border>
-                    <Border CornerRadius="10" Background="{DynamicResource ThemeWarnCardBgBrush}" Padding="16,10" Margin="0,4">
+                    <Border Style="{StaticResource SummaryCardBorderStyle}" Background="{DynamicResource ThemeWarnCardBgBrush}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="⚠️" FontSize="18" VerticalAlignment="Center" />
                             <TextBlock Text="  风险  " FontSize="14" Foreground="{DynamicResource ThemeWarnCardTextBrush}" VerticalAlignment="Center" />
@@ -199,7 +218,7 @@
                                        Foreground="{DynamicResource ThemeAccentOrangeBrush}" VerticalAlignment="Center" />
                         </StackPanel>
                     </Border>
-                    <Border CornerRadius="10" Background="{DynamicResource ThemeFailCardBgBrush}" Padding="16,10" Margin="0,4">
+                    <Border Style="{StaticResource SummaryCardBorderStyle}" Background="{DynamicResource ThemeFailCardBgBrush}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="❌" FontSize="18" VerticalAlignment="Center" />
                             <TextBlock Text="  异常  " FontSize="14" Foreground="{DynamicResource ThemeFailCardTextBrush}" VerticalAlignment="Center" />
@@ -212,9 +231,10 @@
         </Border>
 
         <!-- ═══════════ RESULT LIST ═══════════ -->
-        <Border Grid.Row="2" Margin="20,0,20,10" CornerRadius="12"
-                Background="{DynamicResource ThemeCardBgBrush}"
-                BorderBrush="{DynamicResource ThemeCardBorderBrush}" BorderThickness="1">
+        <Border Grid.Row="2"
+                Margin="16,0,16,10"
+                Style="{StaticResource SurfaceCardBorder}"
+                CornerRadius="14">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -222,8 +242,10 @@
                 </Grid.RowDefinitions>
 
                 <!-- List header -->
-                <Border Grid.Row="0" Padding="20,12" Background="{DynamicResource ThemeHeaderBgBrush}"
-                        CornerRadius="12,12,0,0">
+                <Border Grid.Row="0"
+                        Padding="20,14"
+                        Background="{DynamicResource ThemeHeaderBgBrush}"
+                        CornerRadius="14,14,0,0">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="150" />
@@ -266,9 +288,10 @@
                     </ListBox.ItemContainerStyle>
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <Border Padding="20,10" Margin="0,0,0,1"
+                            <Border Padding="18,11" Margin="6,4,6,4"
                                     Background="{Binding Status, Converter={StaticResource StatusToBg}}"
-                                    BorderBrush="{DynamicResource ThemeRowBorderBrush}" BorderThickness="0,0,0,1">
+                                    BorderBrush="{DynamicResource ThemeRowBorderBrush}" BorderThickness="1"
+                                    CornerRadius="8">
                                 <Border.Style>
                                     <Style TargetType="Border">
                                         <Style.Triggers>
@@ -334,7 +357,11 @@
         </Border>
 
         <!-- ═══════════ FOOTER ═══════════ -->
-        <Border Grid.Row="3" Padding="24,10" Background="{DynamicResource ThemeHeaderBgBrush}">
+        <Border Grid.Row="3"
+                Margin="16,0,16,14"
+                Padding="20,12"
+                Style="{StaticResource SoftPanelBorder}"
+                Background="{DynamicResource ThemeHeaderBgBrush}">
             <Grid>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Foreground="{DynamicResource ThemeTextSecondaryBrush}" FontSize="12">
