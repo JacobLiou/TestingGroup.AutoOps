@@ -23,6 +23,7 @@ public partial class MainViewModel : ObservableObject
     private readonly TpConnectivityInspector _tpConnectivityInspector;
     private RunbookDefinition? _activeRunbook;
     private Dictionary<string, RunbookStepDefinition> _runbookStepsByStepId = new(StringComparer.OrdinalIgnoreCase);
+    private bool _isUpdatingLanguageSelection;
 
     [ObservableProperty]
     private ObservableCollection<DiagnosticItem> _diagnosticItems = [];
@@ -37,13 +38,13 @@ public partial class MainViewModel : ObservableObject
     private bool _scanComplete;
 
     [ObservableProperty]
-    private string _currentScanItem = "就绪";
+    private string _currentScanItem = string.Empty;
 
     [ObservableProperty]
     private DiagnosticItem? _currentDiagnosticItem;
 
     [ObservableProperty]
-    private string _statusText = "点击「开始体检」全面扫描您的电脑";
+    private string _statusText = string.Empty;
 
     [ObservableProperty]
     private int _totalItems;
@@ -67,16 +68,22 @@ public partial class MainViewModel : ObservableObject
     private string _themeIcon = "☀️";
 
     [ObservableProperty]
-    private string _themeModeText = "主题: 浅色";
+    private string _themeModeText = string.Empty;
 
     [ObservableProperty]
     private bool _isReportingToMims;
 
     [ObservableProperty]
-    private string _externalConfigStatus = "未获取 MIMS 外部依赖配置";
+    private string _externalConfigStatus = string.Empty;
 
     [ObservableProperty]
     private string _currentRunbookName = "default";
+
+    [ObservableProperty]
+    private string _selectedLanguageCode = LanguageService.ZhCn;
+
+    [ObservableProperty]
+    private string _scannedProgressText = string.Empty;
 
     public event EventHandler? RunbookEditorRequested;
 
@@ -87,6 +94,8 @@ public partial class MainViewModel : ObservableObject
         _mimsStationCapabilityParser = new MimsStationCapabilityParser();
         _mimsPowerSupplyParser = new MimsPowerSupplyParser();
         _tpConnectivityInspector = new TpConnectivityInspector();
+        SelectedLanguageCode = LanguageService.Instance.CurrentLanguage;
+        LanguageService.Instance.LanguageChanged += OnLanguageChanged;
         ThemeService.Instance.ThemeChanged += OnThemeChanged;
         UpdateThemeProperties(ThemeService.Instance.CurrentMode, ThemeService.Instance.IsDarkTheme);
         ResetState();
@@ -111,11 +120,12 @@ public partial class MainViewModel : ObservableObject
         FailCount = 0;
         IsScanning = false;
         ScanComplete = false;
-        CurrentScanItem = "就绪";
+        CurrentScanItem = T("Loc.Runtime.Ready", "就绪");
         CurrentDiagnosticItem = null;
         IsReportingToMims = false;
-        ExternalConfigStatus = "未获取 MIMS 外部依赖配置";
-        StatusText = $"点击「开始体检」执行 RunBook：{CurrentRunbookName}";
+        ExternalConfigStatus = TF("Loc.Runtime.ConfigUnavailable", "外部配置不可用: {0}", "未获取 MIMS 外部依赖配置");
+        StatusText = TF("Loc.Runtime.ClickRunbook", "点击「开始体检」执行 RunBook：{0}", CurrentRunbookName);
+        UpdateScannedProgressText();
     }
 
     [RelayCommand]
@@ -127,21 +137,21 @@ public partial class MainViewModel : ObservableObject
         IsScanning = true;
         ScanComplete = false;
         _cts = new CancellationTokenSource();
-        StatusText = "正在扫描...";
+        StatusText = T("Loc.Runtime.Scanning", "正在扫描...");
 
         try
         {
-            StatusText = "正在向 MIMS 获取外部系统配置...";
+            StatusText = T("Loc.Runtime.FetchMimsConfig", "正在向 MIMS 获取外部系统配置...");
             var runContext = await BuildRunContextAsync(_cts.Token);
             if (runContext.ExternalChecksEnabled)
             {
-                ExternalConfigStatus = $"外部配置来源: {runContext.ConfigSource}";
-                StatusText = "已获取 MIMS 配置，开始执行外部接口与本机诊断...";
+                ExternalConfigStatus = TF("Loc.Runtime.ConfigSource", "外部配置来源: {0}", runContext.ConfigSource);
+                StatusText = T("Loc.Runtime.ConfigReady", "已获取 MIMS 配置，开始执行外部接口与本机诊断...");
             }
             else
             {
-                ExternalConfigStatus = $"外部配置不可用: {runContext.ConfigError}";
-                StatusText = "MIMS 配置获取失败，外部依赖项将标记为跳过";
+                ExternalConfigStatus = TF("Loc.Runtime.ConfigUnavailable", "外部配置不可用: {0}", runContext.ConfigError);
+                StatusText = T("Loc.Runtime.ConfigFailed", "MIMS 配置获取失败，外部依赖项将标记为跳过");
             }
 
             var currentStep = _activeRunbook?.Steps.FirstOrDefault(s => s.Enabled);
@@ -182,15 +192,15 @@ public partial class MainViewModel : ObservableObject
             }
 
             ScanComplete = true;
-            CurrentScanItem = "扫描完成";
+            CurrentScanItem = T("Loc.Runtime.ScanComplete", "扫描完成");
             CurrentDiagnosticItem = null;
-            StatusText = $"体检完成！通过 {PassCount} 项 | 风险 {WarningCount} 项 | 异常 {FailCount} 项";
+            StatusText = TF("Loc.Runtime.Summary", "体检完成！通过 {0} 项 | 风险 {1} 项 | 异常 {2} 项", PassCount, WarningCount, FailCount);
             await SendToMimsCoreAsync(trigger: "auto", cancellationToken: CancellationToken.None);
         }
         catch (OperationCanceledException)
         {
-            StatusText = "扫描已取消";
-            CurrentScanItem = "已取消";
+            StatusText = T("Loc.Runtime.ScanCancelled", "扫描已取消");
+            CurrentScanItem = T("Loc.Runtime.Cancelled", "已取消");
             CurrentDiagnosticItem = null;
         }
         finally
@@ -215,7 +225,7 @@ public partial class MainViewModel : ObservableObject
         }
         CalculateScore();
         await AnimateScoreAsync(DisplayScore, HealthScore);
-        StatusText = $"修复完成！健康评分: {HealthScore}";
+        StatusText = TF("Loc.Runtime.FixDone", "修复完成！健康评分: {0}", HealthScore);
         WarningCount = 0;
         FailCount = 0;
         PassCount = DiagnosticItems.Count;
@@ -235,7 +245,7 @@ public partial class MainViewModel : ObservableObject
         CalculateScore();
         await AnimateScoreAsync(DisplayScore, HealthScore);
         UpdateCounts();
-        StatusText = $"已修复: {item.Name}";
+        StatusText = TF("Loc.Runtime.FixedItem", "已修复: {0}", item.Name);
     }
 
     private void CalculateScore()
@@ -299,6 +309,17 @@ public partial class MainViewModel : ObservableObject
         await SendToMimsCoreAsync(trigger: "manual", cancellationToken: CancellationToken.None);
     }
 
+    [RelayCommand]
+    private void SwitchLanguage(string? languageCode)
+    {
+        if (string.IsNullOrWhiteSpace(languageCode))
+        {
+            return;
+        }
+
+        SelectedLanguageCode = languageCode;
+    }
+
     private bool CanSendToMims()
     {
         return !IsScanning && !IsReportingToMims && (ScanComplete || ScannedItems > 0);
@@ -309,10 +330,28 @@ public partial class MainViewModel : ObservableObject
         UpdateThemeProperties(mode, isDark);
     }
 
+    private void OnLanguageChanged(string language)
+    {
+        _isUpdatingLanguageSelection = true;
+        SelectedLanguageCode = language;
+        _isUpdatingLanguageSelection = false;
+        ThemeModeText = T("Loc.Theme.Light", "主题: 浅色");
+        UpdateScannedProgressText();
+        foreach (var item in DiagnosticItems)
+        {
+            item.RefreshLocalizedText();
+        }
+        if (!IsScanning && !ScanComplete)
+        {
+            CurrentScanItem = T("Loc.Runtime.Ready", "就绪");
+            StatusText = TF("Loc.Runtime.ClickRunbook", "点击「开始体检」执行 RunBook：{0}", CurrentRunbookName);
+        }
+    }
+
     private void UpdateThemeProperties(AppTheme mode, bool isDark)
     {
         ThemeIcon = "☀️";
-        ThemeModeText = "主题: 浅色";
+        ThemeModeText = T("Loc.Theme.Light", "主题: 浅色");
     }
 
     partial void OnIsScanningChanged(bool value)
@@ -334,6 +373,22 @@ public partial class MainViewModel : ObservableObject
     partial void OnScannedItemsChanged(int value)
     {
         SendToMimsCommand.NotifyCanExecuteChanged();
+        UpdateScannedProgressText();
+    }
+
+    partial void OnTotalItemsChanged(int value)
+    {
+        UpdateScannedProgressText();
+    }
+
+    partial void OnSelectedLanguageCodeChanged(string value)
+    {
+        if (_isUpdatingLanguageSelection)
+        {
+            return;
+        }
+
+        LanguageService.Instance.SetLanguage(value);
     }
 
     private async Task SendToMimsCoreAsync(string trigger, CancellationToken cancellationToken)
@@ -352,20 +407,20 @@ public partial class MainViewModel : ObservableObject
             if (result.Success)
             {
                 StatusText = trigger == "auto"
-                    ? $"{StatusText} | 已自动上报 MIMS"
-                    : $"手动上报成功: {result.Code} ({result.Endpoint})";
+                    ? TF("Loc.Runtime.AutoReportSuccess", "{0} | 已自动上报 MIMS", StatusText)
+                    : TF("Loc.Runtime.ManualReportSuccess", "手动上报成功: {0} ({1})", result.Code, result.Endpoint);
                 return;
             }
 
             StatusText = trigger == "auto"
-                ? $"{StatusText} | MIMS 自动上报失败: {result.Code}"
-                : $"手动上报失败: {result.Code} - {result.Message}";
+                ? TF("Loc.Runtime.AutoReportFailed", "{0} | MIMS 自动上报失败: {1}", StatusText, result.Code)
+                : TF("Loc.Runtime.ManualReportFailed", "手动上报失败: {0} - {1}", result.Code, result.Message);
         }
         catch (Exception ex)
         {
             StatusText = trigger == "auto"
-                ? $"{StatusText} | MIMS 自动上报异常: {ex.Message}"
-                : $"手动上报异常: {ex.Message}";
+                ? TF("Loc.Runtime.AutoReportException", "{0} | MIMS 自动上报异常: {1}", StatusText, ex.Message)
+                : TF("Loc.Runtime.ManualReportException", "手动上报异常: {0}", ex.Message);
         }
         finally
         {
@@ -430,5 +485,20 @@ public partial class MainViewModel : ObservableObject
         }
 
         ResetState();
+    }
+
+    private static string T(string key, string fallback)
+    {
+        return LanguageService.Instance.Get(key, fallback);
+    }
+
+    private static string TF(string key, string fallbackFormat, params object[] args)
+    {
+        return LanguageService.Instance.Format(key, fallbackFormat, args);
+    }
+
+    private void UpdateScannedProgressText()
+    {
+        ScannedProgressText = TF("Loc.Main.ScannedProgress", "已扫描 {0} / {1} 项", ScannedItems, TotalItems);
     }
 }

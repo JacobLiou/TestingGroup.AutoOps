@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using MockDiagTool.Services;
 
 namespace MockDiagTool.Models;
 
@@ -38,11 +39,11 @@ public partial class DiagnosticItem : ObservableObject
 
     public string CategoryName => Category switch
     {
-        CheckCategory.SystemCheck => "System Check",
-        CheckCategory.StationCheck => "Station Check",
-        CheckCategory.HwSwFwCheck => "HW/SW/FW Check",
-        CheckCategory.HwStatusCheck => "HW Status Check",
-        CheckCategory.OpticalPerformanceCheck => "Optical Performance Check",
+        CheckCategory.SystemCheck => LanguageService.Instance.Get("Loc.Category.SystemCheck", "System Check"),
+        CheckCategory.StationCheck => LanguageService.Instance.Get("Loc.Category.StationCheck", "Station Check"),
+        CheckCategory.HwSwFwCheck => LanguageService.Instance.Get("Loc.Category.HwSwFwCheck", "HW/SW/FW Check"),
+        CheckCategory.HwStatusCheck => LanguageService.Instance.Get("Loc.Category.HwStatusCheck", "HW Status Check"),
+        CheckCategory.OpticalPerformanceCheck => LanguageService.Instance.Get("Loc.Category.OpticalPerformanceCheck", "Optical Performance Check"),
         _ => "Unknown"
     };
 
@@ -60,14 +61,20 @@ public partial class DiagnosticItem : ObservableObject
 
     public string StatusText => Status switch
     {
-        CheckStatus.Pending => "⏳ 等待检测",
-        CheckStatus.Scanning => "🔍 正在扫描...",
-        CheckStatus.Pass => "✅ 正常",
-        CheckStatus.Warning => "⚠️ 存在风险",
-        CheckStatus.Fail => "❌ 异常",
-        CheckStatus.Fixed => "🔧 已修复",
+        CheckStatus.Pending => LanguageService.Instance.Get("Loc.Status.Pending", "⏳ 等待检测"),
+        CheckStatus.Scanning => LanguageService.Instance.Get("Loc.Status.Scanning", "🔍 正在扫描..."),
+        CheckStatus.Pass => LanguageService.Instance.Get("Loc.Status.Pass", "✅ 正常"),
+        CheckStatus.Warning => LanguageService.Instance.Get("Loc.Status.Warning", "⚠️ 存在风险"),
+        CheckStatus.Fail => LanguageService.Instance.Get("Loc.Status.Fail", "❌ 异常"),
+        CheckStatus.Fixed => LanguageService.Instance.Get("Loc.Status.Fixed", "🔧 已修复"),
         _ => ""
     };
+
+    public void RefreshLocalizedText()
+    {
+        OnPropertyChanged(nameof(CategoryName));
+        OnPropertyChanged(nameof(StatusText));
+    }
 
     partial void OnStatusChanged(CheckStatus value)
     {

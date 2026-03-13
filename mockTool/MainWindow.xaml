@@ -4,29 +4,35 @@
         xmlns:conv="clr-namespace:MockDiagTool.Converters"
         xmlns:model="clr-namespace:MockDiagTool.Models"
         xmlns:vm="clr-namespace:MockDiagTool.ViewModels"
-        Title="🛡 自动诊断工具"
-        Height="800" Width="1100"
-        MinHeight="700" MinWidth="900"
+        Title="{DynamicResource Loc.App.Title}"
+        Height="800"
+        Width="1100"
+        MinHeight="700"
+        MinWidth="900"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource ThemeBgBrush}"
         WindowState="Maximized">
-
     <Window.DataContext>
         <vm:MainViewModel />
     </Window.DataContext>
-
     <Window.Resources>
         <conv:StatusToColorConverter x:Key="StatusToColor" />
         <conv:StatusToBgConverter x:Key="StatusToBg" />
         <conv:ScoreToColorConverter x:Key="ScoreToColor" />
         <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
         <conv:InverseBoolToVisibilityConverter x:Key="InvBoolToVis" />
-        <Style x:Key="SummaryCardBorderStyle" TargetType="Border">
-            <Setter Property="CornerRadius" Value="12" />
-            <Setter Property="Padding" Value="16,12" />
-            <Setter Property="Margin" Value="0,4" />
-            <Setter Property="BorderBrush" Value="{DynamicResource ThemeCardBorderBrush}" />
-            <Setter Property="BorderThickness" Value="1" />
+        <Style x:Key="SummaryCardBorderStyle"
+               TargetType="Border">
+            <Setter Property="CornerRadius"
+                    Value="12" />
+            <Setter Property="Padding"
+                    Value="16,12" />
+            <Setter Property="Margin"
+                    Value="0,4" />
+            <Setter Property="BorderBrush"
+                    Value="{DynamicResource ThemeCardBorderBrush}" />
+            <Setter Property="BorderThickness"
+                    Value="1" />
             <Setter Property="RenderTransform">
                 <Setter.Value>
                     <TranslateTransform Y="0" />
@@ -34,11 +40,14 @@
             </Setter>
             <Setter Property="Effect">
                 <Setter.Value>
-                    <DropShadowEffect BlurRadius="10" ShadowDepth="1" Opacity="0.18" />
+                    <DropShadowEffect BlurRadius="10"
+                                      ShadowDepth="1"
+                                      Opacity="0.18" />
                 </Setter.Value>
             </Setter>
             <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
+                <Trigger Property="IsMouseOver"
+                         Value="True">
                     <Setter Property="RenderTransform">
                         <Setter.Value>
                             <TranslateTransform Y="-1" />
@@ -48,7 +57,6 @@
             </Style.Triggers>
         </Style>
     </Window.Resources>
-
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -56,7 +64,6 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-
         <!-- ═══════════ HEADER ═══════════ -->
         <Border Grid.Row="0"
                 Margin="6,18,6,10"
@@ -64,28 +71,58 @@
                 Padding="24,16"
                 Background="{DynamicResource ThemeHeaderBgBrush}">
             <Grid>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="🛡" FontSize="28" VerticalAlignment="Center" />
-                    <TextBlock Text="  自动诊断工具" FontSize="22" FontWeight="Bold"
-                               Foreground="{DynamicResource ThemeTextPrimaryBrush}" VerticalAlignment="Center" />
-                    <TextBlock Text="  · RunBook驱动" FontSize="13"
-                               Foreground="{DynamicResource ThemeTextSecondaryBrush}" VerticalAlignment="Center" Margin="8,4,0,0" />
-                    <TextBlock Text="{Binding CurrentRunbookName, StringFormat=  · RunBook: {0}}" FontSize="13"
-                               Foreground="{DynamicResource ThemeTextSecondaryBrush}" VerticalAlignment="Center" Margin="8,4,0,0" />
+                <StackPanel Orientation="Horizontal"
+                            VerticalAlignment="Center">
+                    <TextBlock Text="🛡"
+                               FontSize="28"
+                               VerticalAlignment="Center" />
+                    <TextBlock Text="{DynamicResource Loc.Main.BrandTitle}"
+                               FontSize="22"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource ThemeTextPrimaryBrush}"
+                               VerticalAlignment="Center" />
+                    <TextBlock Text="{DynamicResource Loc.Main.RunbookDriven}"
+                               FontSize="13"
+                               Foreground="{DynamicResource ThemeTextSecondaryBrush}"
+                               VerticalAlignment="Center"
+                               Margin="8,4,0,0" />
+                    <TextBlock Text="{Binding CurrentRunbookName, StringFormat=  · RunBook: {0}}"
+                               FontSize="13"
+                               Foreground="{DynamicResource ThemeTextSecondaryBrush}"
+                               VerticalAlignment="Center"
+                               Margin="8,4,0,0" />
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center">
                     <StackPanel>
-                        <TextBlock Text="{Binding StatusText}" FontSize="13"
+                        <TextBlock Text="{Binding StatusText}"
+                                   FontSize="13"
                                    Foreground="{DynamicResource ThemeTextSecondaryBrush}"
                                    VerticalAlignment="Center" />
-                        <TextBlock Text="{Binding ExternalConfigStatus}" FontSize="11"
+                        <TextBlock Text="{Binding ExternalConfigStatus}"
+                                   FontSize="11"
                                    Foreground="{DynamicResource ThemeTextSecondaryBrush}"
                                    VerticalAlignment="Center" />
                     </StackPanel>
+                    <TextBlock Text="{DynamicResource Loc.Main.LanguageLabel}"
+                               FontSize="12"
+                               Margin="22 0 10 0"
+                               Foreground="{DynamicResource ThemeTextSecondaryBrush}"
+                               VerticalAlignment="Center" />
+                    <ComboBox Width="128"
+                              Height="28"
+                              Margin="0,0,10,0"
+                              SelectedValuePath="Tag"
+                              SelectedValue="{Binding SelectedLanguageCode, Mode=TwoWay}">
+                        <ComboBoxItem Content="{DynamicResource Loc.Main.LanguageZhOption}"
+                                      Tag="zh-CN" />
+                        <ComboBoxItem Content="{DynamicResource Loc.Main.LanguageEnOption}"
+                                      Tag="en-US" />
+                    </ComboBox>
                 </StackPanel>
             </Grid>
         </Border>
-
         <!-- ═══════════ SCORE RING + SCAN AREA ═══════════ -->
         <Border Grid.Row="1"
                 Margin="6,0,6,10"
@@ -97,15 +134,19 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="200" />
                 </Grid.ColumnDefinitions>
-
                 <!-- Score Circle -->
-                <Grid Grid.Column="0" Width="180" Height="180">
+                <Grid Grid.Column="0"
+                      Width="180"
+                      Height="180">
                     <!-- Background ring -->
-                    <Ellipse Stroke="{DynamicResource ThemeRingBgBrush}" StrokeThickness="10" />
+                    <Ellipse Stroke="{DynamicResource ThemeRingBgBrush}"
+                             StrokeThickness="10" />
                     <!-- Animated ring -->
                     <Ellipse x:Name="ScoreRing"
                              Stroke="{Binding DisplayScore, Converter={StaticResource ScoreToColor}}"
-                             StrokeThickness="10" StrokeDashArray="4 1" Opacity="0.7"
+                             StrokeThickness="10"
+                             StrokeDashArray="4 1"
+                             Opacity="0.7"
                              RenderTransformOrigin="0.5,0.5">
                         <Ellipse.RenderTransform>
                             <RotateTransform x:Name="ringRotation" />
@@ -113,13 +154,16 @@
                         <Ellipse.Style>
                             <Style TargetType="Ellipse">
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsScanning}" Value="True">
+                                    <DataTrigger Binding="{Binding IsScanning}"
+                                                 Value="True">
                                         <DataTrigger.EnterActions>
                                             <BeginStoryboard x:Name="SpinRing">
                                                 <Storyboard RepeatBehavior="Forever">
                                                     <DoubleAnimation
-                                                        Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
-                                                        From="0" To="360" Duration="0:0:2" />
+                                                            Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                                                                     From="0"
+                                                                     To="360"
+                                                                     Duration="0:0:2" />
                                                 </Storyboard>
                                             </BeginStoryboard>
                                         </DataTrigger.EnterActions>
@@ -132,19 +176,24 @@
                         </Ellipse.Style>
                     </Ellipse>
                     <!-- Glow effect when scanning -->
-                    <Ellipse Opacity="0.15" Fill="{Binding DisplayScore, Converter={StaticResource ScoreToColor}}">
+                    <Ellipse Opacity="0.15"
+                             Fill="{Binding DisplayScore, Converter={StaticResource ScoreToColor}}">
                         <Ellipse.Effect>
                             <BlurEffect Radius="40" />
                         </Ellipse.Effect>
                         <Ellipse.Style>
                             <Style TargetType="Ellipse">
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsScanning}" Value="True">
+                                    <DataTrigger Binding="{Binding IsScanning}"
+                                                 Value="True">
                                         <DataTrigger.EnterActions>
                                             <BeginStoryboard x:Name="PulseGlow">
-                                                <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                                <Storyboard RepeatBehavior="Forever"
+                                                            AutoReverse="True">
                                                     <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                                                     From="0.05" To="0.3" Duration="0:0:1" />
+                                                                     From="0.05"
+                                                                     To="0.3"
+                                                                     Duration="0:0:1" />
                                                 </Storyboard>
                                             </BeginStoryboard>
                                         </DataTrigger.EnterActions>
@@ -157,7 +206,9 @@
                         </Ellipse.Style>
                     </Ellipse>
                     <!-- Score text -->
-                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Width="200">
+                    <StackPanel VerticalAlignment="Center"
+                                HorizontalAlignment="Center"
+                                Width="200">
                         <TextBlock x:Name="ScoreValueText"
                                    Text="{Binding DisplayScore}"
                                    FontSize="56"
@@ -168,17 +219,19 @@
                                    Width="120"
                                    RenderTransformOrigin="0.5,0.5">
                             <TextBlock.RenderTransform>
-                                <ScaleTransform ScaleX="1" ScaleY="1" />
-                            </TextBlock.RenderTransform>
-                        </TextBlock>
-                        <TextBlock Text="健康评分" FontSize="14"
+                                <ScaleTransform ScaleX="1"
+                                                ScaleY="1" />
+                            </TextBlock.RenderTransform></TextBlock>
+                        <TextBlock Text="{DynamicResource Loc.Main.HealthScore}"
+                                   FontSize="14"
                                    Foreground="{DynamicResource ThemeTextSecondaryBrush}"
                                    HorizontalAlignment="Center" />
                     </StackPanel>
                 </Grid>
-
                 <!-- Center: current scanning item + action buttons -->
-                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="30,0">
+                <StackPanel Grid.Column="1"
+                            VerticalAlignment="Center"
+                            Margin="30,0">
                     <TextBlock x:Name="CurrentScanText"
                                Text="{Binding CurrentScanItem}"
                                FontSize="20"
@@ -189,78 +242,101 @@
                                Opacity="1">
                         <TextBlock.RenderTransform>
                             <TranslateTransform Y="0" />
-                        </TextBlock.RenderTransform>
-                    </TextBlock>
-                    <TextBlock Margin="0,8,0,0" FontSize="13"
+                        </TextBlock.RenderTransform></TextBlock>
+                    <TextBlock Margin="0,8,0,0"
+                               FontSize="13"
                                Foreground="{DynamicResource ThemeTextSecondaryBrush}">
                         <TextBlock.Text>
-                            <MultiBinding StringFormat="已扫描 {0} / {1} 项">
-                                <Binding Path="ScannedItems" />
-                                <Binding Path="TotalItems" />
-                            </MultiBinding>
-                        </TextBlock.Text>
-                    </TextBlock>
-
-                    <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
+                            <Binding Path="ScannedProgressText" />
+                        </TextBlock.Text></TextBlock>
+                    <StackPanel Orientation="Horizontal"
+                                Margin="0,20,0,0">
                         <!-- Start Scan button -->
                         <Button Style="{StaticResource PrimaryButton}"
-                                Content="🔍 开始体检"
+                                Content="{DynamicResource Loc.Main.StartScan}"
                                 Command="{Binding StartScanCommand}"
                                 Visibility="{Binding IsScanning, Converter={StaticResource InvBoolToVis}}" />
                         <!-- Stop button -->
                         <Button Style="{StaticResource ButtonDefault}"
-                                Content="⏹ 停止"
+                                Content="{DynamicResource Loc.Main.StopScan}"
                                 Command="{Binding StopScanCommand}"
                                 Visibility="{Binding IsScanning, Converter={StaticResource BoolToVis}}"
                                 Margin="8,0,0,0" />
                         <!-- Fix All button -->
                         <Button Style="{StaticResource FixButton}"
-                                Content="🔧 一键修复"
+                                Content="{DynamicResource Loc.Main.FixAll}"
                                 Command="{Binding FixAllCommand}"
                                 Visibility="{Binding ScanComplete, Converter={StaticResource BoolToVis}}"
                                 Margin="8,0,0,0" />
                         <Button Style="{StaticResource ButtonDefault}"
-                                Content="📡 上报到MIMS"
+                                Content="{DynamicResource Loc.Main.ReportMims}"
                                 Command="{Binding SendToMimsCommand}"
                                 Margin="8,0,0,0" />
                         <Button Style="{StaticResource ButtonDefault}"
-                                Content="🧩 RunBook 快速编辑"
+                                Content="{DynamicResource Loc.Main.RunbookEditor}"
                                 Command="{Binding OpenRunbookEditorCommand}"
                                 Visibility="{Binding IsScanning, Converter={StaticResource InvBoolToVis}}"
                                 Margin="8,0,0,0" />
                     </StackPanel>
                 </StackPanel>
-
                 <!-- Right: summary cards -->
-                <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="30,0,40,0">
-                    <Border Style="{StaticResource SummaryCardBorderStyle}" Background="{DynamicResource ThemePassCardBgBrush}">
+                <StackPanel Grid.Column="2"
+                            VerticalAlignment="Center"
+                            Margin="30,0,40,0">
+                    <Border Style="{StaticResource SummaryCardBorderStyle}"
+                            Background="{DynamicResource ThemePassCardBgBrush}">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="✅" FontSize="18" VerticalAlignment="Center" />
-                            <TextBlock Text="  通过  " FontSize="14" Foreground="{DynamicResource ThemePassCardTextBrush}" VerticalAlignment="Center" />
-                            <TextBlock Text="{Binding PassCount}" FontSize="22" FontWeight="Bold"
-                                       Foreground="{DynamicResource ThemeAccentGreenBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="✅"
+                                       FontSize="18"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Loc.Main.Pass}"
+                                       FontSize="14"
+                                       Foreground="{DynamicResource ThemePassCardTextBrush}"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding PassCount}"
+                                       FontSize="22"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource ThemeAccentGreenBrush}"
+                                       VerticalAlignment="Center" />
                         </StackPanel>
                     </Border>
-                    <Border Style="{StaticResource SummaryCardBorderStyle}" Background="{DynamicResource ThemeWarnCardBgBrush}">
+                    <Border Style="{StaticResource SummaryCardBorderStyle}"
+                            Background="{DynamicResource ThemeWarnCardBgBrush}">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="⚠️" FontSize="18" VerticalAlignment="Center" />
-                            <TextBlock Text="  风险  " FontSize="14" Foreground="{DynamicResource ThemeWarnCardTextBrush}" VerticalAlignment="Center" />
-                            <TextBlock Text="{Binding WarningCount}" FontSize="22" FontWeight="Bold"
-                                       Foreground="{DynamicResource ThemeAccentOrangeBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="⚠️"
+                                       FontSize="18"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Loc.Main.Warning}"
+                                       FontSize="14"
+                                       Foreground="{DynamicResource ThemeWarnCardTextBrush}"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding WarningCount}"
+                                       FontSize="22"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource ThemeAccentOrangeBrush}"
+                                       VerticalAlignment="Center" />
                         </StackPanel>
                     </Border>
-                    <Border Style="{StaticResource SummaryCardBorderStyle}" Background="{DynamicResource ThemeFailCardBgBrush}">
+                    <Border Style="{StaticResource SummaryCardBorderStyle}"
+                            Background="{DynamicResource ThemeFailCardBgBrush}">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="❌" FontSize="18" VerticalAlignment="Center" />
-                            <TextBlock Text="  异常  " FontSize="14" Foreground="{DynamicResource ThemeFailCardTextBrush}" VerticalAlignment="Center" />
-                            <TextBlock Text="{Binding FailCount}" FontSize="22" FontWeight="Bold"
-                                       Foreground="{DynamicResource ThemeAccentRedBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="❌"
+                                       FontSize="18"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource Loc.Main.Fail}"
+                                       FontSize="14"
+                                       Foreground="{DynamicResource ThemeFailCardTextBrush}"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding FailCount}"
+                                       FontSize="22"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource ThemeAccentRedBrush}"
+                                       VerticalAlignment="Center" />
                         </StackPanel>
                     </Border>
                 </StackPanel>
             </Grid>
         </Border>
-
         <!-- ═══════════ RESULT LIST ═══════════ -->
         <Border Grid.Row="2"
                 Margin="6,0,6,10"
@@ -271,7 +347,6 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-
                 <!-- List header -->
                 <Border Grid.Row="0"
                         Padding="20,14"
@@ -285,19 +360,33 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="100" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="类别" FontWeight="SemiBold" FontSize="13"
+                        <TextBlock Grid.Column="0"
+                                   Text="{DynamicResource Loc.Main.Header.Category}"
+                                   FontWeight="SemiBold"
+                                   FontSize="13"
                                    Foreground="{DynamicResource ThemeTextSecondaryBrush}" />
-                        <TextBlock Grid.Column="1" Text="检查项" FontWeight="SemiBold" FontSize="13"
+                        <TextBlock Grid.Column="1"
+                                   Text="{DynamicResource Loc.Main.Header.CheckItem}"
+                                   FontWeight="SemiBold"
+                                   FontSize="13"
                                    Foreground="{DynamicResource ThemeTextSecondaryBrush}" />
-                        <TextBlock Grid.Column="2" Text="状态" FontWeight="SemiBold" FontSize="13"
+                        <TextBlock Grid.Column="2"
+                                   Text="{DynamicResource Loc.Main.Header.Status}"
+                                   FontWeight="SemiBold"
+                                   FontSize="13"
                                    Foreground="{DynamicResource ThemeTextSecondaryBrush}" />
-                        <TextBlock Grid.Column="3" Text="详情" FontWeight="SemiBold" FontSize="13"
+                        <TextBlock Grid.Column="3"
+                                   Text="{DynamicResource Loc.Main.Header.Detail}"
+                                   FontWeight="SemiBold"
+                                   FontSize="13"
                                    Foreground="{DynamicResource ThemeTextSecondaryBrush}" />
-                        <TextBlock Grid.Column="4" Text="操作" FontWeight="SemiBold" FontSize="13"
+                        <TextBlock Grid.Column="4"
+                                   Text="{DynamicResource Loc.Main.Header.Action}"
+                                   FontWeight="SemiBold"
+                                   FontSize="13"
                                    Foreground="{DynamicResource ThemeTextSecondaryBrush}" />
                     </Grid>
                 </Border>
-
                 <!-- Item list -->
                 <ListBox x:Name="DiagnosticListBox"
                          Grid.Row="1"
@@ -309,49 +398,67 @@
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                     <ListBox.ItemContainerStyle>
                         <Style TargetType="ListBoxItem">
-                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                            <Setter Property="Padding" Value="0" />
-                            <Setter Property="Margin" Value="0" />
-                            <Setter Property="Background" Value="Transparent" />
-                            <Setter Property="BorderThickness" Value="0" />
-                            <Setter Property="Focusable" Value="False" />
+                            <Setter Property="HorizontalContentAlignment"
+                                    Value="Stretch" />
+                            <Setter Property="Padding"
+                                    Value="0" />
+                            <Setter Property="Margin"
+                                    Value="0" />
+                            <Setter Property="Background"
+                                    Value="Transparent" />
+                            <Setter Property="BorderThickness"
+                                    Value="0" />
+                            <Setter Property="Focusable"
+                                    Value="False" />
                         </Style>
                     </ListBox.ItemContainerStyle>
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <Border Padding="18,11" Margin="6,4,6,4"
+                            <Border Padding="18,11"
+                                    Margin="6,4,6,4"
                                     Background="{Binding Status, Converter={StaticResource StatusToBg}}"
-                                    BorderBrush="{DynamicResource ThemeRowBorderBrush}" BorderThickness="1"
+                                    BorderBrush="{DynamicResource ThemeRowBorderBrush}"
+                                    BorderThickness="1"
                                     CornerRadius="8">
                                 <Border.RenderTransform>
                                     <TranslateTransform Y="0" />
                                 </Border.RenderTransform>
                                 <Border.Effect>
-                                    <DropShadowEffect BlurRadius="8" ShadowDepth="1" Opacity="0.12" />
+                                    <DropShadowEffect BlurRadius="8"
+                                                      ShadowDepth="1"
+                                                      Opacity="0.12" />
                                 </Border.Effect>
                                 <Border.Style>
                                     <Style TargetType="Border">
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                            <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=ListBoxItem}}"
+                                                         Value="True">
                                                 <Setter Property="RenderTransform">
                                                     <Setter.Value>
                                                         <TranslateTransform Y="-1" />
                                                     </Setter.Value>
                                                 </Setter>
                                             </DataTrigger>
-                                            <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
-                                                <Setter Property="BorderBrush" Value="{DynamicResource ThemeTextPrimaryBrush}" />
-                                                <Setter Property="BorderThickness" Value="2" />
+                                            <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}"
+                                                         Value="True">
+                                                <Setter Property="BorderBrush"
+                                                        Value="{DynamicResource ThemeTextPrimaryBrush}" />
+                                                <Setter Property="BorderThickness"
+                                                        Value="2" />
                                                 <Setter Property="Effect">
                                                     <Setter.Value>
-                                                        <DropShadowEffect BlurRadius="12" ShadowDepth="1" Opacity="0.2" />
+                                                        <DropShadowEffect BlurRadius="12"
+                                                                          ShadowDepth="1"
+                                                                          Opacity="0.2" />
                                                     </Setter.Value>
                                                 </Setter>
                                             </DataTrigger>
-                                            <DataTrigger Binding="{Binding Status}" Value="{x:Static model:CheckStatus.Scanning}">
+                                            <DataTrigger Binding="{Binding Status}"
+                                                         Value="{x:Static model:CheckStatus.Scanning}">
                                                 <DataTrigger.EnterActions>
                                                     <BeginStoryboard x:Name="PulseCurrentRow">
-                                                        <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                                        <Storyboard RepeatBehavior="Forever"
+                                                                    AutoReverse="True">
                                                             <DoubleAnimation Storyboard.TargetProperty="Opacity"
                                                                              From="0.78"
                                                                              To="1"
@@ -374,7 +481,6 @@
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="100" />
                                     </Grid.ColumnDefinitions>
-
                                     <TextBlock Grid.Column="0"
                                                Text="{Binding CategoryName}"
                                                FontSize="13"
@@ -382,24 +488,27 @@
                                                VerticalAlignment="Center"
                                                TextWrapping="Wrap"
                                                Margin="0,0,8,0" />
-
-                                    <TextBlock Grid.Column="1" Text="{Binding Name}"
-                                               FontSize="13" Foreground="{DynamicResource ThemeTextPrimaryBrush}"
-                                               VerticalAlignment="Center" TextWrapping="Wrap" />
-
-                                    <TextBlock Grid.Column="2" Text="{Binding StatusText}"
+                                    <TextBlock Grid.Column="1"
+                                               Text="{Binding Name}"
+                                               FontSize="13"
+                                               Foreground="{DynamicResource ThemeTextPrimaryBrush}"
+                                               VerticalAlignment="Center"
+                                               TextWrapping="Wrap" />
+                                    <TextBlock Grid.Column="2"
+                                               Text="{Binding StatusText}"
                                                FontSize="13"
                                                Foreground="{Binding Status, Converter={StaticResource StatusToColor}}"
                                                VerticalAlignment="Center" />
-
-                                    <TextBlock Grid.Column="3" Text="{Binding Detail}"
-                                               FontSize="12" Foreground="{DynamicResource ThemeTextSecondaryBrush}"
-                                               VerticalAlignment="Center" TextWrapping="Wrap"
+                                    <TextBlock Grid.Column="3"
+                                               Text="{Binding Detail}"
+                                               FontSize="12"
+                                               Foreground="{DynamicResource ThemeTextSecondaryBrush}"
+                                               VerticalAlignment="Center"
+                                               TextWrapping="Wrap"
                                                Margin="0,0,10,0" />
-
                                     <Button Grid.Column="4"
                                             Style="{StaticResource FixButton}"
-                                            Content="修复"
+                                            Content="{DynamicResource Loc.Main.FixItem}"
                                             Command="{Binding DataContext.FixItemCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                             CommandParameter="{Binding}"
                                             VerticalAlignment="Center">

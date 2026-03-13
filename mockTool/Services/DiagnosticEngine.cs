@@ -60,7 +60,7 @@ public static class DiagnosticEngine
         if (executor is null)
         {
             item.Status = CheckStatus.Warning;
-            item.Detail = $"未注册的检查项: {step.CheckId}";
+            item.Detail = LocF("Loc.Diag.UnregisteredCheck", "未注册的检查项: {0}", step.CheckId);
             item.Score = 95;
             return new CheckExecutionOutcome { Success = false };
         }
@@ -78,7 +78,7 @@ public static class DiagnosticEngine
         catch (OperationCanceledException) when (!ct.IsCancellationRequested)
         {
             item.Status = CheckStatus.Fail;
-            item.Detail = $"检查超时（>{step.TimeoutMs}ms）";
+            item.Detail = LocF("Loc.Diag.Timeout", "检查超时（>{0}ms）", step.TimeoutMs);
             item.Score = 60;
             return new CheckExecutionOutcome { Success = false };
         }
@@ -89,7 +89,7 @@ public static class DiagnosticEngine
         catch (Exception ex)
         {
             item.Status = CheckStatus.Warning;
-            item.Detail = $"检查时发生异常: {ex.Message}";
+            item.Detail = LocF("Loc.Diag.Exception", "检查时发生异常: {0}", ex.Message);
             item.Score = 95;
             return new CheckExecutionOutcome { Success = false };
         }
@@ -434,6 +434,11 @@ public static class DiagnosticEngine
     private static bool IsSuccessful(CheckStatus status)
     {
         return status is CheckStatus.Pass or CheckStatus.Fixed;
+    }
+
+    private static string LocF(string key, string fallbackFormat, params object[] args)
+    {
+        return LanguageService.Instance.Format(key, fallbackFormat, args);
     }
 
     private static CheckCategory ParseCategory(string category)

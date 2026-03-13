@@ -10,6 +10,8 @@
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml" />
                 <!-- Project light theme baseline -->
                 <ResourceDictionary Source="Themes/LightTheme.xaml" />
+                <!-- Default language resources (can be replaced at runtime) -->
+                <ResourceDictionary Source="Resources/Strings.zh-CN.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <!-- Shared global tuning -->
