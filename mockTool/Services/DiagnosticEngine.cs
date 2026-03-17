@@ -137,6 +137,8 @@ public static class DiagnosticEngine
         RegisterTp(registry, TpCheckIds.HwStatusControlStorageGroup);
         RegisterTp(registry, TpCheckIds.HwStatusInterfaceCommGroup);
         RegisterTp(registry, TpCheckIds.OpticalResidualRisk);
+        RegisterTp(registry, TpCheckIds.OpticalCustomGrrRule);
+        RegisterTp(registry, TpCheckIds.OpticalCustomSnrRule);
 
         return registry;
     }
@@ -176,7 +178,9 @@ public static class DiagnosticEngine
                 checkId != TpCheckIds.HwStatusOpticalGroup &&
                 checkId != TpCheckIds.HwStatusControlStorageGroup &&
                 checkId != TpCheckIds.HwStatusInterfaceCommGroup &&
-                checkId != TpCheckIds.OpticalResidualRisk)
+                checkId != TpCheckIds.OpticalResidualRisk &&
+                checkId != TpCheckIds.OpticalCustomGrrRule &&
+                checkId != TpCheckIds.OpticalCustomSnrRule)
             {
                 item.Status = CheckStatus.Warning;
                 item.Detail = "未获取 TP 连接检查快照";
@@ -297,9 +301,11 @@ public static class DiagnosticEngine
                     item.Score = 65;
                 }
             }
-            else if (checkId == TpCheckIds.StationCapabilityCompliance)
+            else if (checkId == TpCheckIds.StationCapabilityCompliance ||
+                     checkId == TpCheckIds.OpticalCustomGrrRule ||
+                     checkId == TpCheckIds.OpticalCustomSnrRule)
             {
-                var result = StationCapabilityComplianceChecker.Check(runContext);
+                var result = StationCapabilityComplianceChecker.Check(step, runContext);
                 var failed = result.Metrics.Where(m => !m.Pass).ToList();
                 if (result.Success)
                 {
@@ -312,7 +318,7 @@ public static class DiagnosticEngine
                     item.Status = CheckStatus.Fail;
                     item.Detail = failed.Count == 0
                         ? $"工位能力要求不可用或数据缺失（数据源: {result.ActualSource}）"
-                        : $"不满足 {failed.Count} 项（数据源: {result.ActualSource}）: {string.Join("; ", failed.Select(f => $"{f.Metric} 实际{f.Actual} / 要求{f.Required}"))}";
+                        : $"不满足 {failed.Count} 项（数据源: {result.ActualSource}）: {string.Join("; ", result.FailReasons.Count > 0 ? result.FailReasons : failed.Select(f => $"{f.Metric} 实际{f.Actual} / 要求{f.Required}"))}";
                     item.FixSuggestion = "检查工位实测数据、治具状态与 MIMS 下发要求";
                     item.Score = 65;
                 }

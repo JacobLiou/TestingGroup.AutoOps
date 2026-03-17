@@ -51,6 +51,8 @@ public static class RuleCatalog
             ["TP_10"] = Make("TP_10", "STA-HW-011", "STA", "HW", RuleSeverity.S1, "控制与存储组全通过", "控制或存储设备异常", "检查MCU/EEPROM/Flash/Sensor", "升级硬件工程师"),
             ["TP_11"] = Make("TP_11", "STA-HW-012", "STA", "HW", RuleSeverity.S1, "接口通信组全通过", "接口通信异常", "排查I/O、DAC/ADC、SPI/I2C链路", "升级电控工程师"),
             ["TP_12"] = Make("TP_12", "STA-OPT-006", "STA", "OPT", RuleSeverity.S1, "光路残留风险=通过", "光路残留风险未解除", "复查纤芯/熔接点/盘盒", "升级光学与工艺团队"),
+            ["TP_13"] = Make("TP_13", "STA-OPT-C01", "STA", "OPT", RuleSeverity.S1, "GR&R <= runbook.threshold", "定制GR&R规则不满足", "调整治具并复测GR&R", "升级光学量测工程师"),
+            ["TP_14"] = Make("TP_14", "STA-OPT-C02", "STA", "OPT", RuleSeverity.S1, "SNR >= runbook.threshold", "定制SNR规则不满足", "排查链路噪声与信号质量", "升级光学与设备工程师"),
             ["SYS_01"] = Make("SYS_01", "SYS-ENV-001", "SYS", "ENV", RuleSeverity.S2, "OS>=Windows10", "操作系统版本偏低", "升级系统版本", "升级IT桌面支持"),
             ["SYS_02"] = Make("SYS_02", "SYS-ENV-002", "SYS", "ENV", RuleSeverity.S2, "连续运行<=7天", "系统连续运行时间过长", "安排维护窗口重启", "升级IT桌面支持"),
             ["SYS_03"] = Make("SYS_03", "SYS-ENV-003", "SYS", "ENV", RuleSeverity.S2, "最近30天已更新", "Windows更新滞后", "安装最新补丁", "升级IT桌面支持"),
