@@ -14,6 +14,8 @@ public static class TpCheckIds
     public const string HwStatusControlStorageGroup = "TP_10";
     public const string HwStatusInterfaceCommGroup = "TP_11";
     public const string OpticalResidualRisk = "TP_12";
+    public const string OpticalCustomGrrRule = "TP_13";
+    public const string OpticalCustomSnrRule = "TP_14";
 }
 
 public sealed class TpConnectivitySnapshot
@@ -102,6 +104,7 @@ public sealed class StationCapabilityComplianceResult
     public bool Success { get; init; }
     public string ActualSource { get; init; } = string.Empty;
     public List<StationCapabilityMetricResult> Metrics { get; init; } = [];
+    public List<string> FailReasons { get; init; } = [];
 }
 
 public sealed class PowerSupplyRequirements
