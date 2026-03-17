@@ -8,6 +8,7 @@
     <sys:String x:Key="Loc.Main.StopScan" xmlns:sys="clr-namespace:System;assembly=mscorlib">⏹ 停止</sys:String>
     <sys:String x:Key="Loc.Main.FixAll" xmlns:sys="clr-namespace:System;assembly=mscorlib">🔧 一键修复</sys:String>
     <sys:String x:Key="Loc.Main.ReportMims" xmlns:sys="clr-namespace:System;assembly=mscorlib">📡 上报到MIMS</sys:String>
+    <sys:String x:Key="Loc.Main.ExportOnePageReport" xmlns:sys="clr-namespace:System;assembly=mscorlib">🧾 一页报告</sys:String>
     <sys:String x:Key="Loc.Main.RunbookEditor" xmlns:sys="clr-namespace:System;assembly=mscorlib">🧩 RunBook 快速编辑</sys:String>
     <sys:String x:Key="Loc.Main.Pass" xmlns:sys="clr-namespace:System;assembly=mscorlib">通过</sys:String>
     <sys:String x:Key="Loc.Main.Warning" xmlns:sys="clr-namespace:System;assembly=mscorlib">风险</sys:String>
@@ -84,6 +85,11 @@
     <sys:String x:Key="Loc.Runtime.ManualReportFailed" xmlns:sys="clr-namespace:System;assembly=mscorlib">手动上报失败: {0} - {1}</sys:String>
     <sys:String x:Key="Loc.Runtime.AutoReportException" xmlns:sys="clr-namespace:System;assembly=mscorlib">{0} | MIMS 自动上报异常: {1}</sys:String>
     <sys:String x:Key="Loc.Runtime.ManualReportException" xmlns:sys="clr-namespace:System;assembly=mscorlib">手动上报异常: {0}</sys:String>
+    <sys:String x:Key="Loc.Runtime.ReportNotGenerated" xmlns:sys="clr-namespace:System;assembly=mscorlib">尚未生成一页报告</sys:String>
+    <sys:String x:Key="Loc.Runtime.ReportGenerated" xmlns:sys="clr-namespace:System;assembly=mscorlib">一页报告已生成: {0}</sys:String>
+    <sys:String x:Key="Loc.Runtime.AutoReportGenerated" xmlns:sys="clr-namespace:System;assembly=mscorlib">{0} | 已生成一页报告({1})</sys:String>
+    <sys:String x:Key="Loc.Runtime.ManualReportGenerated" xmlns:sys="clr-namespace:System;assembly=mscorlib">已生成一页报告: {0}</sys:String>
+    <sys:String x:Key="Loc.Runtime.ReportGenerateFailed" xmlns:sys="clr-namespace:System;assembly=mscorlib">一页报告生成失败: {0}</sys:String>
 
     <sys:String x:Key="Loc.Diag.UnregisteredCheck" xmlns:sys="clr-namespace:System;assembly=mscorlib">未注册的检查项: {0}</sys:String>
     <sys:String x:Key="Loc.Diag.Timeout" xmlns:sys="clr-namespace:System;assembly=mscorlib">检查超时（&gt;{0}ms）</sys:String>

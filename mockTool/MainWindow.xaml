@@ -104,6 +104,10 @@
                                    FontSize="11"
                                    Foreground="{DynamicResource ThemeTextSecondaryBrush}"
                                    VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding LastReportStatus}"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource ThemeTextSecondaryBrush}"
+                                   VerticalAlignment="Center" />
                     </StackPanel>
                     <TextBlock Text="{DynamicResource Loc.Main.LanguageLabel}"
                                FontSize="12"
@@ -271,6 +275,10 @@
                         <Button Style="{StaticResource ButtonDefault}"
                                 Content="{DynamicResource Loc.Main.ReportMims}"
                                 Command="{Binding SendToMimsCommand}"
+                                Margin="8,0,0,0" />
+                        <Button Style="{StaticResource ButtonDefault}"
+                                Content="{DynamicResource Loc.Main.ExportOnePageReport}"
+                                Command="{Binding ExportOnePageReportCommand}"
                                 Margin="8,0,0,0" />
                         <Button Style="{StaticResource ButtonDefault}"
                                 Content="{DynamicResource Loc.Main.RunbookEditor}"

@@ -21,9 +21,11 @@ public partial class MainViewModel : ObservableObject
     private readonly MimsStationCapabilityParser _mimsStationCapabilityParser;
     private readonly MimsPowerSupplyParser _mimsPowerSupplyParser;
     private readonly TpConnectivityInspector _tpConnectivityInspector;
+    private readonly OnePageDiagnosticReportService _onePageReportService;
     private RunbookDefinition? _activeRunbook;
     private Dictionary<string, RunbookStepDefinition> _runbookStepsByStepId = new(StringComparer.OrdinalIgnoreCase);
     private bool _isUpdatingLanguageSelection;
+    private DateTimeOffset _scanStartedAt;
 
     [ObservableProperty]
     private ObservableCollection<DiagnosticItem> _diagnosticItems = [];
@@ -85,6 +87,9 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private string _scannedProgressText = string.Empty;
 
+    [ObservableProperty]
+    private string _lastReportStatus = string.Empty;
+
     public event EventHandler? RunbookEditorRequested;
 
     public MainViewModel()
@@ -94,6 +99,7 @@ public partial class MainViewModel : ObservableObject
         _mimsStationCapabilityParser = new MimsStationCapabilityParser();
         _mimsPowerSupplyParser = new MimsPowerSupplyParser();
         _tpConnectivityInspector = new TpConnectivityInspector();
+        _onePageReportService = new OnePageDiagnosticReportService();
         SelectedLanguageCode = LanguageService.Instance.CurrentLanguage;
         LanguageService.Instance.LanguageChanged += OnLanguageChanged;
         ThemeService.Instance.ThemeChanged += OnThemeChanged;
@@ -124,6 +130,7 @@ public partial class MainViewModel : ObservableObject
         CurrentDiagnosticItem = null;
         IsReportingToMims = false;
         ExternalConfigStatus = TF("Loc.Runtime.ConfigUnavailable", "外部配置不可用: {0}", "未获取 MIMS 外部依赖配置");
+        LastReportStatus = T("Loc.Runtime.ReportNotGenerated", "尚未生成一页报告");
         StatusText = TF("Loc.Runtime.ClickRunbook", "点击「开始体检」执行 RunBook：{0}", CurrentRunbookName);
         UpdateScannedProgressText();
     }
@@ -136,6 +143,7 @@ public partial class MainViewModel : ObservableObject
         ResetState();
         IsScanning = true;
         ScanComplete = false;
+        _scanStartedAt = DateTimeOffset.Now;
         _cts = new CancellationTokenSource();
         StatusText = T("Loc.Runtime.Scanning", "正在扫描...");
 
@@ -195,6 +203,7 @@ public partial class MainViewModel : ObservableObject
             CurrentScanItem = T("Loc.Runtime.ScanComplete", "扫描完成");
             CurrentDiagnosticItem = null;
             StatusText = TF("Loc.Runtime.Summary", "体检完成！通过 {0} 项 | 风险 {1} 项 | 异常 {2} 项", PassCount, WarningCount, FailCount);
+            await ExportOnePageReportCoreAsync("auto");
             await SendToMimsCoreAsync(trigger: "auto", cancellationToken: CancellationToken.None);
         }
         catch (OperationCanceledException)
@@ -309,6 +318,12 @@ public partial class MainViewModel : ObservableObject
         await SendToMimsCoreAsync(trigger: "manual", cancellationToken: CancellationToken.None);
     }
 
+    [RelayCommand(CanExecute = nameof(CanExportOnePageReport))]
+    private async Task ExportOnePageReportAsync()
+    {
+        await ExportOnePageReportCoreAsync("manual");
+    }
+
     [RelayCommand]
     private void SwitchLanguage(string? languageCode)
     {
@@ -323,6 +338,11 @@ public partial class MainViewModel : ObservableObject
     private bool CanSendToMims()
     {
         return !IsScanning && !IsReportingToMims && (ScanComplete || ScannedItems > 0);
+    }
+
+    private bool CanExportOnePageReport()
+    {
+        return !IsScanning && (ScanComplete || ScannedItems > 0);
     }
 
     private void OnThemeChanged(AppTheme mode, bool isDark)
@@ -357,6 +377,7 @@ public partial class MainViewModel : ObservableObject
     partial void OnIsScanningChanged(bool value)
     {
         SendToMimsCommand.NotifyCanExecuteChanged();
+        ExportOnePageReportCommand.NotifyCanExecuteChanged();
         OpenRunbookEditorCommand.NotifyCanExecuteChanged();
     }
 
@@ -368,11 +389,13 @@ public partial class MainViewModel : ObservableObject
     partial void OnScanCompleteChanged(bool value)
     {
         SendToMimsCommand.NotifyCanExecuteChanged();
+        ExportOnePageReportCommand.NotifyCanExecuteChanged();
     }
 
     partial void OnScannedItemsChanged(int value)
     {
         SendToMimsCommand.NotifyCanExecuteChanged();
+        ExportOnePageReportCommand.NotifyCanExecuteChanged();
         UpdateScannedProgressText();
     }
 
@@ -495,6 +518,38 @@ public partial class MainViewModel : ObservableObject
     private static string TF(string key, string fallbackFormat, params object[] args)
     {
         return LanguageService.Instance.Format(key, fallbackFormat, args);
+    }
+
+    private Task ExportOnePageReportCoreAsync(string trigger)
+    {
+        try
+        {
+            var stepByCheckId = (_activeRunbook?.Steps ?? [])
+                .Where(s => s.Enabled)
+                .GroupBy(s => s.CheckId, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+
+            var (_, markdownPath, document) = _onePageReportService.CreateAndSave(
+                DiagnosticItems.ToList(),
+                stepByCheckId,
+                DefaultStationId,
+                DefaultLineId,
+                DefaultMimsPartNumber,
+                trigger,
+                _scanStartedAt == default ? DateTimeOffset.Now : _scanStartedAt,
+                DateTimeOffset.Now);
+
+            LastReportStatus = TF("Loc.Runtime.ReportGenerated", "一页报告已生成: {0}", markdownPath);
+            StatusText = trigger == "auto"
+                ? TF("Loc.Runtime.AutoReportGenerated", "{0} | 已生成一页报告({1})", StatusText, document.RunId)
+                : TF("Loc.Runtime.ManualReportGenerated", "已生成一页报告: {0}", document.RunId);
+        }
+        catch (Exception ex)
+        {
+            LastReportStatus = TF("Loc.Runtime.ReportGenerateFailed", "一页报告生成失败: {0}", ex.Message);
+        }
+
+        return Task.CompletedTask;
     }
 
     private void UpdateScannedProgressText()

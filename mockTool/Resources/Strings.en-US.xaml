@@ -8,6 +8,7 @@
     <sys:String x:Key="Loc.Main.StopScan" xmlns:sys="clr-namespace:System;assembly=mscorlib">⏹ Stop</sys:String>
     <sys:String x:Key="Loc.Main.FixAll" xmlns:sys="clr-namespace:System;assembly=mscorlib">🔧 Fix All</sys:String>
     <sys:String x:Key="Loc.Main.ReportMims" xmlns:sys="clr-namespace:System;assembly=mscorlib">📡 Report to MIMS</sys:String>
+    <sys:String x:Key="Loc.Main.ExportOnePageReport" xmlns:sys="clr-namespace:System;assembly=mscorlib">🧾 One-Page Report</sys:String>
     <sys:String x:Key="Loc.Main.RunbookEditor" xmlns:sys="clr-namespace:System;assembly=mscorlib">🧩 RunBook Editor</sys:String>
     <sys:String x:Key="Loc.Main.Pass" xmlns:sys="clr-namespace:System;assembly=mscorlib">Pass</sys:String>
     <sys:String x:Key="Loc.Main.Warning" xmlns:sys="clr-namespace:System;assembly=mscorlib">Warning</sys:String>
@@ -84,6 +85,11 @@
     <sys:String x:Key="Loc.Runtime.ManualReportFailed" xmlns:sys="clr-namespace:System;assembly=mscorlib">Manual report failed: {0} - {1}</sys:String>
     <sys:String x:Key="Loc.Runtime.AutoReportException" xmlns:sys="clr-namespace:System;assembly=mscorlib">{0} | Auto report exception: {1}</sys:String>
     <sys:String x:Key="Loc.Runtime.ManualReportException" xmlns:sys="clr-namespace:System;assembly=mscorlib">Manual report exception: {0}</sys:String>
+    <sys:String x:Key="Loc.Runtime.ReportNotGenerated" xmlns:sys="clr-namespace:System;assembly=mscorlib">No one-page report generated yet</sys:String>
+    <sys:String x:Key="Loc.Runtime.ReportGenerated" xmlns:sys="clr-namespace:System;assembly=mscorlib">One-page report generated: {0}</sys:String>
+    <sys:String x:Key="Loc.Runtime.AutoReportGenerated" xmlns:sys="clr-namespace:System;assembly=mscorlib">{0} | One-page report generated ({1})</sys:String>
+    <sys:String x:Key="Loc.Runtime.ManualReportGenerated" xmlns:sys="clr-namespace:System;assembly=mscorlib">One-page report generated: {0}</sys:String>
+    <sys:String x:Key="Loc.Runtime.ReportGenerateFailed" xmlns:sys="clr-namespace:System;assembly=mscorlib">Failed to generate one-page report: {0}</sys:String>
 
     <sys:String x:Key="Loc.Diag.UnregisteredCheck" xmlns:sys="clr-namespace:System;assembly=mscorlib">Unregistered check item: {0}</sys:String>
     <sys:String x:Key="Loc.Diag.Timeout" xmlns:sys="clr-namespace:System;assembly=mscorlib">Check timeout (&gt;{0}ms)</sys:String>
