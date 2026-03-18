@@ -473,8 +473,11 @@ public partial class MainViewModel : ObservableObject
             StationId = DefaultStationId,
             LineId = DefaultLineId
         };
-        var configResult = await _externalSystemClient.GetEnvironmentConfigAsync(configRequest, cancellationToken);
-        var tpSnapshot = await _tpConnectivityInspector.InspectAsync(cancellationToken);
+        var configTask = _externalSystemClient.GetEnvironmentConfigAsync(configRequest, cancellationToken);
+        var tpSnapshotTask = _tpConnectivityInspector.InspectAsync(cancellationToken);
+        await Task.WhenAll(configTask, tpSnapshotTask);
+        var configResult = await configTask;
+        var tpSnapshot = await tpSnapshotTask;
         if (!configResult.Success)
         {
             return new DiagnosticRunContext
