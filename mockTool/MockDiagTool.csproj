@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -66,9 +66,13 @@
 
   <ItemGroup>
     <Compile Remove="MimsMockServer\**\*.cs" />
+    <Compile Remove="PluginSamples\**" />
     <EmbeddedResource Remove="MimsMockServer\**\*" />
+    <EmbeddedResource Remove="PluginSamples\**" />
     <None Remove="MimsMockServer\**\*" />
+    <None Remove="PluginSamples\**" />
     <Content Remove="MimsMockServer\**\*" />
+    <Page Remove="PluginSamples\**" />
   </ItemGroup>
 
 </Project>

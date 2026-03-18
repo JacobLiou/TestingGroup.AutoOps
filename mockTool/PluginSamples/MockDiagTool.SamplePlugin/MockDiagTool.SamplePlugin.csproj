@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>MockDiagTool.SamplePlugin</RootNamespace>
+    <AssemblyName>MockDiagTool.SamplePlugin</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\MockDiagTool.csproj" />
+  </ItemGroup>
+
+  <Target Name="CopyPluginToHostPlugins" AfterTargets="Build">
+    <PropertyGroup>
+      <HostPluginsDir>$(MSBuildThisFileDirectory)..\..\bin\$(Configuration)\net8.0-windows\plugins</HostPluginsDir>
+    </PropertyGroup>
+    <MakeDir Directories="$(HostPluginsDir)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(HostPluginsDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(TargetDir)$(AssemblyName).pdb" DestinationFolder="$(HostPluginsDir)" SkipUnchangedFiles="true" Condition="Exists('$(TargetDir)$(AssemblyName).pdb')" />
+  </Target>
+
+</Project>
