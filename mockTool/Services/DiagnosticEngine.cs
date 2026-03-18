@@ -125,6 +125,7 @@ public static class DiagnosticEngine
         RegisterExternal(registry, ExternalDependencyIds.Tas);
         RegisterExternal(registry, ExternalDependencyIds.FileServer);
         RegisterExternal(registry, ExternalDependencyIds.Lan);
+
         RegisterTp(registry, TpCheckIds.PathAndConfig);
         RegisterTp(registry, TpCheckIds.SerialPorts);
         RegisterTp(registry, TpCheckIds.NetworkEndpoints);
