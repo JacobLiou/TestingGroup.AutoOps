@@ -211,28 +211,6 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task FixAllAsync()
-    {
-        foreach (var item in DiagnosticItems)
-        {
-            if (item.Status is CheckStatus.Warning or CheckStatus.Fail)
-            {
-                item.Status = CheckStatus.Scanning;
-                await Task.Delay(400);
-                item.Status = CheckStatus.Fixed;
-                item.Score = 100;
-                item.Detail += " [已修复]";
-            }
-        }
-        CalculateScore();
-        await AnimateScoreAsync(DisplayScore, HealthScore);
-        StatusText = TF("Loc.Runtime.FixDone", "修复完成！健康评分: {0}", HealthScore);
-        WarningCount = 0;
-        FailCount = 0;
-        PassCount = DiagnosticItems.Count;
-    }
-
-    [RelayCommand]
     private async Task FixItemAsync(DiagnosticItem? item)
     {
         if (item == null || item.Status is not (CheckStatus.Warning or CheckStatus.Fail)) return;

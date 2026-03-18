@@ -6,7 +6,6 @@
     <sys:String x:Key="Loc.Main.HealthScore" xmlns:sys="clr-namespace:System;assembly=mscorlib">健康评分</sys:String>
     <sys:String x:Key="Loc.Main.StartScan" xmlns:sys="clr-namespace:System;assembly=mscorlib">🔍 开始体检</sys:String>
     <sys:String x:Key="Loc.Main.StopScan" xmlns:sys="clr-namespace:System;assembly=mscorlib">⏹ 停止</sys:String>
-    <sys:String x:Key="Loc.Main.FixAll" xmlns:sys="clr-namespace:System;assembly=mscorlib">🔧 一键修复</sys:String>
     <sys:String x:Key="Loc.Main.ReportMims" xmlns:sys="clr-namespace:System;assembly=mscorlib">📡 上报到MIMS</sys:String>
     <sys:String x:Key="Loc.Main.ExportOnePageReport" xmlns:sys="clr-namespace:System;assembly=mscorlib">🧾 一页报告</sys:String>
     <sys:String x:Key="Loc.Main.RunbookEditor" xmlns:sys="clr-namespace:System;assembly=mscorlib">🧩 RunBook 快速编辑</sys:String>

@@ -6,7 +6,6 @@
     <sys:String x:Key="Loc.Main.HealthScore" xmlns:sys="clr-namespace:System;assembly=mscorlib">Health Score</sys:String>
     <sys:String x:Key="Loc.Main.StartScan" xmlns:sys="clr-namespace:System;assembly=mscorlib">🔍 Start Scan</sys:String>
     <sys:String x:Key="Loc.Main.StopScan" xmlns:sys="clr-namespace:System;assembly=mscorlib">⏹ Stop</sys:String>
-    <sys:String x:Key="Loc.Main.FixAll" xmlns:sys="clr-namespace:System;assembly=mscorlib">🔧 Fix All</sys:String>
     <sys:String x:Key="Loc.Main.ReportMims" xmlns:sys="clr-namespace:System;assembly=mscorlib">📡 Report to MIMS</sys:String>
     <sys:String x:Key="Loc.Main.ExportOnePageReport" xmlns:sys="clr-namespace:System;assembly=mscorlib">🧾 One-Page Report</sys:String>
     <sys:String x:Key="Loc.Main.RunbookEditor" xmlns:sys="clr-namespace:System;assembly=mscorlib">🧩 RunBook Editor</sys:String>

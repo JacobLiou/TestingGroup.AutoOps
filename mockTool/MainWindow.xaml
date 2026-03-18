@@ -49,6 +49,10 @@
                 Padding="24,16"
                 Background="{DynamicResource ThemeHeaderBgBrush}">
             <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
                 <StackPanel Orientation="Horizontal"
                             VerticalAlignment="Center">
                     <TextBlock Text="🛡"
@@ -71,21 +75,29 @@
                                Margin="8,4,0,0" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal"
+                            Grid.Column="1"
                             HorizontalAlignment="Right"
                             VerticalAlignment="Center">
-                    <StackPanel>
+                    <StackPanel Width="420"
+                                MaxWidth="420">
                         <TextBlock Text="{Binding StatusText}"
                                    FontSize="13"
                                    Foreground="{DynamicResource ThemeTextSecondaryBrush}"
-                                   VerticalAlignment="Center" />
+                                   VerticalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis"
+                                   ToolTip="{Binding StatusText}" />
                         <TextBlock Text="{Binding ExternalConfigStatus}"
                                    FontSize="11"
                                    Foreground="{DynamicResource ThemeTextSecondaryBrush}"
-                                   VerticalAlignment="Center" />
+                                   VerticalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis"
+                                   ToolTip="{Binding ExternalConfigStatus}" />
                         <TextBlock Text="{Binding LastReportStatus}"
                                    FontSize="11"
                                    Foreground="{DynamicResource ThemeTextSecondaryBrush}"
-                                   VerticalAlignment="Center" />
+                                   VerticalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis"
+                                   ToolTip="{Binding LastReportStatus}" />
                     </StackPanel>
                     <TextBlock Text="{DynamicResource Loc.Main.LanguageLabel}"
                                FontSize="12"
@@ -180,12 +192,6 @@
                                 Content="{DynamicResource Loc.Main.StopScan}"
                                 Command="{Binding StopScanCommand}"
                                 Visibility="{Binding IsScanning, Converter={StaticResource BoolToVis}}"
-                                Margin="8,0,0,0" />
-                        <!-- Fix All button -->
-                        <Button Style="{StaticResource FixButton}"
-                                Content="{DynamicResource Loc.Main.FixAll}"
-                                Command="{Binding FixAllCommand}"
-                                Visibility="{Binding ScanComplete, Converter={StaticResource BoolToVis}}"
                                 Margin="8,0,0,0" />
                         <Button Style="{StaticResource ButtonDefault}"
                                 Content="{DynamicResource Loc.Main.ReportMims}"
