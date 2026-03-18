@@ -12,8 +12,16 @@ public sealed class TpConnectivityInspector
 {
     private const string ConfigRelativePath = @"config\tpConnectivity.json";
     private const string DefaultTpRootPath = @"C:\Users\menghl2\WorkSpace\Projects\Test Program\cal_fts_fvs_fqc\RELEASE";
+    private const int EndpointProbeTimeoutMs = 800;
+    private static readonly TimeSpan CacheTtl = TimeSpan.FromSeconds(45);
     private static readonly Regex ComRegex = new(@"\bCOM\d+\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     private static readonly Regex IpPortRegex = new(@"\b(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)(?::\d{1,5})?\b", RegexOptions.Compiled);
+    private static readonly object CacheSync = new();
+    private static TpConnectivitySnapshot? _cachedSnapshot;
+    private static DateTimeOffset _cachedAtUtc;
+    private static string? _cachedTpRootPath;
+    private static Task<TpConnectivitySnapshot>? _inflightInspectionTask;
+    private static string? _inflightTpRootPath;
 
     private sealed class TpConnectivityConfig
     {
@@ -23,6 +31,56 @@ public sealed class TpConnectivityInspector
     public async Task<TpConnectivitySnapshot> InspectAsync(CancellationToken cancellationToken)
     {
         var tpRootPath = LoadConfigPath();
+        if (TryGetCachedSnapshot(tpRootPath, out var cachedSnapshot))
+        {
+            return cachedSnapshot;
+        }
+
+        Task<TpConnectivitySnapshot> inspectTask;
+        lock (CacheSync)
+        {
+            if (TryGetCachedSnapshotUnderLock(tpRootPath, out cachedSnapshot))
+            {
+                return cachedSnapshot;
+            }
+
+            if (_inflightInspectionTask is not null &&
+                !_inflightInspectionTask.IsCompleted &&
+                string.Equals(_inflightTpRootPath, tpRootPath, StringComparison.OrdinalIgnoreCase))
+            {
+                inspectTask = _inflightInspectionTask;
+            }
+            else
+            {
+                inspectTask = InspectCoreAsync(tpRootPath);
+                _inflightInspectionTask = inspectTask;
+                _inflightTpRootPath = tpRootPath;
+            }
+        }
+
+        var snapshot = await inspectTask.WaitAsync(cancellationToken);
+
+        lock (CacheSync)
+        {
+            if (inspectTask.IsCompletedSuccessfully)
+            {
+                _cachedSnapshot = snapshot;
+                _cachedTpRootPath = tpRootPath;
+                _cachedAtUtc = DateTimeOffset.UtcNow;
+            }
+
+            if (ReferenceEquals(_inflightInspectionTask, inspectTask))
+            {
+                _inflightInspectionTask = null;
+                _inflightTpRootPath = null;
+            }
+        }
+
+        return snapshot;
+    }
+
+    private static async Task<TpConnectivitySnapshot> InspectCoreAsync(string tpRootPath)
+    {
         if (!Directory.Exists(tpRootPath))
         {
             return new TpConnectivitySnapshot
@@ -36,19 +94,12 @@ public sealed class TpConnectivityInspector
         try
         {
             var configFiles = DiscoverConfigFiles(tpRootPath);
-            var contents = new List<string>();
-            foreach (var file in configFiles)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                try
-                {
-                    contents.Add(await File.ReadAllTextAsync(file, cancellationToken));
-                }
-                catch
-                {
-                    // ignore unreadable file
-                }
-            }
+            var contentTasks = configFiles
+                .Select(file => ReadConfigContentSafelyAsync(file, CancellationToken.None))
+                .ToList();
+            var contents = (await Task.WhenAll(contentTasks))
+                .OfType<string>()
+                .ToList();
 
             var expectedSerial = contents
                 .SelectMany(c => ComRegex.Matches(c).Select(m => m.Value.ToUpperInvariant()))
@@ -67,17 +118,14 @@ public sealed class TpConnectivityInspector
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .OrderBy(x => x)
                 .ToList();
+            var availablePortSet = availablePorts.ToHashSet(StringComparer.OrdinalIgnoreCase);
 
             var missingPorts = expectedSerial
-                .Where(p => !availablePorts.Contains(p, StringComparer.OrdinalIgnoreCase))
+                .Where(p => !availablePortSet.Contains(p))
                 .ToList();
 
-            var endpointStatuses = new List<TpNetworkEndpointStatus>();
-            foreach (var endpoint in expectedEndpoints)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                endpointStatuses.Add(await ProbeEndpointAsync(endpoint, cancellationToken));
-            }
+            var endpointStatuses = await Task.WhenAll(
+                expectedEndpoints.Select(endpoint => ProbeEndpointAsync(endpoint, CancellationToken.None)));
 
             return new TpConnectivitySnapshot
             {
@@ -87,7 +135,7 @@ public sealed class TpConnectivityInspector
                 ExpectedSerialPorts = expectedSerial,
                 AvailableSerialPorts = availablePorts,
                 MissingSerialPorts = missingPorts,
-                NetworkEndpoints = endpointStatuses
+                NetworkEndpoints = endpointStatuses.ToList()
             };
         }
         catch (Exception ex)
@@ -99,6 +147,28 @@ public sealed class TpConnectivityInspector
                 Error = ex.Message
             };
         }
+    }
+
+    private static bool TryGetCachedSnapshot(string tpRootPath, out TpConnectivitySnapshot snapshot)
+    {
+        lock (CacheSync)
+        {
+            return TryGetCachedSnapshotUnderLock(tpRootPath, out snapshot);
+        }
+    }
+
+    private static bool TryGetCachedSnapshotUnderLock(string tpRootPath, out TpConnectivitySnapshot snapshot)
+    {
+        if (_cachedSnapshot is not null &&
+            string.Equals(_cachedTpRootPath, tpRootPath, StringComparison.OrdinalIgnoreCase) &&
+            DateTimeOffset.UtcNow - _cachedAtUtc <= CacheTtl)
+        {
+            snapshot = _cachedSnapshot;
+            return true;
+        }
+
+        snapshot = null!;
+        return false;
     }
 
     private static List<string> DiscoverConfigFiles(string rootPath)
@@ -154,15 +224,18 @@ public sealed class TpConnectivityInspector
         {
             var parts = endpoint.Split(':', 2);
             var ip = parts[0];
+            using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            timeoutCts.CancelAfter(EndpointProbeTimeoutMs);
+            var timeoutToken = timeoutCts.Token;
             if (parts.Length == 2 && int.TryParse(parts[1], out var port))
             {
                 using var client = new TcpClient();
-                await client.ConnectAsync(ip, port, cancellationToken);
+                await client.ConnectAsync(ip, port, timeoutToken);
             }
             else
             {
                 using var ping = new Ping();
-                var reply = await ping.SendPingAsync(ip, 1500);
+                var reply = await ping.SendPingAsync(ip, EndpointProbeTimeoutMs).WaitAsync(timeoutToken);
                 if (reply.Status != IPStatus.Success)
                 {
                     throw new InvalidOperationException($"Ping 状态: {reply.Status}");
@@ -187,6 +260,20 @@ public sealed class TpConnectivityInspector
                 ElapsedMs = sw.ElapsedMilliseconds,
                 Error = ex.Message
             };
+        }
+    }
+
+    private static async Task<string?> ReadConfigContentSafelyAsync(string file, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        try
+        {
+            return await File.ReadAllTextAsync(file, cancellationToken);
+        }
+        catch
+        {
+            // ignore unreadable file
+            return null;
         }
     }
 }

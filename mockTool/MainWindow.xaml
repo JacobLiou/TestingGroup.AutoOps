@@ -33,28 +33,6 @@
                     Value="{DynamicResource ThemeCardBorderBrush}" />
             <Setter Property="BorderThickness"
                     Value="1" />
-            <Setter Property="RenderTransform">
-                <Setter.Value>
-                    <TranslateTransform Y="0" />
-                </Setter.Value>
-            </Setter>
-            <Setter Property="Effect">
-                <Setter.Value>
-                    <DropShadowEffect BlurRadius="10"
-                                      ShadowDepth="1"
-                                      Opacity="0.18" />
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver"
-                         Value="True">
-                    <Setter Property="RenderTransform">
-                        <Setter.Value>
-                            <TranslateTransform Y="-1" />
-                        </Setter.Value>
-                    </Setter>
-                </Trigger>
-            </Style.Triggers>
         </Style>
     </Window.Resources>
     <Grid>
@@ -71,6 +49,10 @@
                 Padding="24,16"
                 Background="{DynamicResource ThemeHeaderBgBrush}">
             <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
                 <StackPanel Orientation="Horizontal"
                             VerticalAlignment="Center">
                     <TextBlock Text="🛡"
@@ -93,21 +75,29 @@
                                Margin="8,4,0,0" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal"
+                            Grid.Column="1"
                             HorizontalAlignment="Right"
                             VerticalAlignment="Center">
-                    <StackPanel>
+                    <StackPanel Width="420"
+                                MaxWidth="420">
                         <TextBlock Text="{Binding StatusText}"
                                    FontSize="13"
                                    Foreground="{DynamicResource ThemeTextSecondaryBrush}"
-                                   VerticalAlignment="Center" />
+                                   VerticalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis"
+                                   ToolTip="{Binding StatusText}" />
                         <TextBlock Text="{Binding ExternalConfigStatus}"
                                    FontSize="11"
                                    Foreground="{DynamicResource ThemeTextSecondaryBrush}"
-                                   VerticalAlignment="Center" />
+                                   VerticalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis"
+                                   ToolTip="{Binding ExternalConfigStatus}" />
                         <TextBlock Text="{Binding LastReportStatus}"
                                    FontSize="11"
                                    Foreground="{DynamicResource ThemeTextSecondaryBrush}"
-                                   VerticalAlignment="Center" />
+                                   VerticalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis"
+                                   ToolTip="{Binding LastReportStatus}" />
                     </StackPanel>
                     <TextBlock Text="{DynamicResource Loc.Main.LanguageLabel}"
                                FontSize="12"
@@ -150,65 +140,7 @@
                              Stroke="{Binding DisplayScore, Converter={StaticResource ScoreToColor}}"
                              StrokeThickness="10"
                              StrokeDashArray="4 1"
-                             Opacity="0.7"
-                             RenderTransformOrigin="0.5,0.5">
-                        <Ellipse.RenderTransform>
-                            <RotateTransform x:Name="ringRotation" />
-                        </Ellipse.RenderTransform>
-                        <Ellipse.Style>
-                            <Style TargetType="Ellipse">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsScanning}"
-                                                 Value="True">
-                                        <DataTrigger.EnterActions>
-                                            <BeginStoryboard x:Name="SpinRing">
-                                                <Storyboard RepeatBehavior="Forever">
-                                                    <DoubleAnimation
-                                                            Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
-                                                                     From="0"
-                                                                     To="360"
-                                                                     Duration="0:0:2" />
-                                                </Storyboard>
-                                            </BeginStoryboard>
-                                        </DataTrigger.EnterActions>
-                                        <DataTrigger.ExitActions>
-                                            <StopStoryboard BeginStoryboardName="SpinRing" />
-                                        </DataTrigger.ExitActions>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Ellipse.Style>
-                    </Ellipse>
-                    <!-- Glow effect when scanning -->
-                    <Ellipse Opacity="0.15"
-                             Fill="{Binding DisplayScore, Converter={StaticResource ScoreToColor}}">
-                        <Ellipse.Effect>
-                            <BlurEffect Radius="40" />
-                        </Ellipse.Effect>
-                        <Ellipse.Style>
-                            <Style TargetType="Ellipse">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsScanning}"
-                                                 Value="True">
-                                        <DataTrigger.EnterActions>
-                                            <BeginStoryboard x:Name="PulseGlow">
-                                                <Storyboard RepeatBehavior="Forever"
-                                                            AutoReverse="True">
-                                                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                                                     From="0.05"
-                                                                     To="0.3"
-                                                                     Duration="0:0:1" />
-                                                </Storyboard>
-                                            </BeginStoryboard>
-                                        </DataTrigger.EnterActions>
-                                        <DataTrigger.ExitActions>
-                                            <StopStoryboard BeginStoryboardName="PulseGlow" />
-                                        </DataTrigger.ExitActions>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Ellipse.Style>
-                    </Ellipse>
+                             Opacity="0.85" />
                     <!-- Score text -->
                     <StackPanel VerticalAlignment="Center"
                                 HorizontalAlignment="Center"
@@ -220,12 +152,7 @@
                                    Foreground="{Binding DisplayScore, Converter={StaticResource ScoreToColor}}"
                                    HorizontalAlignment="Center"
                                    TextAlignment="Center"
-                                   Width="120"
-                                   RenderTransformOrigin="0.5,0.5">
-                            <TextBlock.RenderTransform>
-                                <ScaleTransform ScaleX="1"
-                                                ScaleY="1" />
-                            </TextBlock.RenderTransform></TextBlock>
+                                   Width="120" />
                         <TextBlock Text="{DynamicResource Loc.Main.HealthScore}"
                                    FontSize="14"
                                    Foreground="{DynamicResource ThemeTextSecondaryBrush}"
@@ -265,12 +192,6 @@
                                 Content="{DynamicResource Loc.Main.StopScan}"
                                 Command="{Binding StopScanCommand}"
                                 Visibility="{Binding IsScanning, Converter={StaticResource BoolToVis}}"
-                                Margin="8,0,0,0" />
-                        <!-- Fix All button -->
-                        <Button Style="{StaticResource FixButton}"
-                                Content="{DynamicResource Loc.Main.FixAll}"
-                                Command="{Binding FixAllCommand}"
-                                Visibility="{Binding ScanComplete, Converter={StaticResource BoolToVis}}"
                                 Margin="8,0,0,0" />
                         <Button Style="{StaticResource ButtonDefault}"
                                 Content="{DynamicResource Loc.Main.ReportMims}"
@@ -428,55 +349,15 @@
                                     BorderBrush="{DynamicResource ThemeRowBorderBrush}"
                                     BorderThickness="1"
                                     CornerRadius="8">
-                                <Border.RenderTransform>
-                                    <TranslateTransform Y="0" />
-                                </Border.RenderTransform>
-                                <Border.Effect>
-                                    <DropShadowEffect BlurRadius="8"
-                                                      ShadowDepth="1"
-                                                      Opacity="0.12" />
-                                </Border.Effect>
                                 <Border.Style>
                                     <Style TargetType="Border">
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=ListBoxItem}}"
-                                                         Value="True">
-                                                <Setter Property="RenderTransform">
-                                                    <Setter.Value>
-                                                        <TranslateTransform Y="-1" />
-                                                    </Setter.Value>
-                                                </Setter>
-                                            </DataTrigger>
                                             <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}"
                                                          Value="True">
                                                 <Setter Property="BorderBrush"
                                                         Value="{DynamicResource ThemeTextPrimaryBrush}" />
                                                 <Setter Property="BorderThickness"
                                                         Value="2" />
-                                                <Setter Property="Effect">
-                                                    <Setter.Value>
-                                                        <DropShadowEffect BlurRadius="12"
-                                                                          ShadowDepth="1"
-                                                                          Opacity="0.2" />
-                                                    </Setter.Value>
-                                                </Setter>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Status}"
-                                                         Value="{x:Static model:CheckStatus.Scanning}">
-                                                <DataTrigger.EnterActions>
-                                                    <BeginStoryboard x:Name="PulseCurrentRow">
-                                                        <Storyboard RepeatBehavior="Forever"
-                                                                    AutoReverse="True">
-                                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                                                             From="0.78"
-                                                                             To="1"
-                                                                             Duration="0:0:0.55" />
-                                                        </Storyboard>
-                                                    </BeginStoryboard>
-                                                </DataTrigger.EnterActions>
-                                                <DataTrigger.ExitActions>
-                                                    <StopStoryboard BeginStoryboardName="PulseCurrentRow" />
-                                                </DataTrigger.ExitActions>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
