@@ -62,8 +62,6 @@
     <sys:String x:Key="Loc.Status.Warning" xmlns:sys="clr-namespace:System;assembly=mscorlib">⚠️ 存在风险</sys:String>
     <sys:String x:Key="Loc.Status.Fail" xmlns:sys="clr-namespace:System;assembly=mscorlib">❌ 异常</sys:String>
     <sys:String x:Key="Loc.Status.Fixed" xmlns:sys="clr-namespace:System;assembly=mscorlib">🔧 已修复</sys:String>
-    <sys:String x:Key="Loc.Theme.Light" xmlns:sys="clr-namespace:System;assembly=mscorlib">主题: 浅色</sys:String>
-
     <sys:String x:Key="Loc.Runtime.Ready" xmlns:sys="clr-namespace:System;assembly=mscorlib">就绪</sys:String>
     <sys:String x:Key="Loc.Runtime.ClickStartScan" xmlns:sys="clr-namespace:System;assembly=mscorlib">点击「开始体检」全面扫描您的电脑</sys:String>
     <sys:String x:Key="Loc.Runtime.ClickRunbook" xmlns:sys="clr-namespace:System;assembly=mscorlib">点击「开始体检」执行 RunBook：{0}</sys:String>

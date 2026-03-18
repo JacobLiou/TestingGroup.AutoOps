@@ -8,11 +8,47 @@
                 <!-- HandyControl global style resources -->
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml" />
-                <!-- Project light theme baseline -->
-                <ResourceDictionary Source="Themes/LightTheme.xaml" />
                 <!-- Default language resources (can be replaced at runtime) -->
                 <ResourceDictionary Source="Resources/Strings.zh-CN.xaml" />
             </ResourceDictionary.MergedDictionaries>
+
+            <!-- Fixed palette (no runtime theme switching) -->
+            <Color x:Key="ThemeBg">#F7F8FA</Color>
+            <Color x:Key="ThemeCardBg">#FFFFFF</Color>
+            <Color x:Key="ThemeCardBorder">#E3E6EA</Color>
+            <Color x:Key="ThemeHeaderBg">#F2F4F7</Color>
+            <Color x:Key="ThemeTextPrimary">#1F2937</Color>
+            <Color x:Key="ThemeTextSecondary">#667085</Color>
+            <Color x:Key="ThemeAccentGreen">#2E9E58</Color>
+            <Color x:Key="ThemeAccentOrange">#DD7A1F</Color>
+            <Color x:Key="ThemeAccentRed">#D64545</Color>
+            <Color x:Key="ThemeRingBg">#E8ECF2</Color>
+            <Color x:Key="ThemeRowBorder">#E9EDF2</Color>
+            <Color x:Key="ThemePassCardBg">#E9F9EF</Color>
+            <Color x:Key="ThemeWarnCardBg">#FFF6DB</Color>
+            <Color x:Key="ThemeFailCardBg">#FFEDEE</Color>
+            <Color x:Key="ThemePassCardText">#1F7A3A</Color>
+            <Color x:Key="ThemeWarnCardText">#9C6E00</Color>
+            <Color x:Key="ThemeFailCardText">#B83333</Color>
+
+            <SolidColorBrush x:Key="ThemeBgBrush" Color="{StaticResource ThemeBg}" />
+            <SolidColorBrush x:Key="ThemeCardBgBrush" Color="{StaticResource ThemeCardBg}" />
+            <SolidColorBrush x:Key="ThemeCardBorderBrush" Color="{StaticResource ThemeCardBorder}" />
+            <SolidColorBrush x:Key="ThemeHeaderBgBrush" Color="{StaticResource ThemeHeaderBg}" />
+            <SolidColorBrush x:Key="ThemeTextPrimaryBrush" Color="{StaticResource ThemeTextPrimary}" />
+            <SolidColorBrush x:Key="ThemeTextSecondaryBrush" Color="{StaticResource ThemeTextSecondary}" />
+            <SolidColorBrush x:Key="ThemeAccentGreenBrush" Color="{StaticResource ThemeAccentGreen}" />
+            <SolidColorBrush x:Key="ThemeAccentOrangeBrush" Color="{StaticResource ThemeAccentOrange}" />
+            <SolidColorBrush x:Key="ThemeAccentRedBrush" Color="{StaticResource ThemeAccentRed}" />
+            <SolidColorBrush x:Key="ThemeRingBgBrush" Color="{StaticResource ThemeRingBg}" />
+            <SolidColorBrush x:Key="ThemeRowBorderBrush" Color="{StaticResource ThemeRowBorder}" />
+            <SolidColorBrush x:Key="ThemePassCardBgBrush" Color="{StaticResource ThemePassCardBg}" />
+            <SolidColorBrush x:Key="ThemeWarnCardBgBrush" Color="{StaticResource ThemeWarnCardBg}" />
+            <SolidColorBrush x:Key="ThemeFailCardBgBrush" Color="{StaticResource ThemeFailCardBg}" />
+            <SolidColorBrush x:Key="ThemePassCardTextBrush" Color="{StaticResource ThemePassCardText}" />
+            <SolidColorBrush x:Key="ThemeWarnCardTextBrush" Color="{StaticResource ThemeWarnCardText}" />
+            <SolidColorBrush x:Key="ThemeFailCardTextBrush" Color="{StaticResource ThemeFailCardText}" />
+            <SolidColorBrush x:Key="ThemeSecondaryButtonBg" Color="#E8EDF3" />
 
             <!-- Shared global tuning -->
             <Style TargetType="Window">
@@ -57,49 +93,12 @@
                 <Setter Property="BorderThickness" Value="1" />
                 <Setter Property="CornerRadius" Value="14" />
                 <Setter Property="Padding" Value="16" />
-                <Setter Property="RenderTransform">
-                    <Setter.Value>
-                        <TranslateTransform Y="0" />
-                    </Setter.Value>
-                </Setter>
-                <Setter Property="Effect">
-                    <Setter.Value>
-                        <DropShadowEffect BlurRadius="18" ShadowDepth="2" Opacity="0.22" />
-                    </Setter.Value>
-                </Setter>
-                <Style.Triggers>
-                    <Trigger Property="IsMouseOver" Value="True">
-                        <Trigger.EnterActions>
-                            <BeginStoryboard x:Name="LiftCard">
-                                <Storyboard>
-                                    <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
-                                                     To="-2"
-                                                     Duration="0:0:0.12" />
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </Trigger.EnterActions>
-                        <Trigger.ExitActions>
-                            <BeginStoryboard>
-                                <Storyboard>
-                                    <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
-                                                     To="0"
-                                                     Duration="0:0:0.12" />
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </Trigger.ExitActions>
-                    </Trigger>
-                </Style.Triggers>
             </Style>
 
             <Style x:Key="SoftPanelBorder" TargetType="Border" BasedOn="{StaticResource SurfaceCardBorder}">
                 <Setter Property="Background" Value="{DynamicResource ThemeHeaderBgBrush}" />
                 <Setter Property="CornerRadius" Value="12" />
                 <Setter Property="Padding" Value="12" />
-                <Setter Property="Effect">
-                    <Setter.Value>
-                        <DropShadowEffect BlurRadius="12" ShadowDepth="1" Opacity="0.18" />
-                    </Setter.Value>
-                </Setter>
             </Style>
 
             <!-- ── Action Button Styles (theme-aware) ── -->
@@ -120,44 +119,11 @@
                                     CornerRadius="10"
                                     Padding="{TemplateBinding Padding}"
                                     SnapsToDevicePixels="True">
-                                <Border.RenderTransform>
-                                    <TranslateTransform Y="0" />
-                                </Border.RenderTransform>
-                                <Border.Effect>
-                                    <DropShadowEffect BlurRadius="10" ShadowDepth="1" Opacity="0.18" />
-                                </Border.Effect>
                                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Border>
                             <ControlTemplate.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Trigger.EnterActions>
-                                        <BeginStoryboard x:Name="HoverLift">
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetName="border"
-                                                                 Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
-                                                                 To="-1"
-                                                                 Duration="0:0:0.08" />
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </Trigger.EnterActions>
-                                    <Trigger.ExitActions>
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetName="border"
-                                                                 Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
-                                                                 To="0"
-                                                                 Duration="0:0:0.1" />
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </Trigger.ExitActions>
-                                </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
                                     <Setter TargetName="border" Property="Opacity" Value="0.88" />
-                                    <Setter TargetName="border" Property="RenderTransform">
-                                        <Setter.Value>
-                                            <TranslateTransform Y="1" />
-                                        </Setter.Value>
-                                    </Setter>
                                 </Trigger>
                                 <Trigger Property="IsEnabled" Value="False">
                                     <Setter TargetName="border" Property="Opacity" Value="0.4" />
@@ -180,12 +146,6 @@
                 <Setter Property="Padding" Value="12,6" />
             </Style>
 
-            <Style x:Key="ThemeToggleButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
-                <Setter Property="Background" Value="{DynamicResource ThemeSecondaryButtonBg}" />
-                <Setter Property="FontSize" Value="14" />
-                <Setter Property="Padding" Value="10,6" />
-                <Setter Property="ToolTip" Value="切换主题 (自动/深色/浅色)" />
-            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

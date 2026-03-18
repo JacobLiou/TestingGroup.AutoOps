@@ -62,8 +62,6 @@
     <sys:String x:Key="Loc.Status.Warning" xmlns:sys="clr-namespace:System;assembly=mscorlib">⚠️ Warning</sys:String>
     <sys:String x:Key="Loc.Status.Fail" xmlns:sys="clr-namespace:System;assembly=mscorlib">❌ Fail</sys:String>
     <sys:String x:Key="Loc.Status.Fixed" xmlns:sys="clr-namespace:System;assembly=mscorlib">🔧 Fixed</sys:String>
-    <sys:String x:Key="Loc.Theme.Light" xmlns:sys="clr-namespace:System;assembly=mscorlib">Theme: Light</sys:String>
-
     <sys:String x:Key="Loc.Runtime.Ready" xmlns:sys="clr-namespace:System;assembly=mscorlib">Ready</sys:String>
     <sys:String x:Key="Loc.Runtime.ClickStartScan" xmlns:sys="clr-namespace:System;assembly=mscorlib">Click \"Start Scan\" to run a full diagnosis</sys:String>
     <sys:String x:Key="Loc.Runtime.ClickRunbook" xmlns:sys="clr-namespace:System;assembly=mscorlib">Click \"Start Scan\" to execute RunBook: {0}</sys:String>

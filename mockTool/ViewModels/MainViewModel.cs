@@ -67,12 +67,6 @@ public partial class MainViewModel : ObservableObject
     private int _displayScore;
 
     [ObservableProperty]
-    private string _themeIcon = "☀️";
-
-    [ObservableProperty]
-    private string _themeModeText = string.Empty;
-
-    [ObservableProperty]
     private bool _isReportingToMims;
 
     [ObservableProperty]
@@ -102,8 +96,6 @@ public partial class MainViewModel : ObservableObject
         _onePageReportService = new OnePageDiagnosticReportService();
         SelectedLanguageCode = LanguageService.Instance.CurrentLanguage;
         LanguageService.Instance.LanguageChanged += OnLanguageChanged;
-        ThemeService.Instance.ThemeChanged += OnThemeChanged;
-        UpdateThemeProperties(ThemeService.Instance.CurrentMode, ThemeService.Instance.IsDarkTheme);
         ResetState();
     }
 
@@ -277,28 +269,16 @@ public partial class MainViewModel : ObservableObject
         FailCount = DiagnosticItems.Count(i => i.Status == CheckStatus.Fail);
     }
 
-    private async Task AnimateScoreAsync(int from, int to)
+    private Task AnimateScoreAsync(int from, int to)
     {
-        if (from == to) { DisplayScore = to; return; }
-        var step = from < to ? 1 : -1;
-        for (var i = from; i != to; i += step)
-        {
-            DisplayScore = i;
-            await Task.Delay(15);
-        }
         DisplayScore = to;
+        return Task.CompletedTask;
     }
 
     [RelayCommand]
     private void StopScan()
     {
         _cts?.Cancel();
-    }
-
-    [RelayCommand]
-    private void ToggleTheme()
-    {
-        ThemeService.Instance.CycleTheme();
     }
 
     [RelayCommand(CanExecute = nameof(CanOpenRunbookEditor))]
@@ -345,17 +325,11 @@ public partial class MainViewModel : ObservableObject
         return !IsScanning && (ScanComplete || ScannedItems > 0);
     }
 
-    private void OnThemeChanged(AppTheme mode, bool isDark)
-    {
-        UpdateThemeProperties(mode, isDark);
-    }
-
     private void OnLanguageChanged(string language)
     {
         _isUpdatingLanguageSelection = true;
         SelectedLanguageCode = language;
         _isUpdatingLanguageSelection = false;
-        ThemeModeText = T("Loc.Theme.Light", "主题: 浅色");
         UpdateScannedProgressText();
         foreach (var item in DiagnosticItems)
         {
@@ -366,12 +340,6 @@ public partial class MainViewModel : ObservableObject
             CurrentScanItem = T("Loc.Runtime.Ready", "就绪");
             StatusText = TF("Loc.Runtime.ClickRunbook", "点击「开始体检」执行 RunBook：{0}", CurrentRunbookName);
         }
-    }
-
-    private void UpdateThemeProperties(AppTheme mode, bool isDark)
-    {
-        ThemeIcon = "☀️";
-        ThemeModeText = T("Loc.Theme.Light", "主题: 浅色");
     }
 
     partial void OnIsScanningChanged(bool value)
