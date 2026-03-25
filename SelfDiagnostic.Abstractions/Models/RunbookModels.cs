@@ -12,10 +12,11 @@ namespace SelfDiagnostic.Models
 
     public sealed class RunbookStepDefinition
     {
-        public string StepId { get; set; } = string.Empty;
         public string CheckId { get; set; } = string.Empty;
         public string DisplayName { get; set; } = string.Empty;
         public string Category { get; set; } = nameof(CheckCategory.SystemCheck);
+        public string BindDll { get; set; } = string.Empty;
+        public string BindMethod { get; set; } = string.Empty;
         public int TimeoutMs { get; set; } = 5000;
         public bool Enabled { get; set; } = true;
         public Dictionary<string, string> Params { get; set; } = new Dictionary<string, string>();

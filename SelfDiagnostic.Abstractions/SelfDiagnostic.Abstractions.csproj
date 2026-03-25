@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Models\CheckEnums.cs" />
+    <Compile Include="Models\CheckExecutorInfo.cs" />
     <Compile Include="Models\DiagnosticItem.cs" />
     <Compile Include="Models\DiagnosticReportModels.cs" />
     <Compile Include="Models\ExternalDependencyModels.cs" />

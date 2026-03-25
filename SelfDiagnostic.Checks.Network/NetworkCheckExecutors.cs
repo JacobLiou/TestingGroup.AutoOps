@@ -8,7 +8,7 @@ namespace SelfDiagnostic.Services.Executors.Network
 {
     internal static class NetworkCheckExecutors
     {
-        [CheckExecutor("NET_01")]
+        [CheckExecutor("NET_01", DisplayName = "Network Connectivity", Description = "Check if network is available and count active adapters", DefaultCategory = "StationCheck")]
         private static void CheckNetworkAvailable(DiagnosticItem item)
         {
             if (NetworkInterface.GetIsNetworkAvailable())
@@ -30,7 +30,7 @@ namespace SelfDiagnostic.Services.Executors.Network
             }
         }
 
-        [CheckExecutor("NET_02")]
+        [CheckExecutor("NET_02", DisplayName = "DNS Resolution", Description = "Verify DNS resolution works by resolving a known host", DefaultCategory = "StationCheck")]
         private static void CheckDns(DiagnosticItem item)
         {
             try
@@ -49,7 +49,7 @@ namespace SelfDiagnostic.Services.Executors.Network
             }
         }
 
-        [CheckExecutor("NET_03")]
+        [CheckExecutor("NET_03", DisplayName = "Internet Connectivity", Description = "Ping external host to verify internet access", DefaultCategory = "StationCheck")]
         private static void CheckInternet(DiagnosticItem item)
         {
             try

@@ -22,9 +22,6 @@ namespace SelfDiagnostic.UI
     /// </summary>
     public sealed class DiagnosticMainControl : XtraUserControl
     {
-        private const string DefaultMimsAuthor = "YUD";
-        private const string DefaultMimsSpec = "GUI";
-        private const string DefaultMimsPartNumber = "TEST-001";
         private const string DefaultStationId = "STATION-001";
         private const string DefaultLineId = "LINE-001";
 
@@ -56,8 +53,6 @@ namespace SelfDiagnostic.UI
         private CheckEdit _autoScrollCheck;
         private SimpleButton _startButton;
         private SimpleButton _stopButton;
-        private SimpleButton _fixAllButton;
-        private SimpleButton _reportButton;
         private SimpleButton _editorButton;
         private GridControl _gridControl;
         private GridView _gridView;
@@ -136,14 +131,10 @@ namespace SelfDiagnostic.UI
             _startButton.Click += async (s, e) => await StartScanAsync();
             _stopButton = CreateButton("Stop", Color.FromArgb(192, 57, 43));
             _stopButton.Click += (s, e) => StopScan();
-            _fixAllButton = CreateButton("Fix All", Color.FromArgb(46, 204, 113));
-            _fixAllButton.Click += async (s, e) => await FixAllAsync();
-            _reportButton = CreateButton("Report to MIMS", Color.FromArgb(230, 126, 34));
-            _reportButton.Click += async (s, e) => await SendToMimsCoreAsync("manual", CancellationToken.None);
             _editorButton = CreateButton("RunBook Editor", Color.FromArgb(142, 68, 173));
             _editorButton.Click += (s, e) => OpenEditor();
             _autoScrollCheck = new CheckEdit { Text = "Auto-follow current item", Checked = true, Width = 200, Height = 34 };
-            btnRow.Controls.AddRange(new Control[] { _startButton, _stopButton, _fixAllButton, _reportButton, _editorButton, _autoScrollCheck });
+            btnRow.Controls.AddRange(new Control[] { _startButton, _stopButton, _editorButton, _autoScrollCheck });
             headerTable.Controls.Add(btnRow, 1, 1);
             SetButtonsEnabled(false);
 
@@ -333,13 +324,12 @@ namespace SelfDiagnostic.UI
                     _statusLabel.Text = "MIMS config unavailable. External checks will be skipped";
                 }
 
-                foreach (var currentStep in _enabledSteps)
+                for (int i = 0; i < _enabledSteps.Count; i++)
                 {
                     if (token.IsCancellationRequested) break;
 
-                    var item = _diagnosticItems.FirstOrDefault(i =>
-                        i.Id.Equals(currentStep.CheckId, StringComparison.OrdinalIgnoreCase));
-                    if (item == null) continue;
+                    var currentStep = _enabledSteps[i];
+                    var item = _diagnosticItems[i];
 
                     _currentScanLabel.Text = item.CategoryIcon + " " + item.Name;
                     SelectCurrentRow(item);
@@ -352,7 +342,6 @@ namespace SelfDiagnostic.UI
                 _currentScanLabel.Text = "Scan complete";
                 _statusLabel.Text = string.Format("Finished! Pass {0} | Warning {1} | Fail {2}",
                     _passCount, _warningCount, _failCount);
-                await SendToMimsCoreAsync("auto", CancellationToken.None);
             }
             catch (OperationCanceledException)
             {
@@ -395,62 +384,6 @@ namespace SelfDiagnostic.UI
             if (resetResult == DialogResult.Yes)
             {
                 ResetState();
-            }
-        }
-
-        private async Task FixAllAsync()
-        {
-            foreach (var item in _diagnosticItems)
-            {
-                if (item.Status == CheckStatus.Warning || item.Status == CheckStatus.Fail)
-                {
-                    item.Status = CheckStatus.Scanning;
-                    _gridView.RefreshData();
-                    await Task.Delay(130);
-                    item.Status = CheckStatus.Fixed;
-                    item.Score = 100;
-                    item.Detail += " [Fixed]";
-                }
-            }
-
-            RefreshCountersAndScore();
-            _statusLabel.Text = string.Format("Fix complete! Health score: {0}", _scoreRing.Score);
-        }
-
-        private async Task SendToMimsCoreAsync(string trigger, CancellationToken cancellationToken)
-        {
-            try
-            {
-                var request = new MimsAskInfoRequest
-                {
-                    Author = DefaultMimsAuthor,
-                    Spec = DefaultMimsSpec,
-                    PartNumber = DefaultMimsPartNumber,
-                    Date = DateTime.Now,
-                    TotalItems = _diagnosticItems.Count,
-                    PassCount = _passCount,
-                    WarningCount = _warningCount,
-                    FailCount = _failCount
-                };
-                var result = await _externalSystemClient.SendAskInfoAsync(request, cancellationToken);
-                if (result.Success)
-                {
-                    _statusLabel.Text = trigger == "auto"
-                        ? string.Format("{0} | Auto-reported to MIMS", _statusLabel.Text)
-                        : string.Format("Manual report success: {0} ({1})", result.Code, result.Endpoint);
-                }
-                else
-                {
-                    _statusLabel.Text = trigger == "auto"
-                        ? string.Format("{0} | Auto report failed: {1}", _statusLabel.Text, result.Code)
-                        : string.Format("Manual report failed: {0} - {1}", result.Code, result.Message);
-                }
-            }
-            catch (Exception ex)
-            {
-                _statusLabel.Text = trigger == "auto"
-                    ? string.Format("{0} | Auto report exception: {1}", _statusLabel.Text, ex.Message)
-                    : string.Format("Manual report exception: {0}", ex.Message);
             }
         }
 
@@ -504,9 +437,7 @@ namespace SelfDiagnostic.UI
         {
             _startButton.Enabled = !isScanning;
             _stopButton.Enabled = isScanning;
-            _fixAllButton.Enabled = !isScanning;
             _editorButton.Enabled = !isScanning;
-            _reportButton.Enabled = !isScanning;
         }
 
         private void SelectCurrentRow(DiagnosticItem item)

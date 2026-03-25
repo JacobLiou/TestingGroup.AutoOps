@@ -32,6 +32,16 @@ namespace SelfDiagnostic.Services
             return ExecutorRegistry.GetAllCheckIds();
         }
 
+        public static IReadOnlyList<CheckExecutorInfo> GetRegisteredExecutorInfos()
+        {
+            return ExecutorRegistry.GetAllExecutorInfos();
+        }
+
+        public static CheckExecutorInfo GetExecutorInfo(string checkId)
+        {
+            return ExecutorRegistry.GetExecutorInfo(checkId);
+        }
+
         public static List<DiagnosticItem> BuildCheckList(RunbookDefinition runbook = null)
         {
             runbook = runbook ?? LoadRunbook();
@@ -55,11 +65,14 @@ namespace SelfDiagnostic.Services
             item.Status = CheckStatus.Scanning;
             await Task.Delay(Rng.Next(200, 450), ct);
 
-            var executor = ExecutorRegistry.Resolve(step.CheckId);
+            var executor = ExecutorRegistry.ResolveByMethod(step.BindMethod)
+                          ?? ExecutorRegistry.Resolve(step.CheckId);
             if (executor == null)
             {
                 item.Status = CheckStatus.Warning;
-                item.Detail = string.Format("Unregistered check: {0}", step.CheckId);
+                item.Detail = string.IsNullOrWhiteSpace(step.BindMethod)
+                    ? string.Format("Unregistered check: {0}", step.CheckId)
+                    : string.Format("Unbound method: {0}", step.BindMethod);
                 item.Score = 95;
                 return new CheckExecutionOutcome { Success = false };
             }
@@ -123,11 +136,21 @@ namespace SelfDiagnostic.Services
                         if (!seenCheckIds.Add(attribute.CheckId))
                         {
                             throw new InvalidOperationException(
-                                string.Format("重复的检查项执行器注册: {0}，位置: {1}.{2}.{3}",
+                                string.Format("Duplicate check executor registration: {0}, at: {1}.{2}.{3}",
                                     attribute.CheckId, assembly.GetName().Name, type.FullName, method.Name));
                         }
 
-                        registry.Register(new DelegateCheckExecutor(attribute.CheckId, BuildMethodExecutor(method)));
+                        var info = new CheckExecutorInfo
+                        {
+                            CheckId = attribute.CheckId,
+                            DisplayName = string.IsNullOrWhiteSpace(attribute.DisplayName) ? attribute.CheckId : attribute.DisplayName,
+                            Description = attribute.Description ?? string.Empty,
+                            DefaultCategory = string.IsNullOrWhiteSpace(attribute.DefaultCategory) ? "SystemCheck" : attribute.DefaultCategory,
+                            MethodName = method.Name,
+                            ClassName = type.FullName ?? type.Name,
+                            PluginAssembly = assembly.GetName().Name ?? string.Empty
+                        };
+                        registry.Register(new DelegateCheckExecutor(attribute.CheckId, BuildMethodExecutor(method)), info);
                     }
                 }
             }

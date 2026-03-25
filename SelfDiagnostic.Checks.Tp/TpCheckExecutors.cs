@@ -17,7 +17,7 @@ namespace SelfDiagnostic.Services.Executors.Tp
         private static readonly HwStatusGroupedChecker HwStatusGroupedChecker = new HwStatusGroupedChecker();
         private static readonly OpticalPathResidualRiskChecker OpticalPathResidualRiskChecker = new OpticalPathResidualRiskChecker();
 
-        [CheckExecutor(TpCheckIds.PathAndConfig)]
+        [CheckExecutor(TpCheckIds.PathAndConfig, DisplayName = "TP Path & Config", Description = "Verify TP root path exists and config files are readable", DefaultCategory = "StationCheck")]
         private static Task<CheckExecutionOutcome> CheckTpPathAndConfigAsync(
             DiagnosticItem item,
             RunbookStepDefinition step,
@@ -27,7 +27,7 @@ namespace SelfDiagnostic.Services.Executors.Tp
             return ExecuteTpAsync(TpCheckIds.PathAndConfig, item, step, runContext, ct);
         }
 
-        [CheckExecutor(TpCheckIds.SerialPorts)]
+        [CheckExecutor(TpCheckIds.SerialPorts, DisplayName = "TP Serial Port Mapping", Description = "Verify serial port mapping from TP config matches system COM ports", DefaultCategory = "HwStatusCheck")]
         private static Task<CheckExecutionOutcome> CheckTpSerialPortsAsync(
             DiagnosticItem item,
             RunbookStepDefinition step,
@@ -37,7 +37,7 @@ namespace SelfDiagnostic.Services.Executors.Tp
             return ExecuteTpAsync(TpCheckIds.SerialPorts, item, step, runContext, ct);
         }
 
-        [CheckExecutor(TpCheckIds.NetworkEndpoints)]
+        [CheckExecutor(TpCheckIds.NetworkEndpoints, DisplayName = "TP Network Endpoints", Description = "Verify all TP network endpoints are reachable", DefaultCategory = "StationCheck")]
         private static Task<CheckExecutionOutcome> CheckTpNetworkEndpointsAsync(
             DiagnosticItem item,
             RunbookStepDefinition step,
@@ -47,7 +47,7 @@ namespace SelfDiagnostic.Services.Executors.Tp
             return ExecuteTpAsync(TpCheckIds.NetworkEndpoints, item, step, runContext, ct);
         }
 
-        [CheckExecutor(TpCheckIds.VersionCompliance)]
+        [CheckExecutor(TpCheckIds.VersionCompliance, DisplayName = "HW/FW Version Compliance", Description = "Compare device HW/FW versions against TMS requirements", DefaultCategory = "HwSwFwCheck")]
         private static Task<CheckExecutionOutcome> CheckTpVersionComplianceAsync(
             DiagnosticItem item,
             RunbookStepDefinition step,
@@ -57,7 +57,7 @@ namespace SelfDiagnostic.Services.Executors.Tp
             return ExecuteTpAsync(TpCheckIds.VersionCompliance, item, step, runContext, ct);
         }
 
-        [CheckExecutor(TpCheckIds.StationCapabilityCompliance)]
+        [CheckExecutor(TpCheckIds.StationCapabilityCompliance, DisplayName = "Station Capability (GRR/GDS)", Description = "Validate station GRR/GDS/optical performance against MIMS requirements", DefaultCategory = "OpticalPerformanceCheck")]
         private static Task<CheckExecutionOutcome> CheckTpStationCapabilityComplianceAsync(
             DiagnosticItem item,
             RunbookStepDefinition step,
@@ -67,7 +67,7 @@ namespace SelfDiagnostic.Services.Executors.Tp
             return ExecuteTpAsync(TpCheckIds.StationCapabilityCompliance, item, step, runContext, ct);
         }
 
-        [CheckExecutor(TpCheckIds.PowerSupplyQuality)]
+        [CheckExecutor(TpCheckIds.PowerSupplyQuality, DisplayName = "Power Supply Quality", Description = "Sample power supply voltage and check mean/stddev/ripple", DefaultCategory = "HwStatusCheck")]
         private static Task<CheckExecutionOutcome> CheckTpPowerSupplyQualityAsync(
             DiagnosticItem item,
             RunbookStepDefinition step,
@@ -77,7 +77,7 @@ namespace SelfDiagnostic.Services.Executors.Tp
             return ExecuteTpAsync(TpCheckIds.PowerSupplyQuality, item, step, runContext, ct);
         }
 
-        [CheckExecutor(TpCheckIds.DefaultInfoAndLut)]
+        [CheckExecutor(TpCheckIds.DefaultInfoAndLut, DisplayName = "Default Info & LUT Integrity", Description = "Verify default info and LUT table completeness via MIMS", DefaultCategory = "HwSwFwCheck")]
         private static Task<CheckExecutionOutcome> CheckTpDefaultInfoAndLutAsync(
             DiagnosticItem item,
             RunbookStepDefinition step,
@@ -87,7 +87,7 @@ namespace SelfDiagnostic.Services.Executors.Tp
             return ExecuteTpAsync(TpCheckIds.DefaultInfoAndLut, item, step, runContext, ct);
         }
 
-        [CheckExecutor(TpCheckIds.HwSwFwConfigIntegrity)]
+        [CheckExecutor(TpCheckIds.HwSwFwConfigIntegrity, DisplayName = "Config/Corruption Integrity", Description = "Check HW/SW/FW configuration data integrity for corruption", DefaultCategory = "HwSwFwCheck")]
         private static Task<CheckExecutionOutcome> CheckTpHwSwFwConfigIntegrityAsync(
             DiagnosticItem item,
             RunbookStepDefinition step,
@@ -97,7 +97,7 @@ namespace SelfDiagnostic.Services.Executors.Tp
             return ExecuteTpAsync(TpCheckIds.HwSwFwConfigIntegrity, item, step, runContext, ct);
         }
 
-        [CheckExecutor(TpCheckIds.HwStatusOpticalGroup)]
+        [CheckExecutor(TpCheckIds.HwStatusOpticalGroup, DisplayName = "HW Status - Optical Group", Description = "Check optical link devices (PD/VOA/SW/Pump/DFB/TEC/Heater)", DefaultCategory = "HwStatusCheck")]
         private static Task<CheckExecutionOutcome> CheckTpHwStatusOpticalGroupAsync(
             DiagnosticItem item,
             RunbookStepDefinition step,
@@ -107,7 +107,7 @@ namespace SelfDiagnostic.Services.Executors.Tp
             return ExecuteTpAsync(TpCheckIds.HwStatusOpticalGroup, item, step, runContext, ct);
         }
 
-        [CheckExecutor(TpCheckIds.HwStatusControlStorageGroup)]
+        [CheckExecutor(TpCheckIds.HwStatusControlStorageGroup, DisplayName = "HW Status - Control/Storage", Description = "Check control & storage devices (MCU/EEPROM/Flash/Sensor/Watchdog)", DefaultCategory = "HwStatusCheck")]
         private static Task<CheckExecutionOutcome> CheckTpHwStatusControlStorageGroupAsync(
             DiagnosticItem item,
             RunbookStepDefinition step,
@@ -117,7 +117,7 @@ namespace SelfDiagnostic.Services.Executors.Tp
             return ExecuteTpAsync(TpCheckIds.HwStatusControlStorageGroup, item, step, runContext, ct);
         }
 
-        [CheckExecutor(TpCheckIds.HwStatusInterfaceCommGroup)]
+        [CheckExecutor(TpCheckIds.HwStatusInterfaceCommGroup, DisplayName = "HW Status - Interface/Comm", Description = "Check interface & comm devices (I/O Port/DAC/ADC/SPI/I2C)", DefaultCategory = "HwStatusCheck")]
         private static Task<CheckExecutionOutcome> CheckTpHwStatusInterfaceCommGroupAsync(
             DiagnosticItem item,
             RunbookStepDefinition step,
@@ -127,7 +127,7 @@ namespace SelfDiagnostic.Services.Executors.Tp
             return ExecuteTpAsync(TpCheckIds.HwStatusInterfaceCommGroup, item, step, runContext, ct);
         }
 
-        [CheckExecutor(TpCheckIds.OpticalResidualRisk)]
+        [CheckExecutor(TpCheckIds.OpticalResidualRisk, DisplayName = "Optical Residual Risk", Description = "Analyze optical path residual risk after RTS", DefaultCategory = "OpticalPerformanceCheck")]
         private static Task<CheckExecutionOutcome> CheckTpOpticalResidualRiskAsync(
             DiagnosticItem item,
             RunbookStepDefinition step,
@@ -137,7 +137,7 @@ namespace SelfDiagnostic.Services.Executors.Tp
             return ExecuteTpAsync(TpCheckIds.OpticalResidualRisk, item, step, runContext, ct);
         }
 
-        [CheckExecutor(TpCheckIds.OpticalCustomGrrRule)]
+        [CheckExecutor(TpCheckIds.OpticalCustomGrrRule, DisplayName = "Custom Rule - GRR Threshold", Description = "Check optical GRR metric against custom threshold rule", DefaultCategory = "OpticalPerformanceCheck")]
         private static Task<CheckExecutionOutcome> CheckTpOpticalCustomGrrRuleAsync(
             DiagnosticItem item,
             RunbookStepDefinition step,
@@ -147,7 +147,7 @@ namespace SelfDiagnostic.Services.Executors.Tp
             return ExecuteTpAsync(TpCheckIds.OpticalCustomGrrRule, item, step, runContext, ct);
         }
 
-        [CheckExecutor(TpCheckIds.OpticalCustomSnrRule)]
+        [CheckExecutor(TpCheckIds.OpticalCustomSnrRule, DisplayName = "Custom Rule - SNR Threshold", Description = "Check optical SNR metric against custom threshold rule", DefaultCategory = "OpticalPerformanceCheck")]
         private static Task<CheckExecutionOutcome> CheckTpOpticalCustomSnrRuleAsync(
             DiagnosticItem item,
             RunbookStepDefinition step,

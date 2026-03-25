@@ -86,22 +86,17 @@ namespace SelfDiagnostic.Services
                 throw new InvalidOperationException("RunBook must contain at least one enabled step");
             }
 
-            var allStepIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            foreach (var step in runbook.Steps)
+            for (int i = 0; i < runbook.Steps.Count; i++)
             {
-                if (string.IsNullOrWhiteSpace(step.StepId))
-                {
-                    throw new InvalidOperationException("StepId cannot be empty");
-                }
-
+                var step = runbook.Steps[i];
                 if (string.IsNullOrWhiteSpace(step.CheckId))
                 {
-                    throw new InvalidOperationException("Step " + step.StepId + " has empty CheckId");
+                    throw new InvalidOperationException("Step #" + (i + 1) + " has empty CheckId");
                 }
 
-                if (!allStepIds.Add(step.StepId))
+                if (step.Enabled && string.IsNullOrWhiteSpace(step.BindMethod))
                 {
-                    throw new InvalidOperationException("Duplicate StepId: " + step.StepId);
+                    throw new InvalidOperationException("Enabled step " + step.CheckId + " has empty BindMethod");
                 }
             }
         }

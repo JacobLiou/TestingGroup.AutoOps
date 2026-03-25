@@ -11,5 +11,8 @@ namespace SelfDiagnostic.Services.Abstractions
         }
 
         public string CheckId { get; }
+        public string DisplayName { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string DefaultCategory { get; set; } = "SystemCheck";
     }
 }

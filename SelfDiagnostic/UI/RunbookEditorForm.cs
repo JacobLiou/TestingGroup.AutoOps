@@ -18,6 +18,7 @@ namespace SelfDiagnostic.UI
     {
         private readonly RunbookFileService _runbookFileService = new RunbookFileService();
         private readonly BindingList<RunbookStepRow> _rows = new BindingList<RunbookStepRow>();
+        private readonly IReadOnlyList<CheckExecutorInfo> _executorInfos = DiagnosticEngine.GetRegisteredExecutorInfos();
 
         private GridControl _gridControl;
         private GridView _gridView;
@@ -149,19 +150,9 @@ namespace SelfDiagnostic.UI
             _gridView.OptionsView.ColumnAutoWidth = true;
             _gridView.OptionsSelection.EnableAppearanceFocusedRow = true;
 
-            var colStepId = _gridView.Columns.AddVisible("StepId", "StepId");
-            colStepId.Width = 70;
-            colStepId.MinWidth = 50;
-
             var colCheckId = _gridView.Columns.AddVisible("CheckId", "CheckId");
-            colCheckId.Width = 110;
+            colCheckId.Width = 100;
             colCheckId.MinWidth = 70;
-            var checkIdCombo = new RepositoryItemComboBox();
-            foreach (var id in DiagnosticEngine.GetRegisteredCheckIds())
-            {
-                checkIdCombo.Items.Add(id);
-            }
-            colCheckId.ColumnEdit = checkIdCombo;
 
             var colName = _gridView.Columns.AddVisible("DisplayName", "DisplayName");
             colName.Width = 160;
@@ -176,6 +167,23 @@ namespace SelfDiagnostic.UI
                 catCombo.Items.Add(name);
             }
             colCat.ColumnEdit = catCombo;
+
+            var colBindDll = _gridView.Columns.AddVisible("BindDll", "BindDll");
+            colBindDll.Width = 180;
+            colBindDll.MinWidth = 100;
+            colBindDll.OptionsColumn.ReadOnly = true;
+            colBindDll.AppearanceCell.ForeColor = Color.Gray;
+
+            var colBindMethod = _gridView.Columns.AddVisible("BindMethod", "BindMethod");
+            colBindMethod.Width = 280;
+            colBindMethod.MinWidth = 140;
+            colBindMethod.OptionsColumn.ReadOnly = true;
+            colBindMethod.AppearanceCell.ForeColor = Color.Gray;
+            var bindMethodBtnEdit = new RepositoryItemButtonEdit();
+            bindMethodBtnEdit.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.Standard;
+            bindMethodBtnEdit.ReadOnly = true;
+            bindMethodBtnEdit.ButtonClick += BindMethodButtonEdit_ButtonClick;
+            colBindMethod.ColumnEdit = bindMethodBtnEdit;
 
             var colEnabled = _gridView.Columns.AddVisible("Enabled", "Enabled");
             colEnabled.Width = 60;
@@ -242,7 +250,7 @@ namespace SelfDiagnostic.UI
 
             using (var dlg = new XtraForm())
             {
-                dlg.Text = "Edit Params JSON - " + row.StepId;
+                dlg.Text = "Edit Params JSON - " + row.CheckId;
                 dlg.Width = 600;
                 dlg.Height = 480;
                 dlg.MinimumSize = new Size(400, 300);
@@ -328,6 +336,123 @@ namespace SelfDiagnostic.UI
             }
         }
 
+        private void BindMethodButtonEdit_ButtonClick(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
+        {
+            var handle = _gridView.FocusedRowHandle;
+            if (handle < 0 || handle >= _rows.Count) return;
+            var row = _rows[handle];
+
+            using (var dlg = new XtraForm())
+            {
+                dlg.Text = "Select Bind Method - " + row.CheckId;
+                dlg.Width = 1100;
+                dlg.Height = 560;
+                dlg.MinimumSize = new Size(800, 400);
+                dlg.StartPosition = FormStartPosition.CenterParent;
+
+                var layout = new TableLayoutPanel
+                {
+                    Dock = DockStyle.Fill,
+                    ColumnCount = 1,
+                    RowCount = 3,
+                    Padding = new Padding(10)
+                };
+                layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 28F));
+                layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+                layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 44F));
+                dlg.Controls.Add(layout);
+
+                var currentLabel = new LabelControl
+                {
+                    Text = "Current: " + (string.IsNullOrWhiteSpace(row.BindMethod) ? "(none)" : row.BindMethod),
+                    Dock = DockStyle.Fill,
+                    AutoSizeMode = LabelAutoSizeMode.None,
+                    Appearance = { ForeColor = Color.FromArgb(100, 100, 100) }
+                };
+                layout.Controls.Add(currentLabel, 0, 0);
+
+                var pickerGrid = new GridControl { Dock = DockStyle.Fill };
+                var pickerView = new GridView(pickerGrid);
+                pickerGrid.MainView = pickerView;
+                pickerGrid.DataSource = _executorInfos;
+
+                pickerView.OptionsView.ShowGroupPanel = false;
+                pickerView.OptionsView.ShowIndicator = false;
+                pickerView.OptionsView.ShowAutoFilterRow = true;
+                pickerView.OptionsBehavior.Editable = false;
+                pickerView.OptionsSelection.EnableAppearanceFocusedRow = true;
+
+                pickerView.Columns.Clear();
+                var pColDll = pickerView.Columns.AddVisible("BindDll", "DLL");
+                pColDll.Width = 280;
+                var pColMethod = pickerView.Columns.AddVisible("BindMethod", "Method");
+                pColMethod.Width = 500;
+
+                layout.Controls.Add(pickerGrid, 0, 1);
+
+                var btnPanel = new FlowLayoutPanel
+                {
+                    Dock = DockStyle.Fill,
+                    FlowDirection = FlowDirection.RightToLeft,
+                    Padding = new Padding(0, 6, 0, 0)
+                };
+                var cancelBtn = new SimpleButton { Text = "Cancel", Width = 90, Height = 32, DialogResult = DialogResult.Cancel };
+                var okBtn = new SimpleButton
+                {
+                    Text = "Bind Selected",
+                    Width = 120,
+                    Height = 32,
+                    Appearance = { BackColor = Color.FromArgb(41, 128, 185), ForeColor = Color.White, Options = { UseBackColor = true, UseForeColor = true } }
+                };
+
+                CheckExecutorInfo selectedInfo = null;
+
+                okBtn.Click += (s2, e2) =>
+                {
+                    var focusedRow = pickerView.FocusedRowHandle;
+                    if (focusedRow < 0)
+                    {
+                        return;
+                    }
+                    selectedInfo = pickerView.GetRow(focusedRow) as CheckExecutorInfo;
+                    if (selectedInfo != null)
+                    {
+                        dlg.DialogResult = DialogResult.OK;
+                        dlg.Close();
+                    }
+                };
+
+                pickerView.DoubleClick += (s2, e2) =>
+                {
+                    var pt = pickerGrid.PointToClient(Control.MousePosition);
+                    var hitInfo = pickerView.CalcHitInfo(pt);
+                    if (hitInfo.InRow)
+                    {
+                        selectedInfo = pickerView.GetRow(hitInfo.RowHandle) as CheckExecutorInfo;
+                        if (selectedInfo != null)
+                        {
+                            dlg.DialogResult = DialogResult.OK;
+                            dlg.Close();
+                        }
+                    }
+                };
+
+                btnPanel.Controls.AddRange(new Control[] { cancelBtn, okBtn });
+                layout.Controls.Add(btnPanel, 0, 2);
+
+                dlg.AcceptButton = okBtn;
+                dlg.CancelButton = cancelBtn;
+
+                if (dlg.ShowDialog(this) == DialogResult.OK && selectedInfo != null)
+                {
+                    row.BindDll = selectedInfo.BindDll;
+                    row.BindMethod = selectedInfo.BindMethod;
+                    _gridView.RefreshData();
+                    SetStatus("Bound: " + selectedInfo.BindMethod, Color.FromArgb(39, 174, 96));
+                }
+            }
+        }
+
         private static string FormatJson(string json)
         {
             if (string.IsNullOrWhiteSpace(json)) return "{}";
@@ -409,19 +534,14 @@ namespace SelfDiagnostic.UI
 
         private RunbookStepRow CreateNewStepRow()
         {
-            var maxNum = _rows
-                .Select(x => x.StepId)
-                .Where(x => x.StartsWith("S", StringComparison.OrdinalIgnoreCase) && x.Length > 1 && int.TryParse(x.Substring(1), out _))
-                .Select(x => int.Parse(x.Substring(1)))
-                .DefaultIfEmpty(0)
-                .Max();
-
+            var firstInfo = _executorInfos.FirstOrDefault();
             return new RunbookStepRow
             {
-                StepId = "S" + (maxNum + 1).ToString("000"),
-                CheckId = DiagnosticEngine.GetRegisteredCheckIds().FirstOrDefault() ?? "SYS_01",
-                DisplayName = "New Step",
-                Category = nameof(CheckCategory.SystemCheck),
+                CheckId = firstInfo?.CheckId ?? "SYS_01",
+                DisplayName = firstInfo?.DisplayName ?? "New Step",
+                Category = firstInfo?.DefaultCategory ?? nameof(CheckCategory.SystemCheck),
+                BindDll = firstInfo?.BindDll ?? string.Empty,
+                BindMethod = firstInfo?.BindMethod ?? string.Empty,
                 TimeoutMs = 5000,
                 Enabled = true,
                 ParamsJson = "{}"
@@ -434,7 +554,7 @@ namespace SelfDiagnostic.UI
             _rows.Add(newRow);
             _gridView.FocusedRowHandle = _rows.Count - 1;
             _gridView.MakeRowVisible(_rows.Count - 1, false);
-            SetStatus("Appended step: " + newRow.StepId, Color.FromArgb(39, 174, 96));
+            SetStatus("Appended step: " + newRow.CheckId, Color.FromArgb(39, 174, 96));
         }
 
         private void InsertStepAfterCurrent()
@@ -446,16 +566,16 @@ namespace SelfDiagnostic.UI
             _rows.Insert(insertIndex, newRow);
             _gridView.FocusedRowHandle = insertIndex;
             _gridView.MakeRowVisible(insertIndex, false);
-            SetStatus("Inserted step at row " + (insertIndex + 1) + ": " + newRow.StepId, Color.FromArgb(22, 160, 133));
+            SetStatus("Inserted step at row " + (insertIndex + 1) + ": " + newRow.CheckId, Color.FromArgb(22, 160, 133));
         }
 
         private void RemoveSelectedStep()
         {
             var handle = _gridView.FocusedRowHandle;
             if (handle < 0 || handle >= _rows.Count) return;
-            var stepId = _rows[handle].StepId;
+            var checkId = _rows[handle].CheckId;
             _rows.RemoveAt(handle);
-            SetStatus("Removed step: " + stepId, Color.FromArgb(231, 76, 60));
+            SetStatus("Removed step: " + checkId, Color.FromArgb(231, 76, 60));
         }
 
         private void MoveSelected(int delta)
@@ -488,7 +608,7 @@ namespace SelfDiagnostic.UI
                     row.ValidateJson();
                     if (!row.IsParamsJsonValid)
                     {
-                        SetStatus("ParamsJson error: " + row.StepId + " - " + row.ParamsJsonError, Color.FromArgb(231, 76, 60));
+                        SetStatus("ParamsJson error: " + row.CheckId + " - " + row.ParamsJsonError, Color.FromArgb(231, 76, 60));
                         return;
                     }
                 }
@@ -531,10 +651,11 @@ namespace SelfDiagnostic.UI
 
     public sealed class RunbookStepRow
     {
-        public string StepId { get; set; } = string.Empty;
         public string CheckId { get; set; } = string.Empty;
         public string DisplayName { get; set; } = string.Empty;
         public string Category { get; set; } = nameof(CheckCategory.SystemCheck);
+        public string BindDll { get; set; } = string.Empty;
+        public string BindMethod { get; set; } = string.Empty;
         public int TimeoutMs { get; set; } = 5000;
         public bool Enabled { get; set; } = true;
         public string ParamsJson { get; set; } = "{}";
@@ -545,10 +666,11 @@ namespace SelfDiagnostic.UI
         {
             return new RunbookStepRow
             {
-                StepId = def.StepId,
                 CheckId = def.CheckId,
                 DisplayName = def.DisplayName,
                 Category = string.IsNullOrWhiteSpace(def.Category) ? nameof(CheckCategory.SystemCheck) : def.Category,
+                BindDll = def.BindDll ?? string.Empty,
+                BindMethod = def.BindMethod ?? string.Empty,
                 TimeoutMs = def.TimeoutMs,
                 Enabled = def.Enabled,
                 ParamsJson = JsonConvert.SerializeObject(def.Params, Formatting.Indented)
@@ -560,7 +682,7 @@ namespace SelfDiagnostic.UI
             ValidateJson();
             if (!IsParamsJsonValid)
             {
-                throw new InvalidOperationException("Step " + StepId + " has invalid ParamsJson: " + ParamsJsonError);
+                throw new InvalidOperationException("Step " + CheckId + " has invalid ParamsJson: " + ParamsJsonError);
             }
 
             var paramMap = string.IsNullOrWhiteSpace(ParamsJson)
@@ -569,10 +691,11 @@ namespace SelfDiagnostic.UI
 
             return new RunbookStepDefinition
             {
-                StepId = (StepId ?? string.Empty).Trim(),
                 CheckId = (CheckId ?? string.Empty).Trim(),
                 DisplayName = (DisplayName ?? string.Empty).Trim(),
                 Category = string.IsNullOrWhiteSpace(Category) ? nameof(CheckCategory.SystemCheck) : Category.Trim(),
+                BindDll = (BindDll ?? string.Empty).Trim(),
+                BindMethod = (BindMethod ?? string.Empty).Trim(),
                 TimeoutMs = TimeoutMs <= 0 ? 5000 : TimeoutMs,
                 Enabled = Enabled,
                 Params = paramMap

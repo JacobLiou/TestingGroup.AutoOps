@@ -117,13 +117,42 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <!-- ============================================================ -->
-  <!--  Post-build: copy RunBook config from mockTool               -->
+  <!--  Config files (edit in-place, copy if newer to output)       -->
   <!-- ============================================================ -->
+  <ItemGroup>
+    <Content Include="config\runbook\default.runbook.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\lut\default_station.lut">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\deviceActualVersions.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\deviceVersionRequirements.mock.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\externalDependencyChecks.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\hwStatusGrouped.mock.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\hwSwFwConfigIntegrity.mock.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\opticalResidualRisk.mock.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\powerSupplyMock.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\stationActualMetrics.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\tpConnectivity.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="CopyMockToolConfig" AfterTargets="Build">
-    <ItemGroup>
-      <MockToolConfigFiles Include="$(ProjectDir)..\mockTool\config\**\*.*" />
-    </ItemGroup>
-    <Copy SourceFiles="@(MockToolConfigFiles)" DestinationFiles="@(MockToolConfigFiles->'$(OutputPath)config\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
-  </Target>
 </Project>

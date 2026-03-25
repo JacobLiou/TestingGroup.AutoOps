@@ -13,7 +13,7 @@ namespace SelfDiagnostic.Services.Executors.System
 {
     internal static class SystemCheckExecutors
     {
-        [CheckExecutor("SYS_01")]
+        [CheckExecutor("SYS_01", DisplayName = "OS Version", Description = "Check Windows OS version meets minimum requirement", DefaultCategory = "SystemCheck")]
         private static void CheckOsVersion(DiagnosticItem item)
         {
             var os = Environment.OSVersion;
@@ -33,7 +33,7 @@ namespace SelfDiagnostic.Services.Executors.System
             }
         }
 
-        [CheckExecutor("SYS_02")]
+        [CheckExecutor("SYS_02", DisplayName = "System Uptime", Description = "Check system uptime and recommend restart if too long", DefaultCategory = "SystemCheck")]
         private static void CheckUptime(DiagnosticItem item)
         {
             var uptime = TimeSpan.FromMilliseconds((uint)Environment.TickCount);
@@ -51,7 +51,7 @@ namespace SelfDiagnostic.Services.Executors.System
             }
         }
 
-        [CheckExecutor("SYS_03")]
+        [CheckExecutor("SYS_03", DisplayName = "Windows Update", Description = "Check last Windows Update install date", DefaultCategory = "SystemCheck")]
         private static void CheckWindowsUpdate(DiagnosticItem item)
         {
             try
@@ -93,7 +93,7 @@ namespace SelfDiagnostic.Services.Executors.System
             }
         }
 
-        [CheckExecutor("SYS_04")]
+        [CheckExecutor("SYS_04", DisplayName = "Time Sync", Description = "Check local time and timezone offset", DefaultCategory = "SystemCheck")]
         private static void CheckTimeSync(DiagnosticItem item)
         {
             var localNow = DateTime.Now;
@@ -103,7 +103,7 @@ namespace SelfDiagnostic.Services.Executors.System
             item.Score = 100;
         }
 
-        [CheckExecutor("DSK_01")]
+        [CheckExecutor("DSK_01", DisplayName = "System Disk Space", Description = "Check system drive free space", DefaultCategory = "HwStatusCheck")]
         private static void CheckSystemDisk(DiagnosticItem item)
         {
             var sysDrive = Path.GetPathRoot(Environment.SystemDirectory) ?? "C:\\";
@@ -132,7 +132,7 @@ namespace SelfDiagnostic.Services.Executors.System
             }
         }
 
-        [CheckExecutor("DSK_02")]
+        [CheckExecutor("DSK_02", DisplayName = "All Disks Space", Description = "Check free space on all fixed drives", DefaultCategory = "HwStatusCheck")]
         private static void CheckAllDisks(DiagnosticItem item)
         {
             var drives = DriveInfo.GetDrives().Where(d => d.IsReady && d.DriveType == DriveType.Fixed).ToList();
@@ -162,7 +162,7 @@ namespace SelfDiagnostic.Services.Executors.System
             }
         }
 
-        [CheckExecutor("DSK_03")]
+        [CheckExecutor("DSK_03", DisplayName = "Temp Folder Cleanup", Description = "Check temp folder size and recommend cleanup", DefaultCategory = "HwStatusCheck")]
         private static void CheckTempFolder(DiagnosticItem item)
         {
             var tempPath = Path.GetTempPath();
@@ -192,7 +192,7 @@ namespace SelfDiagnostic.Services.Executors.System
             }
         }
 
-        [CheckExecutor("SEC_01")]
+        [CheckExecutor("SEC_01", DisplayName = "Windows Firewall", Description = "Check if Windows Firewall is enabled", DefaultCategory = "HwSwFwCheck")]
         private static void CheckFirewall(DiagnosticItem item)
         {
             try
@@ -224,7 +224,7 @@ namespace SelfDiagnostic.Services.Executors.System
             }
         }
 
-        [CheckExecutor("SEC_02")]
+        [CheckExecutor("SEC_02", DisplayName = "Antivirus Status", Description = "Detect installed antivirus products via WMI SecurityCenter2", DefaultCategory = "HwSwFwCheck")]
         private static void CheckAntivirus(DiagnosticItem item)
         {
             try
@@ -263,7 +263,7 @@ namespace SelfDiagnostic.Services.Executors.System
             }
         }
 
-        [CheckExecutor("SEC_03")]
+        [CheckExecutor("SEC_03", DisplayName = "UAC Status", Description = "Check User Account Control (UAC) is enabled", DefaultCategory = "HwSwFwCheck")]
         private static void CheckUac(DiagnosticItem item)
         {
             try
@@ -295,7 +295,7 @@ namespace SelfDiagnostic.Services.Executors.System
             }
         }
 
-        [CheckExecutor("SEC_04")]
+        [CheckExecutor("SEC_04", DisplayName = "Auto Login Security", Description = "Check if auto-login is enabled (security risk)", DefaultCategory = "HwSwFwCheck")]
         private static void CheckAutoLogin(DiagnosticItem item)
         {
             try
@@ -327,7 +327,7 @@ namespace SelfDiagnostic.Services.Executors.System
             }
         }
 
-        [CheckExecutor("SFT_01")]
+        [CheckExecutor("SFT_01", DisplayName = "Startup Items", Description = "Count boot startup items from registry", DefaultCategory = "HwSwFwCheck")]
         private static void CheckStartupItems(DiagnosticItem item)
         {
             try
@@ -366,7 +366,7 @@ namespace SelfDiagnostic.Services.Executors.System
             }
         }
 
-        [CheckExecutor("SFT_02")]
+        [CheckExecutor("SFT_02", DisplayName = "Installed Programs", Description = "Count installed programs from registry Uninstall key", DefaultCategory = "HwSwFwCheck")]
         private static void CheckInstalledPrograms(DiagnosticItem item)
         {
             try
@@ -388,7 +388,7 @@ namespace SelfDiagnostic.Services.Executors.System
             }
         }
 
-        [CheckExecutor("SFT_03")]
+        [CheckExecutor("SFT_03", DisplayName = "COM / Serial Ports", Description = "Enumerate available serial (COM) ports", DefaultCategory = "HwSwFwCheck")]
         private static void CheckComPorts(DiagnosticItem item)
         {
             var ports = SerialPort.GetPortNames();
@@ -404,7 +404,7 @@ namespace SelfDiagnostic.Services.Executors.System
             item.Score = 100;
         }
 
-        [CheckExecutor("PRF_01")]
+        [CheckExecutor("PRF_01", DisplayName = "CPU Usage", Description = "Check current CPU load percentage via WMI", DefaultCategory = "OpticalPerformanceCheck")]
         private static void CheckCpu(DiagnosticItem item)
         {
             try
@@ -448,7 +448,7 @@ namespace SelfDiagnostic.Services.Executors.System
             }
         }
 
-        [CheckExecutor("PRF_02")]
+        [CheckExecutor("PRF_02", DisplayName = "Memory Usage", Description = "Check physical memory usage percentage via WMI", DefaultCategory = "OpticalPerformanceCheck")]
         private static void CheckMemory(DiagnosticItem item)
         {
             try
@@ -496,7 +496,7 @@ namespace SelfDiagnostic.Services.Executors.System
             }
         }
 
-        [CheckExecutor("PRF_03")]
+        [CheckExecutor("PRF_03", DisplayName = "Running Processes", Description = "Count running processes and warn if excessive", DefaultCategory = "OpticalPerformanceCheck")]
         private static void CheckProcesses(DiagnosticItem item)
         {
             var procs = Process.GetProcesses();

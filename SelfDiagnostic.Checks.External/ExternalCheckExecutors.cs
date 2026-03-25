@@ -10,7 +10,7 @@ namespace SelfDiagnostic.Services.Executors.External
     {
         private static readonly ExternalDependencyHttpChecker ExternalChecker = new ExternalDependencyHttpChecker();
 
-        [CheckExecutor(ExternalDependencyIds.Mes)]
+        [CheckExecutor(ExternalDependencyIds.Mes, DisplayName = "MES API Connectivity", Description = "HTTP POST to MES endpoint and verify response", DefaultCategory = "StationCheck")]
         private static Task<CheckExecutionOutcome> CheckExternalMesAsync(
             DiagnosticItem item,
             RunbookStepDefinition step,
@@ -20,7 +20,7 @@ namespace SelfDiagnostic.Services.Executors.External
             return ExecuteExternalAsync(ExternalDependencyIds.Mes, item, step, runContext, ct);
         }
 
-        [CheckExecutor(ExternalDependencyIds.Tms)]
+        [CheckExecutor(ExternalDependencyIds.Tms, DisplayName = "TMS API Connectivity", Description = "HTTP POST to TMS endpoint and verify response", DefaultCategory = "StationCheck")]
         private static Task<CheckExecutionOutcome> CheckExternalTmsAsync(
             DiagnosticItem item,
             RunbookStepDefinition step,
@@ -30,7 +30,7 @@ namespace SelfDiagnostic.Services.Executors.External
             return ExecuteExternalAsync(ExternalDependencyIds.Tms, item, step, runContext, ct);
         }
 
-        [CheckExecutor(ExternalDependencyIds.Tas)]
+        [CheckExecutor(ExternalDependencyIds.Tas, DisplayName = "TAS AOI API Connectivity", Description = "HTTP POST to TAS AOI endpoint and verify response", DefaultCategory = "StationCheck")]
         private static Task<CheckExecutionOutcome> CheckExternalTasAsync(
             DiagnosticItem item,
             RunbookStepDefinition step,
@@ -40,7 +40,7 @@ namespace SelfDiagnostic.Services.Executors.External
             return ExecuteExternalAsync(ExternalDependencyIds.Tas, item, step, runContext, ct);
         }
 
-        [CheckExecutor(ExternalDependencyIds.FileServer)]
+        [CheckExecutor(ExternalDependencyIds.FileServer, DisplayName = "File Server Connectivity", Description = "HTTP POST to File Server endpoint and verify response", DefaultCategory = "StationCheck")]
         private static Task<CheckExecutionOutcome> CheckExternalFileServerAsync(
             DiagnosticItem item,
             RunbookStepDefinition step,
@@ -50,7 +50,7 @@ namespace SelfDiagnostic.Services.Executors.External
             return ExecuteExternalAsync(ExternalDependencyIds.FileServer, item, step, runContext, ct);
         }
 
-        [CheckExecutor(ExternalDependencyIds.Lan)]
+        [CheckExecutor(ExternalDependencyIds.Lan, DisplayName = "LAN Gateway Connectivity", Description = "HTTP POST to LAN gateway endpoint and verify response", DefaultCategory = "StationCheck")]
         private static Task<CheckExecutionOutcome> CheckExternalLanAsync(
             DiagnosticItem item,
             RunbookStepDefinition step,
