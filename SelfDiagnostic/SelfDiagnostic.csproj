@@ -50,9 +50,6 @@
   </ItemGroup>
   <!-- ============================================================ -->
   <!--  DevExpress v19.2 References                                 -->
-  <!--  Assemblies resolved from GAC or DevExpress install folder.  -->
-  <!--  If not in GAC, add HintPath per your DevExpress install:    -->
-  <!--  <HintPath>C:\Program Files (x86)\DevExpress 19.2\...dll</HintPath> -->
   <!-- ============================================================ -->
   <ItemGroup>
     <Reference Include="DevExpress.Data.v19.2" />
@@ -70,24 +67,13 @@
     </PackageReference>
   </ItemGroup>
   <!-- ============================================================ -->
-  <!--  Models                                                      -->
+  <!--  Project References                                          -->
   <!-- ============================================================ -->
   <ItemGroup>
-    <Compile Include="Models\CheckEnums.cs" />
-    <Compile Include="Models\DiagnosticItem.cs" />
-    <Compile Include="Models\DiagnosticReportModels.cs" />
-    <Compile Include="Models\ExternalDependencyModels.cs" />
-    <Compile Include="Models\MimsMessageModels.cs" />
-    <Compile Include="Models\RunbookModels.cs" />
-    <Compile Include="Models\TpConnectivityModels.cs" />
-  </ItemGroup>
-  <!-- ============================================================ -->
-  <!--  Services / Abstractions                                     -->
-  <!-- ============================================================ -->
-  <ItemGroup>
-    <Compile Include="Services\Abstractions\CheckExecutorAttribute.cs" />
-    <Compile Include="Services\Abstractions\ICheckExecutor.cs" />
-    <Compile Include="Services\Abstractions\IExternalSystemClient.cs" />
+    <ProjectReference Include="..\SelfDiagnostic.Abstractions\SelfDiagnostic.Abstractions.csproj">
+      <Project>{B0000001-0000-0000-0000-000000000001}</Project>
+      <Name>SelfDiagnostic.Abstractions</Name>
+    </ProjectReference>
   </ItemGroup>
   <!-- ============================================================ -->
   <!--  Services / Core                                             -->
@@ -95,8 +81,6 @@
   <ItemGroup>
     <Compile Include="Services\CheckExecutorRegistry.cs" />
     <Compile Include="Services\DiagnosticEngine.cs" />
-    <Compile Include="Services\ExternalDependencyHttpChecker.cs" />
-    <Compile Include="Services\LanguageService.cs" />
     <Compile Include="Services\MimsConfigXmlParser.cs" />
     <Compile Include="Services\MimsGrpcClient.cs" />
     <Compile Include="Services\MimsPowerSupplyParser.cs" />
@@ -107,27 +91,6 @@
     <Compile Include="Services\RunbookFileService.cs" />
     <Compile Include="Services\RunbookProvider.cs" />
     <Compile Include="Services\TpConnectivityInspector.cs" />
-  </ItemGroup>
-  <!-- ============================================================ -->
-  <!--  Services / Checkers                                         -->
-  <!-- ============================================================ -->
-  <ItemGroup>
-    <Compile Include="Services\DefaultInfoAndLutChecker.cs" />
-    <Compile Include="Services\DeviceVersionComplianceChecker.cs" />
-    <Compile Include="Services\HwStatusGroupedChecker.cs" />
-    <Compile Include="Services\HwSwFwConfigIntegrityChecker.cs" />
-    <Compile Include="Services\OpticalPathResidualRiskChecker.cs" />
-    <Compile Include="Services\PowerSupplyQualityChecker.cs" />
-    <Compile Include="Services\StationCapabilityComplianceChecker.cs" />
-  </ItemGroup>
-  <!-- ============================================================ -->
-  <!--  Services / Executors                                        -->
-  <!-- ============================================================ -->
-  <ItemGroup>
-    <Compile Include="Services\Executors\External\ExternalCheckExecutors.cs" />
-    <Compile Include="Services\Executors\Network\NetworkCheckExecutors.cs" />
-    <Compile Include="Services\Executors\System\SystemCheckExecutors.cs" />
-    <Compile Include="Services\Executors\Tp\TpCheckExecutors.cs" />
   </ItemGroup>
   <!-- ============================================================ -->
   <!--  UI                                                          -->
@@ -152,17 +115,6 @@
   <!-- ============================================================ -->
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <!-- ============================================================ -->
-  <!--  Content / Resources                                         -->
-  <!-- ============================================================ -->
-  <ItemGroup>
-    <Content Include="i18n\strings.zh-CN.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="i18n\strings.en-US.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <!-- ============================================================ -->
   <!--  Post-build: copy RunBook config from mockTool               -->

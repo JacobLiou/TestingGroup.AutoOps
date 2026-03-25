@@ -59,7 +59,7 @@ namespace SelfDiagnostic.Services
             if (executor == null)
             {
                 item.Status = CheckStatus.Warning;
-                item.Detail = LocF("Loc.Diag.UnregisteredCheck", "未注册的检查项: {0}", step.CheckId);
+                item.Detail = string.Format("Unregistered check: {0}", step.CheckId);
                 item.Score = 95;
                 return new CheckExecutionOutcome { Success = false };
             }
@@ -78,7 +78,7 @@ namespace SelfDiagnostic.Services
                 catch (OperationCanceledException) when (!ct.IsCancellationRequested)
                 {
                     item.Status = CheckStatus.Fail;
-                    item.Detail = LocF("Loc.Diag.Timeout", "检查超时（>{0}ms）", step.TimeoutMs);
+                    item.Detail = string.Format("Check timeout (>{0}ms)", step.TimeoutMs);
                     item.Score = 60;
                     return new CheckExecutionOutcome { Success = false };
                 }
@@ -89,7 +89,7 @@ namespace SelfDiagnostic.Services
                 catch (Exception ex)
                 {
                     item.Status = CheckStatus.Warning;
-                    item.Detail = LocF("Loc.Diag.Exception", "检查时发生异常: {0}", ex.Message);
+                    item.Detail = string.Format("Check exception: {0}", ex.Message);
                     item.Score = 95;
                     return new CheckExecutionOutcome { Success = false };
                 }
@@ -209,11 +209,6 @@ namespace SelfDiagnostic.Services
             {
                 return ex.Types.Where(t => t != null);
             }
-        }
-
-        private static string LocF(string key, string fallbackFormat, params object[] args)
-        {
-            return LanguageService.Instance.Format(key, fallbackFormat, args);
         }
 
         private static CheckCategory ParseCategory(string category)

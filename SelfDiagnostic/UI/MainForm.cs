@@ -1,6 +1,5 @@
 using System.Drawing;
 using DevExpress.XtraEditors;
-using SelfDiagnostic.Services;
 
 namespace SelfDiagnostic.UI
 {
@@ -12,7 +11,7 @@ namespace SelfDiagnostic.UI
     {
         public MainForm()
         {
-            Text = LanguageService.Instance.Get("Loc.App.Title", "自动诊断工具 - SelfDiagnostic");
+            Text = "Auto Diagnostic Tool - SelfDiagnostic";
             Width = 1420;
             Height = 860;
             StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;

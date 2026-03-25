@@ -36,7 +36,7 @@ namespace SelfDiagnostic.UI
             Height = 860;
             MinimumSize = new Size(1000, 600);
             StartPosition = FormStartPosition.CenterParent;
-            Text = T("Loc.Editor.Title", "RunBook 快速编辑器");
+            Text = "RunBook Quick Editor";
             InitializeUi();
             LoadRunbook(runbookId);
         }
@@ -59,7 +59,7 @@ namespace SelfDiagnostic.UI
             Controls.Add(root);
 
             // =====================================================
-            //  Row 0 — Metadata bar
+            //  Row 0 - Metadata bar
             // =====================================================
             var metaBar = new TableLayoutPanel
             {
@@ -89,14 +89,14 @@ namespace SelfDiagnostic.UI
             metaBar.Controls.Add(ML("Version:"), 4, 0);
             _runbookVersionBox = new TextEdit { Dock = DockStyle.Fill };
             metaBar.Controls.Add(_runbookVersionBox, 5, 0);
-            metaBar.Controls.Add(ML("文件路径:"), 7, 0);
+            metaBar.Controls.Add(ML("File:"), 7, 0);
             _filePathLabel = new LabelControl { Dock = DockStyle.Fill, AutoSizeMode = LabelAutoSizeMode.None, AutoEllipsis = true };
             _filePathLabel.Appearance.ForeColor = Color.Gray;
             metaBar.Controls.Add(_filePathLabel, 8, 0);
             root.Controls.Add(metaBar, 0, 0);
 
             // =====================================================
-            //  Row 1 — Action toolbar
+            //  Row 1 - Action toolbar
             // =====================================================
             var toolbar = new FlowLayoutPanel
             {
@@ -106,29 +106,36 @@ namespace SelfDiagnostic.UI
                 Padding = new Padding(0, 2, 0, 2)
             };
 
-            AddBtn(toolbar, "加载 Default", Color.FromArgb(41, 128, 185), (s, e) => LoadRunbook("default"));
+            AddBtn(toolbar, "Load Default", Color.FromArgb(41, 128, 185), (s, e) => LoadRunbook("default"));
             AddSep(toolbar);
-            AddBtn(toolbar, "新增(末尾)", Color.FromArgb(46, 204, 113), (s, e) => AppendStep());
-            AddBtn(toolbar, "插入(当前行后)", Color.FromArgb(22, 160, 133), (s, e) => InsertStepAfterCurrent());
-            AddBtn(toolbar, "删除步骤", Color.FromArgb(231, 76, 60), (s, e) => RemoveSelectedStep());
-            AddBtn(toolbar, "上移 ▲", Color.FromArgb(52, 73, 94), (s, e) => MoveSelected(-1));
-            AddBtn(toolbar, "下移 ▼", Color.FromArgb(52, 73, 94), (s, e) => MoveSelected(1));
-            AddBtn(toolbar, "自动重连", Color.FromArgb(155, 89, 182), (s, e) => AutoRelink());
+            AddBtn(toolbar, "Append", Color.FromArgb(46, 204, 113), (s, e) => AppendStep());
+            AddBtn(toolbar, "Insert After", Color.FromArgb(22, 160, 133), (s, e) => InsertStepAfterCurrent());
+            AddBtn(toolbar, "Remove", Color.FromArgb(231, 76, 60), (s, e) => RemoveSelectedStep());
+            AddBtn(toolbar, "Move Up", Color.FromArgb(52, 73, 94), (s, e) => MoveSelected(-1));
+            AddBtn(toolbar, "Move Down", Color.FromArgb(52, 73, 94), (s, e) => MoveSelected(1));
             AddSep(toolbar);
-            AddBtn(toolbar, "保存", Color.FromArgb(230, 126, 34), (s, e) => SaveAs(_runbookIdBox.Text.Trim()));
+            AddBtn(toolbar, "Save", Color.FromArgb(230, 126, 34), (s, e) => SaveAs(_runbookIdBox.Text.Trim()));
 
-            var saveAsLabel = ML("另存为:");
-            saveAsLabel.Margin = new Padding(12, 8, 2, 0);
+            var saveAsLabel = new LabelControl
+            {
+                Text = "Save As:",
+                AutoSizeMode = LabelAutoSizeMode.None,
+                Width = 60,
+                Height = 30,
+                Margin = new Padding(12, 0, 2, 0),
+                Anchor = AnchorStyles.Left,
+                Appearance = { TextOptions = { VAlignment = DevExpress.Utils.VertAlignment.Center } }
+            };
             toolbar.Controls.Add(saveAsLabel);
-            _saveAsIdBox = new TextEdit { Width = 120, Height = 28 };
-            _saveAsIdBox.Properties.NullValuePrompt = "输入 RunBook Id";
+            _saveAsIdBox = new TextEdit { Width = 120, Height = 28, Margin = new Padding(0, 3, 0, 0) };
+            _saveAsIdBox.Properties.NullValuePrompt = "Enter RunBook Id";
             toolbar.Controls.Add(_saveAsIdBox);
-            AddBtn(toolbar, "另存模板", Color.FromArgb(142, 68, 173), (s, e) => SaveAs(_saveAsIdBox.Text.Trim()));
+            AddBtn(toolbar, "Save Template", Color.FromArgb(142, 68, 173), (s, e) => SaveAs(_saveAsIdBox.Text.Trim()));
 
             root.Controls.Add(toolbar, 0, 1);
 
             // =====================================================
-            //  Row 2 — Grid
+            //  Row 2 - Grid
             // =====================================================
             _gridControl = new GridControl { Dock = DockStyle.Fill };
             _gridView = new GridView(_gridControl);
@@ -182,14 +189,6 @@ namespace SelfDiagnostic.UI
             colTimeout.Width = 70;
             colTimeout.MinWidth = 50;
 
-            var colSucc = _gridView.Columns.AddVisible("NextOnSuccess", "OnSuccess");
-            colSucc.Width = 80;
-            colSucc.MinWidth = 50;
-
-            var colFail = _gridView.Columns.AddVisible("NextOnFailure", "OnFailure");
-            colFail.Width = 80;
-            colFail.MinWidth = 50;
-
             var colParams = _gridView.Columns.AddVisible("ParamsJson", "Params (JSON)");
             colParams.Width = 280;
             colParams.MinWidth = 100;
@@ -220,7 +219,7 @@ namespace SelfDiagnostic.UI
             root.Controls.Add(_gridControl, 0, 2);
 
             // =====================================================
-            //  Row 3 — Status bar
+            //  Row 3 - Status bar
             // =====================================================
             var statusBar = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(248, 248, 248) };
             _statusLabel = new LabelControl
@@ -243,7 +242,7 @@ namespace SelfDiagnostic.UI
 
             using (var dlg = new XtraForm())
             {
-                dlg.Text = "编辑 Params JSON — " + row.StepId;
+                dlg.Text = "Edit Params JSON - " + row.StepId;
                 dlg.Width = 600;
                 dlg.Height = 480;
                 dlg.MinimumSize = new Size(400, 300);
@@ -263,7 +262,7 @@ namespace SelfDiagnostic.UI
 
                 var hint = new LabelControl
                 {
-                    Text = "格式: { \"key1\": \"value1\", \"key2\": \"value2\" }",
+                    Text = "Format: { \"key1\": \"value1\", \"key2\": \"value2\" }",
                     Dock = DockStyle.Fill,
                     Appearance = { ForeColor = Color.Gray }
                 };
@@ -284,10 +283,10 @@ namespace SelfDiagnostic.UI
                     FlowDirection = FlowDirection.RightToLeft,
                     Padding = new Padding(0, 4, 0, 0)
                 };
-                var cancelBtn = new SimpleButton { Text = "取消", Width = 80, Height = 30, DialogResult = DialogResult.Cancel };
+                var cancelBtn = new SimpleButton { Text = "Cancel", Width = 80, Height = 30, DialogResult = DialogResult.Cancel };
                 var okBtn = new SimpleButton
                 {
-                    Text = "确定",
+                    Text = "OK",
                     Width = 80,
                     Height = 30,
                     Appearance = { BackColor = Color.FromArgb(41, 128, 185), ForeColor = Color.White, Options = { UseBackColor = true, UseForeColor = true } }
@@ -316,7 +315,7 @@ namespace SelfDiagnostic.UI
                     }
                     catch (Exception ex)
                     {
-                        errorLabel.Text = "JSON 无效: " + ex.Message;
+                        errorLabel.Text = "Invalid JSON: " + ex.Message;
                     }
                 };
 
@@ -350,8 +349,14 @@ namespace SelfDiagnostic.UI
                 Text = text,
                 AutoSizeMode = LabelAutoSizeMode.None,
                 Dock = DockStyle.Fill,
-                Padding = new Padding(2, 6, 2, 0),
-                Appearance = { TextOptions = { HAlignment = DevExpress.Utils.HorzAlignment.Far } }
+                Appearance =
+                {
+                    TextOptions =
+                    {
+                        HAlignment = DevExpress.Utils.HorzAlignment.Far,
+                        VAlignment = DevExpress.Utils.VertAlignment.Center
+                    }
+                }
             };
         }
 
@@ -394,11 +399,11 @@ namespace SelfDiagnostic.UI
                 {
                     _rows.Add(RunbookStepRow.FromDefinition(step));
                 }
-                SetStatus("已加载 RunBook: " + runbookId + " (" + runbook.Steps.Count + " 步骤)", Color.FromArgb(39, 174, 96));
+                SetStatus("Loaded RunBook: " + runbookId + " (" + runbook.Steps.Count + " steps)", Color.FromArgb(39, 174, 96));
             }
             catch (Exception ex)
             {
-                SetStatus("加载失败: " + ex.Message, Color.FromArgb(231, 76, 60));
+                SetStatus("Load failed: " + ex.Message, Color.FromArgb(231, 76, 60));
             }
         }
 
@@ -415,7 +420,7 @@ namespace SelfDiagnostic.UI
             {
                 StepId = "S" + (maxNum + 1).ToString("000"),
                 CheckId = DiagnosticEngine.GetRegisteredCheckIds().FirstOrDefault() ?? "SYS_01",
-                DisplayName = "新步骤",
+                DisplayName = "New Step",
                 Category = nameof(CheckCategory.SystemCheck),
                 TimeoutMs = 5000,
                 Enabled = true,
@@ -429,7 +434,7 @@ namespace SelfDiagnostic.UI
             _rows.Add(newRow);
             _gridView.FocusedRowHandle = _rows.Count - 1;
             _gridView.MakeRowVisible(_rows.Count - 1, false);
-            SetStatus("已新增步骤(末尾): " + newRow.StepId, Color.FromArgb(39, 174, 96));
+            SetStatus("Appended step: " + newRow.StepId, Color.FromArgb(39, 174, 96));
         }
 
         private void InsertStepAfterCurrent()
@@ -441,7 +446,7 @@ namespace SelfDiagnostic.UI
             _rows.Insert(insertIndex, newRow);
             _gridView.FocusedRowHandle = insertIndex;
             _gridView.MakeRowVisible(insertIndex, false);
-            SetStatus("已插入步骤(行 " + (insertIndex + 1) + "): " + newRow.StepId, Color.FromArgb(22, 160, 133));
+            SetStatus("Inserted step at row " + (insertIndex + 1) + ": " + newRow.StepId, Color.FromArgb(22, 160, 133));
         }
 
         private void RemoveSelectedStep()
@@ -450,7 +455,7 @@ namespace SelfDiagnostic.UI
             if (handle < 0 || handle >= _rows.Count) return;
             var stepId = _rows[handle].StepId;
             _rows.RemoveAt(handle);
-            SetStatus("已删除步骤: " + stepId, Color.FromArgb(231, 76, 60));
+            SetStatus("Removed step: " + stepId, Color.FromArgb(231, 76, 60));
         }
 
         private void MoveSelected(int delta)
@@ -466,24 +471,11 @@ namespace SelfDiagnostic.UI
             _gridView.FocusedRowHandle = target;
         }
 
-        private void AutoRelink()
-        {
-            CommitPendingEdits();
-            var defs = _rows.Select(r => r.ToDefinition()).ToList();
-            _runbookFileService.AutoRelinkByEnabledOrder(defs);
-            _rows.Clear();
-            foreach (var def in defs)
-            {
-                _rows.Add(RunbookStepRow.FromDefinition(def));
-            }
-            SetStatus("已按启用顺序自动重连 " + defs.Count(d => d.Enabled) + " 个步骤", Color.FromArgb(155, 89, 182));
-        }
-
         private void SaveAs(string runbookId)
         {
             if (string.IsNullOrWhiteSpace(runbookId))
             {
-                SetStatus("请输入有效 RunBook Id", Color.FromArgb(231, 76, 60));
+                SetStatus("Please enter a valid RunBook Id", Color.FromArgb(231, 76, 60));
                 return;
             }
 
@@ -496,7 +488,7 @@ namespace SelfDiagnostic.UI
                     row.ValidateJson();
                     if (!row.IsParamsJsonValid)
                     {
-                        SetStatus("ParamsJson 错误: " + row.StepId + " - " + row.ParamsJsonError, Color.FromArgb(231, 76, 60));
+                        SetStatus("ParamsJson error: " + row.StepId + " - " + row.ParamsJsonError, Color.FromArgb(231, 76, 60));
                         return;
                     }
                 }
@@ -514,13 +506,13 @@ namespace SelfDiagnostic.UI
 
                 var enabledCount = runbook.Steps.Count(st => st.Enabled);
                 var disabledCount = runbook.Steps.Count - enabledCount;
-                var msg = "保存成功: " + runbookId + " (" + enabledCount + " 启用, " + disabledCount + " 禁用)";
+                var msg = "Saved: " + runbookId + " (" + enabledCount + " enabled, " + disabledCount + " disabled)";
                 SetStatus(msg, Color.FromArgb(39, 174, 96));
                 RunbookSaved?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)
             {
-                SetStatus("保存失败: " + ex.Message, Color.FromArgb(231, 76, 60));
+                SetStatus("Save failed: " + ex.Message, Color.FromArgb(231, 76, 60));
             }
         }
 
@@ -535,11 +527,6 @@ namespace SelfDiagnostic.UI
             _statusLabel.Text = message;
             _statusLabel.Appearance.ForeColor = color;
         }
-
-        private static string T(string key, string fallback)
-        {
-            return LanguageService.Instance.Get(key, fallback);
-        }
     }
 
     public sealed class RunbookStepRow
@@ -550,8 +537,6 @@ namespace SelfDiagnostic.UI
         public string Category { get; set; } = nameof(CheckCategory.SystemCheck);
         public int TimeoutMs { get; set; } = 5000;
         public bool Enabled { get; set; } = true;
-        public string NextOnSuccess { get; set; } = string.Empty;
-        public string NextOnFailure { get; set; } = string.Empty;
         public string ParamsJson { get; set; } = "{}";
         public bool IsParamsJsonValid { get; private set; } = true;
         public string ParamsJsonError { get; private set; } = string.Empty;
@@ -566,8 +551,6 @@ namespace SelfDiagnostic.UI
                 Category = string.IsNullOrWhiteSpace(def.Category) ? nameof(CheckCategory.SystemCheck) : def.Category,
                 TimeoutMs = def.TimeoutMs,
                 Enabled = def.Enabled,
-                NextOnSuccess = def.NextOnSuccess,
-                NextOnFailure = def.NextOnFailure,
                 ParamsJson = JsonConvert.SerializeObject(def.Params, Formatting.Indented)
             };
         }
@@ -577,7 +560,7 @@ namespace SelfDiagnostic.UI
             ValidateJson();
             if (!IsParamsJsonValid)
             {
-                throw new InvalidOperationException("步骤 " + StepId + " 的 ParamsJson 非法: " + ParamsJsonError);
+                throw new InvalidOperationException("Step " + StepId + " has invalid ParamsJson: " + ParamsJsonError);
             }
 
             var paramMap = string.IsNullOrWhiteSpace(ParamsJson)
@@ -592,8 +575,6 @@ namespace SelfDiagnostic.UI
                 Category = string.IsNullOrWhiteSpace(Category) ? nameof(CheckCategory.SystemCheck) : Category.Trim(),
                 TimeoutMs = TimeoutMs <= 0 ? 5000 : TimeoutMs,
                 Enabled = Enabled,
-                NextOnSuccess = (NextOnSuccess ?? string.Empty).Trim(),
-                NextOnFailure = (NextOnFailure ?? string.Empty).Trim(),
                 Params = paramMap
             };
         }

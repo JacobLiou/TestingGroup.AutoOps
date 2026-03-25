@@ -35,8 +35,7 @@ namespace SelfDiagnostic.UI
         private readonly TpConnectivityInspector _tpConnectivityInspector = new TpConnectivityInspector();
 
         private readonly BindingList<DiagnosticItem> _diagnosticItems = new BindingList<DiagnosticItem>();
-        private readonly Dictionary<string, RunbookStepDefinition> _runbookStepsByStepId =
-            new Dictionary<string, RunbookStepDefinition>(StringComparer.OrdinalIgnoreCase);
+        private List<RunbookStepDefinition> _enabledSteps = new List<RunbookStepDefinition>();
         private readonly object _scanLock = new object();
 
         private const string DefaultRunbookFileId = "default";
@@ -54,7 +53,6 @@ namespace SelfDiagnostic.UI
         private LabelControl _summaryLabel;
         private LabelControl _scanProgressLabel;
         private LabelControl _currentScanLabel;
-        private ComboBoxEdit _languageCombo;
         private CheckEdit _autoScrollCheck;
         private SimpleButton _startButton;
         private SimpleButton _stopButton;
@@ -72,9 +70,7 @@ namespace SelfDiagnostic.UI
             _externalSystemClient = externalSystemClient
                 ?? new MimsGrpcClient(new MimsXmlBuilder());
             InitializeUi();
-            ApplyLanguage();
             ResetState();
-            LanguageService.Instance.LanguageChanged += OnLanguageChanged;
         }
 
         protected override void Dispose(bool disposing)
@@ -82,7 +78,6 @@ namespace SelfDiagnostic.UI
             if (disposing)
             {
                 _cts?.Cancel();
-                LanguageService.Instance.LanguageChanged -= OnLanguageChanged;
             }
             base.Dispose(disposing);
         }
@@ -111,10 +106,11 @@ namespace SelfDiagnostic.UI
             headerTable.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
 
             _scoreRing = new ScoreRingControl { Size = new Size(130, 130), Margin = new Padding(4) };
+            _scoreRing.Subtitle = "Overall Score";
             headerTable.Controls.Add(_scoreRing, 0, 0);
             headerTable.SetRowSpan(_scoreRing, 4);
 
-            // Row 0: RunbookLabel + Language combo
+            // Row 0: RunbookLabel
             var row0 = new FlowLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -122,21 +118,12 @@ namespace SelfDiagnostic.UI
                 WrapContents = false,
                 Margin = new Padding(0)
             };
-            _runbookLabel = new LabelControl { AutoSizeMode = LabelAutoSizeMode.None, Width = 160, Height = 22 };
+            _runbookLabel = new LabelControl { AutoSizeMode = LabelAutoSizeMode.None, Width = 260, Height = 22 };
             _runbookLabel.Appearance.Font = new Font(Font.FontFamily, 10f, FontStyle.Bold);
-            var langLabel = new LabelControl { Text = "语言", AutoSizeMode = LabelAutoSizeMode.None, Width = 36, Height = 22, Padding = new Padding(8, 4, 2, 0) };
-            _languageCombo = new ComboBoxEdit { Width = 90 };
-            _languageCombo.Properties.Items.AddRange(new[] { "中文", "English" });
-            _languageCombo.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
-            _languageCombo.SelectedIndexChanged += (s, e) =>
-            {
-                var code = _languageCombo.SelectedIndex == 1 ? LanguageService.EnUs : LanguageService.ZhCn;
-                LanguageService.Instance.SetLanguage(code);
-            };
-            row0.Controls.AddRange(new Control[] { _runbookLabel, langLabel, _languageCombo });
+            row0.Controls.Add(_runbookLabel);
             headerTable.Controls.Add(row0, 1, 0);
 
-            // Row 1: Action buttons + auto-scroll (fixed height, no AutoSize)
+            // Row 1: Action buttons + auto-scroll
             var btnRow = new FlowLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -145,19 +132,20 @@ namespace SelfDiagnostic.UI
                 Margin = new Padding(0),
                 Padding = new Padding(0, 2, 0, 2)
             };
-            _startButton = CreateButton("开始诊断", Color.FromArgb(41, 128, 185));
+            _startButton = CreateButton("Start Scan", Color.FromArgb(41, 128, 185));
             _startButton.Click += async (s, e) => await StartScanAsync();
-            _stopButton = CreateButton("停止", Color.FromArgb(192, 57, 43));
+            _stopButton = CreateButton("Stop", Color.FromArgb(192, 57, 43));
             _stopButton.Click += (s, e) => StopScan();
-            _fixAllButton = CreateButton("一键修复", Color.FromArgb(46, 204, 113));
+            _fixAllButton = CreateButton("Fix All", Color.FromArgb(46, 204, 113));
             _fixAllButton.Click += async (s, e) => await FixAllAsync();
-            _reportButton = CreateButton("上报 MIMS", Color.FromArgb(230, 126, 34));
+            _reportButton = CreateButton("Report to MIMS", Color.FromArgb(230, 126, 34));
             _reportButton.Click += async (s, e) => await SendToMimsCoreAsync("manual", CancellationToken.None);
-            _editorButton = CreateButton("RunBook 编辑器", Color.FromArgb(142, 68, 173));
+            _editorButton = CreateButton("RunBook Editor", Color.FromArgb(142, 68, 173));
             _editorButton.Click += (s, e) => OpenEditor();
-            _autoScrollCheck = new CheckEdit { Checked = true, Width = 200, Height = 34 };
+            _autoScrollCheck = new CheckEdit { Text = "Auto-follow current item", Checked = true, Width = 200, Height = 34 };
             btnRow.Controls.AddRange(new Control[] { _startButton, _stopButton, _fixAllButton, _reportButton, _editorButton, _autoScrollCheck });
             headerTable.Controls.Add(btnRow, 1, 1);
+            SetButtonsEnabled(false);
 
             // Row 2: Status label
             _statusLabel = new LabelControl { Dock = DockStyle.Fill, AutoSizeMode = LabelAutoSizeMode.None };
@@ -239,7 +227,6 @@ namespace SelfDiagnostic.UI
 
             // =====================================================
             //  Assemble: add Fill first, then Top panels last
-            //  (WinForms docks last-added Top controls topmost)
             // =====================================================
             Controls.Add(_gridControl);
             Controls.Add(scanBar);
@@ -289,53 +276,10 @@ namespace SelfDiagnostic.UI
             return btn;
         }
 
-        private void ApplyLanguage()
-        {
-            _startButton.Text = T("Loc.App.Start", "开始诊断");
-            _stopButton.Text = T("Loc.App.Stop", "停止");
-            _fixAllButton.Text = T("Loc.App.FixAll", "一键修复");
-            _reportButton.Text = T("Loc.App.Report", "上报 MIMS");
-            _editorButton.Text = T("Loc.App.Editor", "RunBook 编辑器");
-            _autoScrollCheck.Text = T("Loc.App.AutoScroll", "自动跟随当前项");
-            _scoreRing.Subtitle = T("Loc.App.OverallScore", "整体评分");
-
-            var runbookId = _activeRunbook?.Id ?? "default";
-            _runbookLabel.Text = T("Loc.App.Runbook", "RunBook") + ": " + runbookId;
-
-            var scannedCount = _diagnosticItems.Count(i =>
-                i.Status != CheckStatus.Pending && i.Status != CheckStatus.Scanning);
-            _scanProgressLabel.Text = TF("Loc.Main.ScannedProgress", "已扫描 {0} / {1} 项",
-                scannedCount, _diagnosticItems.Count);
-
-            _languageCombo.SelectedIndex =
-                LanguageService.Instance.CurrentLanguage == LanguageService.EnUs ? 1 : 0;
-
-            _gridView.RefreshData();
-        }
-
-        private void OnLanguageChanged(string lang)
-        {
-            if (InvokeRequired)
-            {
-                BeginInvoke(new Action(() => OnLanguageChanged(lang)));
-                return;
-            }
-
-            ApplyLanguage();
-            foreach (var item in _diagnosticItems)
-            {
-                item.RefreshLocalizedText();
-            }
-        }
-
         private void ResetState()
         {
             _activeRunbook = DiagnosticEngine.LoadRunbook();
-            _runbookStepsByStepId.Clear();
-            foreach (var step in _activeRunbook.Steps.Where(s => s.Enabled))
-            {
-                _runbookStepsByStepId[step.StepId] = step;
-            }
+            _enabledSteps = _activeRunbook.Steps.Where(s => s.Enabled).ToList();
 
             _diagnosticItems.Clear();
             foreach (var item in DiagnosticEngine.BuildCheckList(_activeRunbook))
@@ -347,13 +291,13 @@ namespace SelfDiagnostic.UI
             _warningCount = 0;
             _failCount = 0;
             _scoreRing.Score = 100;
-            _runbookLabel.Text = T("Loc.App.Runbook", "RunBook") + ": " + _activeRunbook.Id;
-            _statusLabel.Text = TF("Loc.Runtime.ClickRunbook", "点击\"开始诊断\"执行 RunBook：{0}", _activeRunbook.Id);
-            _externalConfigLabel.Text = TF("Loc.Runtime.ConfigUnavailable", "外部配置不可用: {0}", "未获取 MIMS 外部依赖配置");
-            _currentScanLabel.Text = T("Loc.Runtime.Ready", "就绪");
-            _summaryLabel.Text = TF("Loc.App.Summary", "通过 {0} | 风险 {1} | 异常 {2}",
+            _runbookLabel.Text = "RunBook: " + _activeRunbook.Id;
+            _statusLabel.Text = string.Format("Click \"Start Scan\" to run RunBook: {0}", _activeRunbook.Id);
+            _externalConfigLabel.Text = "Config unavailable: MIMS external dependency config not fetched";
+            _currentScanLabel.Text = "Ready";
+            _summaryLabel.Text = string.Format("Pass {0} | Warning {1} | Fail {2}",
                 _passCount, _warningCount, _failCount);
-            _scanProgressLabel.Text = TF("Loc.Main.ScannedProgress", "已扫描 {0} / {1} 项",
+            _scanProgressLabel.Text = string.Format("Scanned {0} / {1}",
                 0, _diagnosticItems.Count);
             _gridView.RefreshData();
         }
@@ -373,61 +317,47 @@ namespace SelfDiagnostic.UI
             SetButtonsEnabled(true);
             ResetState();
             var token = _cts.Token;
-            _statusLabel.Text = T("Loc.Runtime.Scanning", "正在扫描...");
+            _statusLabel.Text = "Scanning...";
 
             try
             {
-                _statusLabel.Text = T("Loc.Runtime.FetchMimsConfig", "正在向 MIMS 获取外部系统配置...");
+                _statusLabel.Text = "Fetching MIMS environment config...";
                 var runContext = await BuildRunContextAsync(token);
                 if (runContext.ExternalChecksEnabled)
                 {
-                    _externalConfigLabel.Text = TF("Loc.Runtime.ConfigSource", "外部配置来源: {0}", runContext.ConfigSource);
+                    _externalConfigLabel.Text = string.Format("Config source: {0}", runContext.ConfigSource);
                 }
                 else
                 {
-                    _externalConfigLabel.Text = TF("Loc.Runtime.ConfigUnavailable", "外部配置不可用: {0}", runContext.ConfigError);
-                    _statusLabel.Text = T("Loc.Runtime.ConfigFailed", "MIMS 配置获取失败，外部依赖项将标记为跳过");
+                    _externalConfigLabel.Text = string.Format("Config unavailable: {0}", runContext.ConfigError);
+                    _statusLabel.Text = "MIMS config unavailable. External checks will be skipped";
                 }
 
-                var currentStep = _activeRunbook?.Steps.FirstOrDefault(s => s.Enabled);
-                var stepGuard = 0;
-                var maxStepGuard = Math.Max(1, _runbookStepsByStepId.Count * 4);
-                while (currentStep != null && stepGuard < maxStepGuard && !token.IsCancellationRequested)
+                foreach (var currentStep in _enabledSteps)
                 {
+                    if (token.IsCancellationRequested) break;
+
                     var item = _diagnosticItems.FirstOrDefault(i =>
                         i.Id.Equals(currentStep.CheckId, StringComparison.OrdinalIgnoreCase));
-                    if (item == null) break;
+                    if (item == null) continue;
 
                     _currentScanLabel.Text = item.CategoryIcon + " " + item.Name;
                     SelectCurrentRow(item);
 
-                    var outcome = await DiagnosticEngine.RunCheckAsync(item, currentStep, runContext, token);
+                    await DiagnosticEngine.RunCheckAsync(item, currentStep, runContext, token);
                     _gridView.RefreshData();
                     RefreshCountersAndScore();
-
-                    var nextStepId = outcome.Success ? currentStep.NextOnSuccess : currentStep.NextOnFailure;
-                    if (string.IsNullOrWhiteSpace(nextStepId) ||
-                        !_runbookStepsByStepId.TryGetValue(nextStepId, out var next))
-                    {
-                        currentStep = null;
-                    }
-                    else
-                    {
-                        currentStep = next;
-                    }
-                    stepGuard++;
                 }
 
-                _currentScanLabel.Text = T("Loc.Runtime.ScanComplete", "扫描完成");
-                _statusLabel.Text = TF("Loc.Runtime.Summary",
-                    "体检完成！通过 {0} 项 | 风险 {1} 项 | 异常 {2} 项",
+                _currentScanLabel.Text = "Scan complete";
+                _statusLabel.Text = string.Format("Finished! Pass {0} | Warning {1} | Fail {2}",
                     _passCount, _warningCount, _failCount);
                 await SendToMimsCoreAsync("auto", CancellationToken.None);
             }
             catch (OperationCanceledException)
             {
-                _statusLabel.Text = T("Loc.Runtime.ScanCancelled", "扫描已取消");
-                _currentScanLabel.Text = T("Loc.Runtime.Cancelled", "已取消");
+                _statusLabel.Text = "Scan cancelled";
+                _currentScanLabel.Text = "Cancelled";
             }
             finally
             {
@@ -446,19 +376,19 @@ namespace SelfDiagnostic.UI
             if (_cts == null || _cts.IsCancellationRequested) return;
 
             var result = XtraMessageBox.Show(
-                T("Loc.Runtime.StopConfirm", "确定要停止当前扫描吗？"),
-                T("Loc.Runtime.StopTitle", "停止扫描"),
+                "Are you sure you want to stop the current scan?",
+                "Stop Scan",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question);
 
             if (result != DialogResult.Yes) return;
 
             _cts.Cancel();
-            _statusLabel.Text = T("Loc.Runtime.Stopping", "正在停止...");
+            _statusLabel.Text = "Stopping...";
 
             var resetResult = XtraMessageBox.Show(
-                T("Loc.Runtime.ResetConfirm", "是否要重置诊断表格？\n选择\"是\"将清空当前结果并恢复初始状态。"),
-                T("Loc.Runtime.ResetTitle", "重置表格"),
+                "Do you want to reset the diagnostic table?\nChoose \"Yes\" to clear results and restore initial state.",
+                "Reset Table",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question);
 
@@ -479,12 +409,12 @@ namespace SelfDiagnostic.UI
                     await Task.Delay(130);
                     item.Status = CheckStatus.Fixed;
                     item.Score = 100;
-                    item.Detail += " [已修复]";
+                    item.Detail += " [Fixed]";
                 }
             }
 
             RefreshCountersAndScore();
-            _statusLabel.Text = TF("Loc.Runtime.FixDone", "修复完成！健康评分: {0}", _scoreRing.Score);
+            _statusLabel.Text = string.Format("Fix complete! Health score: {0}", _scoreRing.Score);
         }
 
         private async Task SendToMimsCoreAsync(string trigger, CancellationToken cancellationToken)
@@ -506,21 +436,21 @@ namespace SelfDiagnostic.UI
                 if (result.Success)
                 {
                     _statusLabel.Text = trigger == "auto"
-                        ? TF("Loc.Runtime.AutoReportSuccess", "{0} | 已自动上报 MIMS", _statusLabel.Text)
-                        : TF("Loc.Runtime.ManualReportSuccess", "手动上报成功: {0} ({1})", result.Code, result.Endpoint);
+                        ? string.Format("{0} | Auto-reported to MIMS", _statusLabel.Text)
+                        : string.Format("Manual report success: {0} ({1})", result.Code, result.Endpoint);
                 }
                 else
                 {
                     _statusLabel.Text = trigger == "auto"
-                        ? TF("Loc.Runtime.AutoReportFailed", "{0} | MIMS 自动上报失败: {1}", _statusLabel.Text, result.Code)
-                        : TF("Loc.Runtime.ManualReportFailed", "手动上报失败: {0} - {1}", result.Code, result.Message);
+                        ? string.Format("{0} | Auto report failed: {1}", _statusLabel.Text, result.Code)
+                        : string.Format("Manual report failed: {0} - {1}", result.Code, result.Message);
                 }
             }
             catch (Exception ex)
             {
                 _statusLabel.Text = trigger == "auto"
-                    ? TF("Loc.Runtime.AutoReportException", "{0} | MIMS 自动上报异常: {1}", _statusLabel.Text, ex.Message)
-                    : TF("Loc.Runtime.ManualReportException", "手动上报异常: {0}", ex.Message);
+                    ? string.Format("{0} | Auto report exception: {1}", _statusLabel.Text, ex.Message)
+                    : string.Format("Manual report exception: {0}", ex.Message);
             }
         }
 
@@ -564,9 +494,9 @@ namespace SelfDiagnostic.UI
                 .ToList();
             var score = scored.Count == 0 ? 100 : scored.Sum(i => i.Score) / scored.Count;
             _scoreRing.Score = score;
-            _summaryLabel.Text = TF("Loc.App.Summary", "通过 {0} | 风险 {1} | 异常 {2}",
+            _summaryLabel.Text = string.Format("Pass {0} | Warning {1} | Fail {2}",
                 _passCount, _warningCount, _failCount);
-            _scanProgressLabel.Text = TF("Loc.Main.ScannedProgress", "已扫描 {0} / {1} 项",
+            _scanProgressLabel.Text = string.Format("Scanned {0} / {1}",
                 scored.Count, _diagnosticItems.Count);
         }
 
@@ -599,16 +529,5 @@ namespace SelfDiagnostic.UI
                 editor.ShowDialog(FindForm());
             }
         }
-
-        private static string T(string key, string fallback)
-        {
-            return LanguageService.Instance.Get(key, fallback);
-        }
-
-        private static string TF(string key, string fallback, params object[] args)
-        {
-            return LanguageService.Instance.Format(key, fallback, args);
-        }
-
     }
 }
