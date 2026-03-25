@@ -10,6 +10,7 @@ namespace SelfDiagnostic.UI.Controls
         private readonly Timer _animationTimer;
         private int _targetScore;
         private int _displayScore;
+        private string _subtitle = "整体评分";
 
         public int Score
         {
@@ -22,6 +23,12 @@ namespace SelfDiagnostic.UI.Controls
                     _animationTimer.Start();
                 }
             }
+        }
+
+        public string Subtitle
+        {
+            get => _subtitle;
+            set { _subtitle = value ?? string.Empty; Invalidate(); }
         }
 
         public ScoreRingControl()
@@ -61,17 +68,17 @@ namespace SelfDiagnostic.UI.Controls
             }
 
             using (var scoreFont = new Font(Font.FontFamily, 22, FontStyle.Bold))
-            using (var subFont = new Font(Font.FontFamily, 9, FontStyle.Regular))
+            using (var subFont = new Font(Font.FontFamily, 8, FontStyle.Regular))
             {
                 var scoreText = _displayScore.ToString();
                 var scoreSize = g.MeasureString(scoreText, scoreFont);
-                var subText = "SCORE";
+                var subText = _subtitle;
                 var subSize = g.MeasureString(subText, subFont);
 
                 g.DrawString(scoreText, scoreFont, Brushes.Black,
-                    (Width - scoreSize.Width) / 2f, (Height - scoreSize.Height) / 2f - 8);
+                    (Width - scoreSize.Width) / 2f, (Height - scoreSize.Height) / 2f - 10);
                 g.DrawString(subText, subFont, Brushes.Gray,
-                    (Width - subSize.Width) / 2f, (Height - subSize.Height) / 2f + 22);
+                    (Width - subSize.Width) / 2f, (Height - subSize.Height) / 2f + 20);
             }
         }
 

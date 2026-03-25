@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -15,7 +14,6 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
-
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
@@ -26,7 +24,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
@@ -36,7 +33,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-
   <!-- ============================================================ -->
   <!--  Framework References                                        -->
   <!-- ============================================================ -->
@@ -52,7 +48,6 @@
     <Reference Include="System.Xml.Linq" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
-
   <!-- ============================================================ -->
   <!--  DevExpress v19.2 References                                 -->
   <!--  Assemblies resolved from GAC or DevExpress install folder.  -->
@@ -66,7 +61,6 @@
     <Reference Include="DevExpress.XtraGrid.v19.2" />
     <Reference Include="DevExpress.XtraLayout.v19.2" />
   </ItemGroup>
-
   <!-- ============================================================ -->
   <!--  NuGet Package References                                    -->
   <!-- ============================================================ -->
@@ -75,7 +69,6 @@
       <Version>13.0.3</Version>
     </PackageReference>
   </ItemGroup>
-
   <!-- ============================================================ -->
   <!--  Models                                                      -->
   <!-- ============================================================ -->
@@ -88,7 +81,6 @@
     <Compile Include="Models\RunbookModels.cs" />
     <Compile Include="Models\TpConnectivityModels.cs" />
   </ItemGroup>
-
   <!-- ============================================================ -->
   <!--  Services / Abstractions                                     -->
   <!-- ============================================================ -->
@@ -97,7 +89,6 @@
     <Compile Include="Services\Abstractions\ICheckExecutor.cs" />
     <Compile Include="Services\Abstractions\IExternalSystemClient.cs" />
   </ItemGroup>
-
   <!-- ============================================================ -->
   <!--  Services / Core                                             -->
   <!-- ============================================================ -->
@@ -117,7 +108,6 @@
     <Compile Include="Services\RunbookProvider.cs" />
     <Compile Include="Services\TpConnectivityInspector.cs" />
   </ItemGroup>
-
   <!-- ============================================================ -->
   <!--  Services / Checkers                                         -->
   <!-- ============================================================ -->
@@ -130,7 +120,6 @@
     <Compile Include="Services\PowerSupplyQualityChecker.cs" />
     <Compile Include="Services\StationCapabilityComplianceChecker.cs" />
   </ItemGroup>
-
   <!-- ============================================================ -->
   <!--  Services / Executors                                        -->
   <!-- ============================================================ -->
@@ -140,25 +129,30 @@
     <Compile Include="Services\Executors\System\SystemCheckExecutors.cs" />
     <Compile Include="Services\Executors\Tp\TpCheckExecutors.cs" />
   </ItemGroup>
-
   <!-- ============================================================ -->
   <!--  UI                                                          -->
   <!-- ============================================================ -->
   <ItemGroup>
     <Compile Include="UI\Program.cs" />
-    <Compile Include="UI\MainForm.cs" />
-    <Compile Include="UI\DiagnosticMainControl.cs" />
-    <Compile Include="UI\RunbookEditorForm.cs" />
-    <Compile Include="UI\Controls\ScoreRingControl.cs" />
+    <Compile Include="UI\MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\DiagnosticMainControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\RunbookEditorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Controls\ScoreRingControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
   </ItemGroup>
-
   <!-- ============================================================ -->
   <!--  Properties                                                  -->
   <!-- ============================================================ -->
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-
   <!-- ============================================================ -->
   <!--  Content / Resources                                         -->
   <!-- ============================================================ -->
@@ -170,18 +164,14 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-
   <!-- ============================================================ -->
   <!--  Post-build: copy RunBook config from mockTool               -->
   <!-- ============================================================ -->
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-
   <Target Name="CopyMockToolConfig" AfterTargets="Build">
     <ItemGroup>
       <MockToolConfigFiles Include="$(ProjectDir)..\mockTool\config\**\*.*" />
     </ItemGroup>
-    <Copy SourceFiles="@(MockToolConfigFiles)"
-          DestinationFiles="@(MockToolConfigFiles->'$(OutputPath)config\%(RecursiveDir)%(Filename)%(Extension)')"
-          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(MockToolConfigFiles)" DestinationFiles="@(MockToolConfigFiles->'$(OutputPath)config\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
   </Target>
 </Project>

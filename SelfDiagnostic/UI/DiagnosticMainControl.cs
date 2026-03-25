@@ -39,8 +39,11 @@ namespace SelfDiagnostic.UI
             new Dictionary<string, RunbookStepDefinition>(StringComparer.OrdinalIgnoreCase);
         private readonly object _scanLock = new object();
 
+        private const string DefaultRunbookFileId = "default";
+
         private CancellationTokenSource _cts;
         private RunbookDefinition _activeRunbook;
+        private string _activeRunbookFileId = DefaultRunbookFileId;
         private int _passCount;
         private int _warningCount;
         private int _failCount;
@@ -144,7 +147,7 @@ namespace SelfDiagnostic.UI
             };
             _startButton = CreateButton("开始诊断", Color.FromArgb(41, 128, 185));
             _startButton.Click += async (s, e) => await StartScanAsync();
-            _stopButton = CreateButton("停止", Color.FromArgb(149, 165, 166));
+            _stopButton = CreateButton("停止", Color.FromArgb(192, 57, 43));
             _stopButton.Click += (s, e) => StopScan();
             _fixAllButton = CreateButton("一键修复", Color.FromArgb(46, 204, 113));
             _fixAllButton.Click += async (s, e) => await FixAllAsync();
@@ -152,7 +155,7 @@ namespace SelfDiagnostic.UI
             _reportButton.Click += async (s, e) => await SendToMimsCoreAsync("manual", CancellationToken.None);
             _editorButton = CreateButton("RunBook 编辑器", Color.FromArgb(142, 68, 173));
             _editorButton.Click += (s, e) => OpenEditor();
-            _autoScrollCheck = new CheckEdit { Checked = true, Width = 140, Height = 34 };
+            _autoScrollCheck = new CheckEdit { Checked = true, Width = 200, Height = 34 };
             btnRow.Controls.AddRange(new Control[] { _startButton, _stopButton, _fixAllButton, _reportButton, _editorButton, _autoScrollCheck });
             headerTable.Controls.Add(btnRow, 1, 1);
 
@@ -294,6 +297,7 @@ namespace SelfDiagnostic.UI
             _reportButton.Text = T("Loc.App.Report", "上报 MIMS");
             _editorButton.Text = T("Loc.App.Editor", "RunBook 编辑器");
             _autoScrollCheck.Text = T("Loc.App.AutoScroll", "自动跟随当前项");
+            _scoreRing.Subtitle = T("Loc.App.OverallScore", "整体评分");
 
             var runbookId = _activeRunbook?.Id ?? "default";
             _runbookLabel.Text = T("Loc.App.Runbook", "RunBook") + ": " + runbookId;
@@ -354,12 +358,15 @@ namespace SelfDiagnostic.UI
             _gridView.RefreshData();
         }
 
+        private bool _isScanning;
+
         private async Task StartScanAsync()
         {
             lock (_scanLock)
             {
-                if (_cts != null && !_cts.IsCancellationRequested)
+                if (_isScanning)
                     return;
+                _isScanning = true;
                 _cts = new CancellationTokenSource();
             }
 
@@ -424,13 +431,41 @@ namespace SelfDiagnostic.UI
             }
             finally
             {
+                lock (_scanLock)
+                {
+                    _isScanning = false;
+                    _cts?.Dispose();
+                    _cts = null;
+                }
                 SetButtonsEnabled(false);
             }
         }
 
         private void StopScan()
         {
-            _cts?.Cancel();
+            if (_cts == null || _cts.IsCancellationRequested) return;
+
+            var result = XtraMessageBox.Show(
+                T("Loc.Runtime.StopConfirm", "确定要停止当前扫描吗？"),
+                T("Loc.Runtime.StopTitle", "停止扫描"),
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (result != DialogResult.Yes) return;
+
+            _cts.Cancel();
+            _statusLabel.Text = T("Loc.Runtime.Stopping", "正在停止...");
+
+            var resetResult = XtraMessageBox.Show(
+                T("Loc.Runtime.ResetConfirm", "是否要重置诊断表格？\n选择\"是\"将清空当前结果并恢复初始状态。"),
+                T("Loc.Runtime.ResetTitle", "重置表格"),
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (resetResult == DialogResult.Yes)
+            {
+                ResetState();
+            }
         }
 
         private async Task FixAllAsync()
@@ -558,7 +593,7 @@ namespace SelfDiagnostic.UI
 
         private void OpenEditor()
         {
-            using (var editor = new RunbookEditorForm(_activeRunbook?.Id ?? "default"))
+            using (var editor = new RunbookEditorForm(_activeRunbookFileId))
             {
                 editor.RunbookSaved += (s, e) => ResetState();
                 editor.ShowDialog(FindForm());

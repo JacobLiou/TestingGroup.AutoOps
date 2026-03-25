@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
+using DevExpress.XtraEditors.Repository;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Views.Grid;
 using Newtonsoft.Json;
@@ -25,13 +26,15 @@ namespace SelfDiagnostic.UI
         private TextEdit _runbookVersionBox;
         private TextEdit _saveAsIdBox;
         private LabelControl _statusLabel;
+        private LabelControl _filePathLabel;
 
         public event EventHandler RunbookSaved;
 
         public RunbookEditorForm(string runbookId = "default")
         {
-            Width = 1320;
-            Height = 800;
+            Width = 1400;
+            Height = 860;
+            MinimumSize = new Size(1000, 600);
             StartPosition = FormStartPosition.CenterParent;
             Text = T("Loc.Editor.Title", "RunBook 快速编辑器");
             InitializeUi();
@@ -42,49 +45,91 @@ namespace SelfDiagnostic.UI
         {
             SuspendLayout();
 
-            var rootPanel = new TableLayoutPanel
+            var root = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
                 ColumnCount = 1,
-                RowCount = 3,
+                RowCount = 4,
                 Padding = new Padding(10)
             };
-            rootPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 80));
-            rootPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-            rootPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 36));
-            Controls.Add(rootPanel);
+            root.RowStyles.Add(new RowStyle(SizeType.Absolute, 36F));
+            root.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));
+            root.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            root.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));
+            Controls.Add(root);
 
-            // -- Top toolbar --
-            var toolbar = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoScroll = true, WrapContents = true };
+            // =====================================================
+            //  Row 0 — Metadata bar
+            // =====================================================
+            var metaBar = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                ColumnCount = 9,
+                RowCount = 1,
+                Margin = new Padding(0, 0, 0, 4)
+            };
+            metaBar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 26F));
+            metaBar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120F));
+            metaBar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 36F));
+            metaBar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 220F));
+            metaBar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 52F));
+            metaBar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 80F));
+            metaBar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 10F));
+            metaBar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 62F));
+            metaBar.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
 
-            toolbar.Controls.Add(MakeLabel("Id:"));
-            _runbookIdBox = new TextEdit { Width = 100 };
-            toolbar.Controls.Add(_runbookIdBox);
+            metaBar.Controls.Add(ML("Id:"), 0, 0);
+            _runbookIdBox = new TextEdit { Dock = DockStyle.Fill };
+            _runbookIdBox.Properties.ReadOnly = true;
+            _runbookIdBox.Properties.Appearance.BackColor = Color.FromArgb(245, 245, 245);
+            metaBar.Controls.Add(_runbookIdBox, 1, 0);
+            metaBar.Controls.Add(ML("Title:"), 2, 0);
+            _runbookTitleBox = new TextEdit { Dock = DockStyle.Fill };
+            metaBar.Controls.Add(_runbookTitleBox, 3, 0);
+            metaBar.Controls.Add(ML("Version:"), 4, 0);
+            _runbookVersionBox = new TextEdit { Dock = DockStyle.Fill };
+            metaBar.Controls.Add(_runbookVersionBox, 5, 0);
+            metaBar.Controls.Add(ML("文件路径:"), 7, 0);
+            _filePathLabel = new LabelControl { Dock = DockStyle.Fill, AutoSizeMode = LabelAutoSizeMode.None, AutoEllipsis = true };
+            _filePathLabel.Appearance.ForeColor = Color.Gray;
+            metaBar.Controls.Add(_filePathLabel, 8, 0);
+            root.Controls.Add(metaBar, 0, 0);
 
-            toolbar.Controls.Add(MakeLabel("Title:"));
-            _runbookTitleBox = new TextEdit { Width = 180 };
-            toolbar.Controls.Add(_runbookTitleBox);
+            // =====================================================
+            //  Row 1 — Action toolbar
+            // =====================================================
+            var toolbar = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                FlowDirection = FlowDirection.LeftToRight,
+                WrapContents = false,
+                Padding = new Padding(0, 2, 0, 2)
+            };
 
-            toolbar.Controls.Add(MakeLabel("Version:"));
-            _runbookVersionBox = new TextEdit { Width = 80 };
-            toolbar.Controls.Add(_runbookVersionBox);
+            AddBtn(toolbar, "加载 Default", Color.FromArgb(41, 128, 185), (s, e) => LoadRunbook("default"));
+            AddSep(toolbar);
+            AddBtn(toolbar, "新增(末尾)", Color.FromArgb(46, 204, 113), (s, e) => AppendStep());
+            AddBtn(toolbar, "插入(当前行后)", Color.FromArgb(22, 160, 133), (s, e) => InsertStepAfterCurrent());
+            AddBtn(toolbar, "删除步骤", Color.FromArgb(231, 76, 60), (s, e) => RemoveSelectedStep());
+            AddBtn(toolbar, "上移 ▲", Color.FromArgb(52, 73, 94), (s, e) => MoveSelected(-1));
+            AddBtn(toolbar, "下移 ▼", Color.FromArgb(52, 73, 94), (s, e) => MoveSelected(1));
+            AddBtn(toolbar, "自动重连", Color.FromArgb(155, 89, 182), (s, e) => AutoRelink());
+            AddSep(toolbar);
+            AddBtn(toolbar, "保存", Color.FromArgb(230, 126, 34), (s, e) => SaveAs(_runbookIdBox.Text.Trim()));
 
-            AddToolButton(toolbar, T("Loc.Editor.LoadDefault", "加载 Default"), (s, e) => LoadRunbook("default"));
-            AddToolButton(toolbar, T("Loc.Editor.Add", "新增步骤"), (s, e) => AddStep());
-            AddToolButton(toolbar, T("Loc.Editor.Remove", "删除步骤"), (s, e) => RemoveSelectedStep());
-            AddToolButton(toolbar, T("Loc.Editor.Up", "上移"), (s, e) => MoveSelected(-1));
-            AddToolButton(toolbar, T("Loc.Editor.Down", "下移"), (s, e) => MoveSelected(1));
-            AddToolButton(toolbar, T("Loc.Editor.Relink", "自动重连"), (s, e) => AutoRelink());
-            AddToolButton(toolbar, T("Loc.Editor.SaveDefault", "保存 Default"), (s, e) => SaveAs("default"));
-
-            toolbar.Controls.Add(MakeLabel("SaveAs Id:"));
-            _saveAsIdBox = new TextEdit { Width = 120 };
+            var saveAsLabel = ML("另存为:");
+            saveAsLabel.Margin = new Padding(12, 8, 2, 0);
+            toolbar.Controls.Add(saveAsLabel);
+            _saveAsIdBox = new TextEdit { Width = 120, Height = 28 };
+            _saveAsIdBox.Properties.NullValuePrompt = "输入 RunBook Id";
             toolbar.Controls.Add(_saveAsIdBox);
-            AddToolButton(toolbar, T("Loc.Editor.SaveAs", "另存模板"), (s, e) => SaveAs(_saveAsIdBox.Text.Trim()));
+            AddBtn(toolbar, "另存模板", Color.FromArgb(142, 68, 173), (s, e) => SaveAs(_saveAsIdBox.Text.Trim()));
 
-            rootPanel.Controls.Add(toolbar, 0, 0);
+            root.Controls.Add(toolbar, 0, 1);
 
-            // -- Grid --
+            // =====================================================
+            //  Row 2 — Grid
+            // =====================================================
             _gridControl = new GridControl { Dock = DockStyle.Fill };
             _gridView = new GridView(_gridControl);
             _gridControl.MainView = _gridView;
@@ -93,60 +138,271 @@ namespace SelfDiagnostic.UI
             _gridView.OptionsView.ShowGroupPanel = false;
             _gridView.OptionsView.ShowIndicator = false;
             _gridView.OptionsBehavior.Editable = true;
+            _gridView.OptionsView.RowAutoHeight = true;
+            _gridView.OptionsView.ColumnAutoWidth = true;
+            _gridView.OptionsSelection.EnableAppearanceFocusedRow = true;
 
-            _gridView.Columns.AddVisible("StepId", "StepId").Width = 82;
-            _gridView.Columns.AddVisible("CheckId", "CheckId").Width = 140;
-            _gridView.Columns.AddVisible("DisplayName", "DisplayName").Width = 180;
-            _gridView.Columns.AddVisible("Category", "Category").Width = 160;
-            _gridView.Columns.AddVisible("Enabled", "Enabled").Width = 70;
-            _gridView.Columns.AddVisible("TimeoutMs", "TimeoutMs").Width = 90;
-            _gridView.Columns.AddVisible("NextOnSuccess", "NextOnSuccess").Width = 100;
-            _gridView.Columns.AddVisible("NextOnFailure", "NextOnFailure").Width = 100;
-            _gridView.Columns.AddVisible("ParamsJson", "ParamsJson").Width = 400;
+            var colStepId = _gridView.Columns.AddVisible("StepId", "StepId");
+            colStepId.Width = 70;
+            colStepId.MinWidth = 50;
 
-            rootPanel.Controls.Add(_gridControl, 0, 1);
+            var colCheckId = _gridView.Columns.AddVisible("CheckId", "CheckId");
+            colCheckId.Width = 110;
+            colCheckId.MinWidth = 70;
+            var checkIdCombo = new RepositoryItemComboBox();
+            foreach (var id in DiagnosticEngine.GetRegisteredCheckIds())
+            {
+                checkIdCombo.Items.Add(id);
+            }
+            colCheckId.ColumnEdit = checkIdCombo;
 
-            // -- Status bar --
-            _statusLabel = new LabelControl { Dock = DockStyle.Fill };
-            rootPanel.Controls.Add(_statusLabel, 0, 2);
+            var colName = _gridView.Columns.AddVisible("DisplayName", "DisplayName");
+            colName.Width = 160;
+            colName.MinWidth = 80;
 
-            ResumeLayout();
+            var colCat = _gridView.Columns.AddVisible("Category", "Category");
+            colCat.Width = 120;
+            colCat.MinWidth = 70;
+            var catCombo = new RepositoryItemComboBox();
+            foreach (var name in Enum.GetNames(typeof(CheckCategory)))
+            {
+                catCombo.Items.Add(name);
+            }
+            colCat.ColumnEdit = catCombo;
+
+            var colEnabled = _gridView.Columns.AddVisible("Enabled", "Enabled");
+            colEnabled.Width = 60;
+            colEnabled.MinWidth = 40;
+            var enabledCheckEdit = new RepositoryItemCheckEdit();
+            enabledCheckEdit.ValueChecked = true;
+            enabledCheckEdit.ValueUnchecked = false;
+            colEnabled.ColumnEdit = enabledCheckEdit;
+
+            var colTimeout = _gridView.Columns.AddVisible("TimeoutMs", "TimeoutMs");
+            colTimeout.Width = 70;
+            colTimeout.MinWidth = 50;
+
+            var colSucc = _gridView.Columns.AddVisible("NextOnSuccess", "OnSuccess");
+            colSucc.Width = 80;
+            colSucc.MinWidth = 50;
+
+            var colFail = _gridView.Columns.AddVisible("NextOnFailure", "OnFailure");
+            colFail.Width = 80;
+            colFail.MinWidth = 50;
+
+            var colParams = _gridView.Columns.AddVisible("ParamsJson", "Params (JSON)");
+            colParams.Width = 280;
+            colParams.MinWidth = 100;
+            var paramsBtnEdit = new RepositoryItemButtonEdit();
+            paramsBtnEdit.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.Standard;
+            paramsBtnEdit.ButtonClick += ParamsButtonEdit_ButtonClick;
+            colParams.ColumnEdit = paramsBtnEdit;
+
+            _gridView.RowStyle += (s, e) =>
+            {
+                if (e.RowHandle < 0) return;
+                var row = _gridView.GetRow(e.RowHandle) as RunbookStepRow;
+                if (row == null) return;
+                if (!row.Enabled)
+                {
+                    e.Appearance.ForeColor = Color.Silver;
+                }
+            };
+
+            _gridView.CellValueChanged += (s, e) =>
+            {
+                if (e.Column.FieldName == "Enabled")
+                {
+                    _gridView.RefreshData();
+                }
+            };
+
+            root.Controls.Add(_gridControl, 0, 2);
+
+            // =====================================================
+            //  Row 3 — Status bar
+            // =====================================================
+            var statusBar = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(248, 248, 248) };
+            _statusLabel = new LabelControl
+            {
+                Dock = DockStyle.Fill,
+                AutoSizeMode = LabelAutoSizeMode.None,
+                Padding = new Padding(4, 4, 0, 0)
+            };
+            statusBar.Controls.Add(_statusLabel);
+            root.Controls.Add(statusBar, 0, 3);
+
+            ResumeLayout(true);
         }
 
-        private static LabelControl MakeLabel(string text)
+        private void ParamsButtonEdit_ButtonClick(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
         {
-            return new LabelControl { Text = text, AutoSizeMode = LabelAutoSizeMode.Default, Padding = new Padding(0, 6, 4, 0) };
+            var handle = _gridView.FocusedRowHandle;
+            if (handle < 0 || handle >= _rows.Count) return;
+            var row = _rows[handle];
+
+            using (var dlg = new XtraForm())
+            {
+                dlg.Text = "编辑 Params JSON — " + row.StepId;
+                dlg.Width = 600;
+                dlg.Height = 480;
+                dlg.MinimumSize = new Size(400, 300);
+                dlg.StartPosition = FormStartPosition.CenterParent;
+
+                var root = new TableLayoutPanel
+                {
+                    Dock = DockStyle.Fill,
+                    ColumnCount = 1,
+                    RowCount = 3,
+                    Padding = new Padding(10)
+                };
+                root.RowStyles.Add(new RowStyle(SizeType.Absolute, 24F));
+                root.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+                root.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
+                dlg.Controls.Add(root);
+
+                var hint = new LabelControl
+                {
+                    Text = "格式: { \"key1\": \"value1\", \"key2\": \"value2\" }",
+                    Dock = DockStyle.Fill,
+                    Appearance = { ForeColor = Color.Gray }
+                };
+                root.Controls.Add(hint, 0, 0);
+
+                var editor = new MemoEdit
+                {
+                    Dock = DockStyle.Fill,
+                    EditValue = FormatJson(row.ParamsJson)
+                };
+                editor.Properties.ScrollBars = ScrollBars.Both;
+                editor.Properties.WordWrap = false;
+                root.Controls.Add(editor, 0, 1);
+
+                var btnPanel = new FlowLayoutPanel
+                {
+                    Dock = DockStyle.Fill,
+                    FlowDirection = FlowDirection.RightToLeft,
+                    Padding = new Padding(0, 4, 0, 0)
+                };
+                var cancelBtn = new SimpleButton { Text = "取消", Width = 80, Height = 30, DialogResult = DialogResult.Cancel };
+                var okBtn = new SimpleButton
+                {
+                    Text = "确定",
+                    Width = 80,
+                    Height = 30,
+                    Appearance = { BackColor = Color.FromArgb(41, 128, 185), ForeColor = Color.White, Options = { UseBackColor = true, UseForeColor = true } }
+                };
+
+                var errorLabel = new LabelControl
+                {
+                    AutoSizeMode = LabelAutoSizeMode.None,
+                    Width = 360,
+                    Height = 30,
+                    Padding = new Padding(0, 8, 0, 0),
+                    Appearance = { ForeColor = Color.FromArgb(231, 76, 60) }
+                };
+
+                okBtn.Click += (s2, e2) =>
+                {
+                    var text = (editor.EditValue ?? "").ToString().Trim();
+                    if (string.IsNullOrEmpty(text)) text = "{}";
+                    try
+                    {
+                        JsonConvert.DeserializeObject<Dictionary<string, string>>(text);
+                        row.ParamsJson = text;
+                        _gridView.RefreshData();
+                        dlg.DialogResult = DialogResult.OK;
+                        dlg.Close();
+                    }
+                    catch (Exception ex)
+                    {
+                        errorLabel.Text = "JSON 无效: " + ex.Message;
+                    }
+                };
+
+                btnPanel.Controls.AddRange(new Control[] { cancelBtn, okBtn, errorLabel });
+                root.Controls.Add(btnPanel, 0, 2);
+
+                dlg.AcceptButton = okBtn;
+                dlg.CancelButton = cancelBtn;
+                dlg.ShowDialog(this);
+            }
         }
 
-        private static void AddToolButton(FlowLayoutPanel panel, string text, EventHandler onClick)
+        private static string FormatJson(string json)
         {
-            var btn = new SimpleButton { Text = text, AutoSize = true };
+            if (string.IsNullOrWhiteSpace(json)) return "{}";
+            try
+            {
+                var obj = JsonConvert.DeserializeObject(json);
+                return JsonConvert.SerializeObject(obj, Formatting.Indented);
+            }
+            catch
+            {
+                return json;
+            }
+        }
+
+        private static LabelControl ML(string text)
+        {
+            return new LabelControl
+            {
+                Text = text,
+                AutoSizeMode = LabelAutoSizeMode.None,
+                Dock = DockStyle.Fill,
+                Padding = new Padding(2, 6, 2, 0),
+                Appearance = { TextOptions = { HAlignment = DevExpress.Utils.HorzAlignment.Far } }
+            };
+        }
+
+        private static void AddBtn(FlowLayoutPanel panel, string text, Color backColor, EventHandler onClick)
+        {
+            var btn = new SimpleButton
+            {
+                Text = text,
+                Width = 100,
+                Height = 30,
+                Margin = new Padding(2, 2, 2, 2),
+                Appearance =
+                {
+                    BackColor = backColor,
+                    ForeColor = Color.White,
+                    Options = { UseBackColor = true, UseForeColor = true }
+                }
+            };
             btn.Click += onClick;
             panel.Controls.Add(btn);
+        }
+
+        private static void AddSep(FlowLayoutPanel panel)
+        {
+            panel.Controls.Add(new Panel { Width = 8, Height = 1, Margin = new Padding(0) });
         }
 
         private void LoadRunbook(string runbookId)
         {
             try
             {
+                var path = _runbookFileService.BuildRunbookPath(runbookId);
                 var runbook = _runbookFileService.Load(runbookId);
-                _runbookIdBox.Text = runbook.Id;
+                _runbookIdBox.Text = runbookId;
                 _runbookTitleBox.Text = runbook.Title;
                 _runbookVersionBox.Text = runbook.Version;
+                _filePathLabel.Text = path;
                 _rows.Clear();
                 foreach (var step in runbook.Steps)
                 {
                     _rows.Add(RunbookStepRow.FromDefinition(step));
                 }
-                _statusLabel.Text = "已加载: " + runbook.Id;
+                SetStatus("已加载 RunBook: " + runbookId + " (" + runbook.Steps.Count + " 步骤)", Color.FromArgb(39, 174, 96));
             }
             catch (Exception ex)
             {
-                _statusLabel.Text = "加载失败: " + ex.Message;
+                SetStatus("加载失败: " + ex.Message, Color.FromArgb(231, 76, 60));
             }
         }
 
-        private void AddStep()
+        private RunbookStepRow CreateNewStepRow()
         {
             var maxNum = _rows
                 .Select(x => x.StepId)
@@ -155,7 +411,7 @@ namespace SelfDiagnostic.UI
                 .DefaultIfEmpty(0)
                 .Max();
 
-            _rows.Add(new RunbookStepRow
+            return new RunbookStepRow
             {
                 StepId = "S" + (maxNum + 1).ToString("000"),
                 CheckId = DiagnosticEngine.GetRegisteredCheckIds().FirstOrDefault() ?? "SYS_01",
@@ -164,14 +420,37 @@ namespace SelfDiagnostic.UI
                 TimeoutMs = 5000,
                 Enabled = true,
                 ParamsJson = "{}"
-            });
+            };
+        }
+
+        private void AppendStep()
+        {
+            var newRow = CreateNewStepRow();
+            _rows.Add(newRow);
+            _gridView.FocusedRowHandle = _rows.Count - 1;
+            _gridView.MakeRowVisible(_rows.Count - 1, false);
+            SetStatus("已新增步骤(末尾): " + newRow.StepId, Color.FromArgb(39, 174, 96));
+        }
+
+        private void InsertStepAfterCurrent()
+        {
+            var handle = _gridView.FocusedRowHandle;
+            var insertIndex = (handle >= 0 && handle < _rows.Count) ? handle + 1 : _rows.Count;
+
+            var newRow = CreateNewStepRow();
+            _rows.Insert(insertIndex, newRow);
+            _gridView.FocusedRowHandle = insertIndex;
+            _gridView.MakeRowVisible(insertIndex, false);
+            SetStatus("已插入步骤(行 " + (insertIndex + 1) + "): " + newRow.StepId, Color.FromArgb(22, 160, 133));
         }
 
         private void RemoveSelectedStep()
         {
             var handle = _gridView.FocusedRowHandle;
             if (handle < 0 || handle >= _rows.Count) return;
+            var stepId = _rows[handle].StepId;
             _rows.RemoveAt(handle);
+            SetStatus("已删除步骤: " + stepId, Color.FromArgb(231, 76, 60));
         }
 
         private void MoveSelected(int delta)
@@ -189,6 +468,7 @@ namespace SelfDiagnostic.UI
 
         private void AutoRelink()
         {
+            CommitPendingEdits();
             var defs = _rows.Select(r => r.ToDefinition()).ToList();
             _runbookFileService.AutoRelinkByEnabledOrder(defs);
             _rows.Clear();
@@ -196,16 +476,18 @@ namespace SelfDiagnostic.UI
             {
                 _rows.Add(RunbookStepRow.FromDefinition(def));
             }
-            _statusLabel.Text = "已按启用顺序自动重连";
+            SetStatus("已按启用顺序自动重连 " + defs.Count(d => d.Enabled) + " 个步骤", Color.FromArgb(155, 89, 182));
         }
 
         private void SaveAs(string runbookId)
         {
             if (string.IsNullOrWhiteSpace(runbookId))
             {
-                _statusLabel.Text = "请输入有效 RunBook Id";
+                SetStatus("请输入有效 RunBook Id", Color.FromArgb(231, 76, 60));
                 return;
             }
+
+            CommitPendingEdits();
 
             try
             {
@@ -214,7 +496,7 @@ namespace SelfDiagnostic.UI
                     row.ValidateJson();
                     if (!row.IsParamsJsonValid)
                     {
-                        _statusLabel.Text = "ParamsJson 错误: " + row.StepId + " - " + row.ParamsJsonError;
+                        SetStatus("ParamsJson 错误: " + row.StepId + " - " + row.ParamsJsonError, Color.FromArgb(231, 76, 60));
                         return;
                     }
                 }
@@ -228,13 +510,30 @@ namespace SelfDiagnostic.UI
                 };
                 _runbookFileService.Save(runbook, runbookId);
                 _runbookIdBox.Text = runbookId;
-                _statusLabel.Text = "保存成功: " + runbookId;
+                _filePathLabel.Text = _runbookFileService.BuildRunbookPath(runbookId);
+
+                var enabledCount = runbook.Steps.Count(st => st.Enabled);
+                var disabledCount = runbook.Steps.Count - enabledCount;
+                var msg = "保存成功: " + runbookId + " (" + enabledCount + " 启用, " + disabledCount + " 禁用)";
+                SetStatus(msg, Color.FromArgb(39, 174, 96));
                 RunbookSaved?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)
             {
-                _statusLabel.Text = "保存失败: " + ex.Message;
+                SetStatus("保存失败: " + ex.Message, Color.FromArgb(231, 76, 60));
             }
+        }
+
+        private void CommitPendingEdits()
+        {
+            _gridView.CloseEditor();
+            _gridView.UpdateCurrentRow();
+        }
+
+        private void SetStatus(string message, Color color)
+        {
+            _statusLabel.Text = message;
+            _statusLabel.Appearance.ForeColor = color;
         }
 
         private static string T(string key, string fallback)
