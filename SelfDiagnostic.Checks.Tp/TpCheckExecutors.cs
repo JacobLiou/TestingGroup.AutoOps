@@ -1,9 +1,9 @@
+using SelfDiagnostic.Models;
+using SelfDiagnostic.Services.Abstractions;
 using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using SelfDiagnostic.Models;
-using SelfDiagnostic.Services.Abstractions;
 
 namespace SelfDiagnostic.Services.Executors.Tp
 {

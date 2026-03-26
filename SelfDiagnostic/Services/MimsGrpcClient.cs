@@ -1,8 +1,7 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using SelfDiagnostic.Models;
 using SelfDiagnostic.Services.Abstractions;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SelfDiagnostic.Services
 {

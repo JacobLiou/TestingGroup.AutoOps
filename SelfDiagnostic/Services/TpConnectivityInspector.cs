@@ -1,3 +1,5 @@
+using Newtonsoft.Json;
+using SelfDiagnostic.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,8 +11,6 @@ using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using SelfDiagnostic.Models;
 
 namespace SelfDiagnostic.Services
 {

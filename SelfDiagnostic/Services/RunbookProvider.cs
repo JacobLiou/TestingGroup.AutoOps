@@ -1,7 +1,7 @@
-using System;
-using System.IO;
 using Newtonsoft.Json;
 using SelfDiagnostic.Models;
+using System;
+using System.IO;
 
 namespace SelfDiagnostic.Services
 {

@@ -1,3 +1,4 @@
+using SelfDiagnostic.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -6,7 +7,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using SelfDiagnostic.Models;
 
 namespace SelfDiagnostic.Services
 {
@@ -263,7 +263,7 @@ namespace SelfDiagnostic.Services
         /// Map method parameters from well-known context objects and step.Params.
         /// Priority: well-known injectable types → step.Params by name → default value.
         /// </summary>
-        private static object[] MapParameters(
+        internal static object[] MapParameters(
             MethodInfo method,
             DiagnosticItem item,
             RunbookStepDefinition step,
@@ -380,7 +380,7 @@ namespace SelfDiagnostic.Services
         /// Supports: void, bool, Task, Task&lt;bool&gt;, Task&lt;CheckExecutionOutcome&gt;,
         /// CheckExecutionOutcome, and any other type (stored as Detail).
         /// </summary>
-        private static async Task<CheckExecutionOutcome> AdaptReturnValue(object result, DiagnosticItem item)
+        internal static async Task<CheckExecutionOutcome> AdaptReturnValue(object result, DiagnosticItem item)
         {
             if (result == null)
                 return InferOutcomeFromItem(item);
@@ -466,7 +466,7 @@ namespace SelfDiagnostic.Services
         //  Helpers
         // ──────────────────────────────────────────────────────────────
 
-        private static object TryCreateInstance(Type type)
+        internal static object TryCreateInstance(Type type)
         {
             try { return Activator.CreateInstance(type, nonPublic: true); }
             catch { return null; }

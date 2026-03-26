@@ -1,7 +1,7 @@
+using SelfDiagnostic.Models;
 using System;
 using System.Linq;
 using System.Xml.Linq;
-using SelfDiagnostic.Models;
 
 namespace SelfDiagnostic.Services
 {

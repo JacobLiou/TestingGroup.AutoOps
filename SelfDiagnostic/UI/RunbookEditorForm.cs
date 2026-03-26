@@ -1,10 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Windows.Forms;
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Repository;
 using DevExpress.XtraGrid;
@@ -12,6 +5,12 @@ using DevExpress.XtraGrid.Views.Grid;
 using Newtonsoft.Json;
 using SelfDiagnostic.Models;
 using SelfDiagnostic.Services;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
+using System.Linq;
+using System.Windows.Forms;
 
 namespace SelfDiagnostic.UI
 {

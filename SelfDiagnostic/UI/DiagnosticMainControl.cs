@@ -1,3 +1,10 @@
+using DevExpress.XtraEditors;
+using DevExpress.XtraGrid;
+using DevExpress.XtraGrid.Views.Grid;
+using SelfDiagnostic.Models;
+using SelfDiagnostic.Services;
+using SelfDiagnostic.Services.Abstractions;
+using SelfDiagnostic.UI.Controls;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -6,13 +13,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DevExpress.XtraEditors;
-using DevExpress.XtraGrid;
-using DevExpress.XtraGrid.Views.Grid;
-using SelfDiagnostic.Models;
-using SelfDiagnostic.Services;
-using SelfDiagnostic.Services.Abstractions;
-using SelfDiagnostic.UI.Controls;
 
 namespace SelfDiagnostic.UI
 {
@@ -277,13 +277,16 @@ namespace SelfDiagnostic.UI
                 case CheckStatus.Fail:
                     e.Appearance.BackColor = Color.FromArgb(255, 237, 237);
                     break;
+
                 case CheckStatus.Warning:
                     e.Appearance.BackColor = Color.FromArgb(255, 248, 229);
                     break;
+
                 case CheckStatus.Pass:
                 case CheckStatus.Fixed:
                     e.Appearance.BackColor = Color.FromArgb(236, 255, 236);
                     break;
+
                 case CheckStatus.Scanning:
                     e.Appearance.BackColor = Color.FromArgb(233, 245, 255);
                     break;

@@ -1,6 +1,6 @@
+using SelfDiagnostic.Models;
 using System;
 using System.Collections.Generic;
-using SelfDiagnostic.Models;
 
 namespace SelfDiagnostic.Services
 {

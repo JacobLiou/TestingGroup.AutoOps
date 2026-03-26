@@ -40,8 +40,10 @@ namespace SelfDiagnostic.Models
     {
         public bool Success { get; set; }
         public int? StatusCode { get; set; }
+
         /// <summary>响应耗时（毫秒）</summary>
         public long ElapsedMs { get; set; }
+
         public string Error { get; set; } = string.Empty;
         public string Url { get; set; } = string.Empty;
         public string EndpointName { get; set; } = string.Empty;

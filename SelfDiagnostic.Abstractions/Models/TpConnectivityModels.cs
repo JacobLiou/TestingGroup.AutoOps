@@ -30,18 +30,25 @@ namespace SelfDiagnostic.Models
     {
         /// <summary>TP 程序根目录路径</summary>
         public string TpRootPath { get; set; } = string.Empty;
+
         /// <summary>TP 路径是否存在</summary>
         public bool TpPathExists { get; set; }
+
         /// <summary>检测到的配置文件列表</summary>
         public List<string> ConfigFiles { get; set; } = new List<string>();
+
         /// <summary>期望的串口列表</summary>
         public List<string> ExpectedSerialPorts { get; set; } = new List<string>();
+
         /// <summary>系统中实际可用的串口列表</summary>
         public List<string> AvailableSerialPorts { get; set; } = new List<string>();
+
         /// <summary>缺失的串口列表</summary>
         public List<string> MissingSerialPorts { get; set; } = new List<string>();
+
         /// <summary>网络端点可达性检测结果</summary>
         public List<TpNetworkEndpointStatus> NetworkEndpoints { get; set; } = new List<TpNetworkEndpointStatus>();
+
         /// <summary>检测过程中的错误信息</summary>
         public string Error { get; set; } = string.Empty;
     }
@@ -53,10 +60,13 @@ namespace SelfDiagnostic.Models
     {
         /// <summary>端点地址（host:port 或 URL）</summary>
         public string Endpoint { get; set; } = string.Empty;
+
         /// <summary>是否可达</summary>
         public bool Reachable { get; set; }
+
         /// <summary>探测耗时（毫秒）</summary>
         public long ElapsedMs { get; set; }
+
         public string Error { get; set; } = string.Empty;
     }
 
@@ -86,6 +96,7 @@ namespace SelfDiagnostic.Models
         public string DeviceKey { get; set; } = string.Empty;
         public string RequiredVersion { get; set; } = string.Empty;
         public string ActualVersion { get; set; } = string.Empty;
+
         /// <summary>是否缺少实际版本信息</summary>
         public bool MissingActual { get; set; }
     }
@@ -101,6 +112,7 @@ namespace SelfDiagnostic.Models
         public string RequirementSource { get; set; } = string.Empty;
         public List<DeviceVersionRequirement> Requirements { get; set; } = new List<DeviceVersionRequirement>();
         public List<DeviceVersionActual> Actuals { get; set; } = new List<DeviceVersionActual>();
+
         /// <summary>不匹配的设备列表</summary>
         public List<DeviceVersionMismatch> Mismatches { get; set; } = new List<DeviceVersionMismatch>();
     }
@@ -112,16 +124,22 @@ namespace SelfDiagnostic.Models
     {
         /// <summary>GRR 最大百分比</summary>
         public double GrrMaxPercent { get; set; } = 10.0;
+
         /// <summary>GDS 最小百分比</summary>
         public double GdsMinPercent { get; set; } = 90.0;
+
         /// <summary>最大输出光功率下限 (dBm)</summary>
         public double MaxOutputPowerMinDbm { get; set; } = 6.0;
+
         /// <summary>信噪比下限 (dB)</summary>
         public double SnrMinDb { get; set; } = 30.0;
+
         /// <summary>开关重复性上限 (dB)</summary>
         public double SwitchRepeatabilityMaxDb { get; set; } = 0.5;
+
         /// <summary>功率稳定性上限 (dB)</summary>
         public double PowerStabilityMaxDb { get; set; } = 0.3;
+
         /// <summary>要求的通道规划</summary>
         public string ChannelPlanRequired { get; set; } = "100G-4CH";
     }
@@ -147,10 +165,13 @@ namespace SelfDiagnostic.Models
     {
         /// <summary>指标名称</summary>
         public string Metric { get; set; } = string.Empty;
+
         /// <summary>基线要求值</summary>
         public string Required { get; set; } = string.Empty;
+
         /// <summary>实际值</summary>
         public string Actual { get; set; } = string.Empty;
+
         /// <summary>是否达标</summary>
         public bool Pass { get; set; }
     }
@@ -161,10 +182,13 @@ namespace SelfDiagnostic.Models
     public sealed class StationCapabilityComplianceResult
     {
         public bool Success { get; set; }
+
         /// <summary>实际值数据来源</summary>
         public string ActualSource { get; set; } = string.Empty;
+
         /// <summary>各指标对比结果</summary>
         public List<StationCapabilityMetricResult> Metrics { get; set; } = new List<StationCapabilityMetricResult>();
+
         /// <summary>失败原因列表</summary>
         public List<string> FailReasons { get; set; } = new List<string>();
     }
@@ -176,18 +200,25 @@ namespace SelfDiagnostic.Models
     {
         /// <summary>目标电压 (V)</summary>
         public double TargetVoltageV { get; set; } = 12.0;
+
         /// <summary>最小允许电压 (V)</summary>
         public double MinVoltageV { get; set; } = 11.4;
+
         /// <summary>最大允许电压 (V)</summary>
         public double MaxVoltageV { get; set; } = 12.6;
+
         /// <summary>标准差上限 (V)</summary>
         public double MaxStdDevV { get; set; } = 0.06;
+
         /// <summary>纹波上限 (V)</summary>
         public double MaxRippleV { get; set; } = 0.25;
+
         /// <summary>采样间隔 (ms)</summary>
         public int SampleIntervalMs { get; set; } = 500;
+
         /// <summary>采样次数</summary>
         public int SampleCount { get; set; } = 12;
+
         /// <summary>TP 电压 API 地址</summary>
         public string TpVoltageApiUrl { get; set; } = string.Empty;
     }
@@ -198,6 +229,7 @@ namespace SelfDiagnostic.Models
     public sealed class PowerVoltageSample
     {
         public System.DateTime Timestamp { get; set; }
+
         /// <summary>电压值 (V)</summary>
         public double VoltageV { get; set; }
     }
@@ -209,22 +241,31 @@ namespace SelfDiagnostic.Models
     {
         public bool Success { get; set; }
         public string Source { get; set; } = string.Empty;
+
         /// <summary>采样数据序列</summary>
         public List<PowerVoltageSample> Samples { get; set; } = new List<PowerVoltageSample>();
+
         /// <summary>导出的曲线 JSON 文件路径</summary>
         public string CurveJsonPath { get; set; } = string.Empty;
+
         /// <summary>导出的曲线 CSV 文件路径</summary>
         public string CurveCsvPath { get; set; } = string.Empty;
+
         /// <summary>平均电压 (V)</summary>
         public double MeanV { get; set; }
+
         /// <summary>标准差 (V)</summary>
         public double StdDevV { get; set; }
+
         /// <summary>最小电压 (V)</summary>
         public double MinV { get; set; }
+
         /// <summary>最大电压 (V)</summary>
         public double MaxV { get; set; }
+
         /// <summary>纹波 (V) = Max - Min</summary>
         public double RippleV { get; set; }
+
         public List<string> FailReasons { get; set; } = new List<string>();
     }
 
@@ -271,8 +312,10 @@ namespace SelfDiagnostic.Models
     {
         public bool Success { get; set; }
         public string Source { get; set; } = string.Empty;
+
         /// <summary>分组键（如 Optical / ControlStorage / InterfaceComm）</summary>
         public string GroupKey { get; set; } = string.Empty;
+
         public List<GroupedCheckMetric> Metrics { get; set; } = new List<GroupedCheckMetric>();
         public List<string> FailReasons { get; set; } = new List<string>();
     }

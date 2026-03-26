@@ -7,14 +7,19 @@ namespace SelfDiagnostic.Models
     {
         /// <summary>等待执行</summary>
         Pending,
+
         /// <summary>正在扫描中</summary>
         Scanning,
+
         /// <summary>检查通过</summary>
         Pass,
+
         /// <summary>存在警告</summary>
         Warning,
+
         /// <summary>检查失败</summary>
         Fail,
+
         /// <summary>已自动修复</summary>
         Fixed
     }
@@ -26,12 +31,16 @@ namespace SelfDiagnostic.Models
     {
         /// <summary>系统级检查</summary>
         SystemCheck,
+
         /// <summary>工站能力检查</summary>
         StationCheck,
+
         /// <summary>硬件/软件/固件配置检查</summary>
         HwSwFwCheck,
+
         /// <summary>硬件状态检查</summary>
         HwStatusCheck,
+
         /// <summary>光学性能检查</summary>
         OpticalPerformanceCheck
     }

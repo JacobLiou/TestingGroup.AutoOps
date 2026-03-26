@@ -1,3 +1,5 @@
+using Newtonsoft.Json.Linq;
+using SelfDiagnostic.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,8 +8,6 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using Newtonsoft.Json.Linq;
-using SelfDiagnostic.Models;
 
 namespace SelfDiagnostic.Services
 {

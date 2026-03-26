@@ -1,12 +1,36 @@
 {
   "devices": [
-    { "deviceKey": "hw_powermeter", "requiredVersion": "PM-1.3.2" },
-    { "deviceKey": "hw_fixture_ctrl", "requiredVersion": "FX-0.9.8" },
-    { "deviceKey": "sw_test_program", "requiredVersion": "TP-5.2.0" },
-    { "deviceKey": "sw_station_agent", "requiredVersion": "AGENT-2.1.4" },
-    { "deviceKey": "fw_product_main", "requiredVersion": "FW-2.5.1" },
-    { "deviceKey": "fw_fixture_mcu", "requiredVersion": "MCU-1.7.4" },
-    { "deviceKey": "fpga_main", "requiredVersion": "FPGA-3.4.0" },
-    { "deviceKey": "cpld_ctrl", "requiredVersion": "CPLD-1.2.7" }
+    {
+      "deviceKey": "hw_powermeter",
+      "requiredVersion": "PM-1.3.2"
+    },
+    {
+      "deviceKey": "hw_fixture_ctrl",
+      "requiredVersion": "FX-0.9.8"
+    },
+    {
+      "deviceKey": "sw_test_program",
+      "requiredVersion": "TP-5.2.0"
+    },
+    {
+      "deviceKey": "sw_station_agent",
+      "requiredVersion": "AGENT-2.1.4"
+    },
+    {
+      "deviceKey": "fw_product_main",
+      "requiredVersion": "FW-2.5.1"
+    },
+    {
+      "deviceKey": "fw_fixture_mcu",
+      "requiredVersion": "MCU-1.7.4"
+    },
+    {
+      "deviceKey": "fpga_main",
+      "requiredVersion": "FPGA-3.4.0"
+    },
+    {
+      "deviceKey": "cpld_ctrl",
+      "requiredVersion": "CPLD-1.2.7"
+    }
   ]
 }

@@ -1,10 +1,10 @@
+using Newtonsoft.Json;
+using SelfDiagnostic.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Newtonsoft.Json;
-using SelfDiagnostic.Models;
 
 namespace SelfDiagnostic.Services
 {
@@ -40,10 +40,15 @@ namespace SelfDiagnostic.Services
 
             var document = new DiagnosticResultDocument
             {
-                RunId = runId, StationId = stationId, LineId = lineId,
-                ProductModel = productModel, TriggerSource = triggerSource,
-                StartedAt = startedAt, EndedAt = endedAt,
-                OverallLevel = overallLevel, OverallSeverity = overallSeverity,
+                RunId = runId,
+                StationId = stationId,
+                LineId = lineId,
+                ProductModel = productModel,
+                TriggerSource = triggerSource,
+                StartedAt = startedAt,
+                EndedAt = endedAt,
+                OverallLevel = overallLevel,
+                OverallSeverity = overallSeverity,
                 AllowProduction = errorCount == 0,
                 Summary = new DiagnosticSummary { OkCount = okCount, WarnCount = warnCount, ErrorCount = errorCount, TopIssues = topIssues },
                 Results = results
@@ -87,11 +92,19 @@ namespace SelfDiagnostic.Services
 
             return new DiagnosticRuleResult
             {
-                RuleCode = metadata.RuleCode, RuleName = ruleName, CheckId = item.Id,
-                Domain = metadata.Domain, Category = metadata.Category,
-                ResultLevel = level, Severity = metadata.Severity, Threshold = metadata.Threshold,
-                FailReason = failReason, Action = action, Escalation = escalation,
-                Detail = item.Detail, Score = item.Score
+                RuleCode = metadata.RuleCode,
+                RuleName = ruleName,
+                CheckId = item.Id,
+                Domain = metadata.Domain,
+                Category = metadata.Category,
+                ResultLevel = level,
+                Severity = metadata.Severity,
+                Threshold = metadata.Threshold,
+                FailReason = failReason,
+                Action = action,
+                Escalation = escalation,
+                Detail = item.Detail,
+                Score = item.Score
             };
         }
 

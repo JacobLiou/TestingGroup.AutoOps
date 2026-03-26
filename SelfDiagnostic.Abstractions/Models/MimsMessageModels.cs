@@ -24,6 +24,7 @@ namespace SelfDiagnostic.Models
     {
         /// <summary>工站 ID</summary>
         public string StationId { get; set; } = "STATION-001";
+
         /// <summary>产线 ID</summary>
         public string LineId { get; set; } = "LINE-001";
     }
@@ -36,6 +37,7 @@ namespace SelfDiagnostic.Models
         public bool Success { get; set; }
         public string Code { get; set; } = string.Empty;
         public string Message { get; set; } = string.Empty;
+
         /// <summary>实际通信端点地址</summary>
         public string Endpoint { get; set; } = string.Empty;
     }
@@ -49,6 +51,7 @@ namespace SelfDiagnostic.Models
         public string Code { get; set; } = string.Empty;
         public string Message { get; set; } = string.Empty;
         public string Endpoint { get; set; } = string.Empty;
+
         /// <summary>MIMS 返回的环境配置 XML</summary>
         public string ConfigXml { get; set; } = string.Empty;
     }

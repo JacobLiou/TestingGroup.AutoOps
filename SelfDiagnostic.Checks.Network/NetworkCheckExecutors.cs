@@ -1,8 +1,8 @@
+using SelfDiagnostic.Models;
+using SelfDiagnostic.Services.Abstractions;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
-using SelfDiagnostic.Models;
-using SelfDiagnostic.Services.Abstractions;
 
 namespace SelfDiagnostic.Services.Executors.Network
 {

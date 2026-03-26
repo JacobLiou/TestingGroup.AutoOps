@@ -1,3 +1,5 @@
+using SelfDiagnostic.Models;
+using SelfDiagnostic.Services.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -5,8 +7,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using SelfDiagnostic.Models;
-using SelfDiagnostic.Services.Abstractions;
 
 namespace SelfDiagnostic.Services
 {
@@ -198,7 +198,7 @@ namespace SelfDiagnostic.Services
             {
                 foreach (var type in SafeGetTypes(assembly))
                 {
-                    var methods = type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+                    var methods = type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
                     foreach (var method in methods)
                     {
                         var attribute = method.GetCustomAttribute<CheckExecutorAttribute>();
@@ -234,7 +234,8 @@ namespace SelfDiagnostic.Services
         {
             var parameters = method.GetParameters();
 
-            if (method.ReturnType == typeof(void) &&
+            if (method.IsStatic &&
+                method.ReturnType == typeof(void) &&
                 parameters.Length == 1 &&
                 parameters[0].ParameterType == typeof(DiagnosticItem))
             {
@@ -249,7 +250,8 @@ namespace SelfDiagnostic.Services
                 };
             }
 
-            if (method.ReturnType == typeof(Task<CheckExecutionOutcome>) &&
+            if (method.IsStatic &&
+                method.ReturnType == typeof(Task<CheckExecutionOutcome>) &&
                 parameters.Length == 4 &&
                 parameters[0].ParameterType == typeof(DiagnosticItem) &&
                 parameters[1].ParameterType == typeof(RunbookStepDefinition) &&
@@ -260,9 +262,38 @@ namespace SelfDiagnostic.Services
                 return (item, step, runContext, ct) => action(item, step, runContext, ct);
             }
 
-            throw new InvalidOperationException(
-                string.Format("检查项执行器方法签名非法: {0}.{1}。支持签名: void (DiagnosticItem) 或 Task<CheckExecutionOutcome> (DiagnosticItem, RunbookStepDefinition, DiagnosticRunContext, CancellationToken)",
-                    method.DeclaringType?.FullName, method.Name));
+            object instance = null;
+            if (!method.IsStatic)
+            {
+                instance = GenericMethodInvoker.TryCreateInstance(method.DeclaringType);
+                if (instance == null)
+                {
+                    throw new InvalidOperationException(
+                        string.Format("Cannot create instance of {0} (no parameterless constructor) for [CheckExecutor] method {1}",
+                            method.DeclaringType?.FullName, method.Name));
+                }
+            }
+
+            return async (item, step, runContext, ct) =>
+            {
+                var args = GenericMethodInvoker.MapParameters(method, item, step, runContext, ct);
+                try
+                {
+                    var rawResult = method.Invoke(instance, args);
+                    return await GenericMethodInvoker.AdaptReturnValue(rawResult, item);
+                }
+                catch (TargetInvocationException tex)
+                {
+                    var inner = tex.InnerException ?? tex;
+                    if (inner is OperationCanceledException && ct.IsCancellationRequested)
+                        throw inner;
+
+                    item.Status = CheckStatus.Fail;
+                    item.Detail = string.Format("{0}.{1} threw: {2}",
+                        method.DeclaringType?.FullName, method.Name, inner.Message);
+                    return new CheckExecutionOutcome { Success = false };
+                }
+            };
         }
 
         private static IEnumerable<Assembly> DiscoverExecutorAssemblies()

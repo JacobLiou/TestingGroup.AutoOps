@@ -1,11 +1,11 @@
+using Newtonsoft.Json;
+using SelfDiagnostic.Models;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using Newtonsoft.Json;
-using SelfDiagnostic.Models;
 
 namespace SelfDiagnostic.Services
 {
@@ -17,6 +17,7 @@ namespace SelfDiagnostic.Services
         private const string ActualMetricsConfigRelativePath = @"config\stationActualMetrics.json";
         private const string TpConnectivityConfigRelativePath = @"config\tpConnectivity.json";
         private static readonly HttpClient HttpClient = new HttpClient() { Timeout = TimeSpan.FromSeconds(4) };
+
         private static readonly string[] TpMetricFileNames = new string[]
         {
             "stationActualMetrics.json",
@@ -270,6 +271,7 @@ namespace SelfDiagnostic.Services
                     defaultOperator = "lte";
                     defaultThreshold = req.GrrMaxPercent;
                     return true;
+
                 case "gds":
                 case "gdspercent":
                     metricName = "GDS";
@@ -277,6 +279,7 @@ namespace SelfDiagnostic.Services
                     defaultOperator = "gte";
                     defaultThreshold = req.GdsMinPercent;
                     return true;
+
                 case "maxoutputpower":
                 case "maxoutputpowerdbm":
                     metricName = "最大出光功率";
@@ -284,6 +287,7 @@ namespace SelfDiagnostic.Services
                     defaultOperator = "gte";
                     defaultThreshold = req.MaxOutputPowerMinDbm;
                     return true;
+
                 case "snr":
                 case "snrdb":
                     metricName = "信噪比";
@@ -291,6 +295,7 @@ namespace SelfDiagnostic.Services
                     defaultOperator = "gte";
                     defaultThreshold = req.SnrMinDb;
                     return true;
+
                 case "switchrepeatability":
                 case "switchrepeatabilitydb":
                     metricName = "开关重复性";
@@ -298,6 +303,7 @@ namespace SelfDiagnostic.Services
                     defaultOperator = "lte";
                     defaultThreshold = req.SwitchRepeatabilityMaxDb;
                     return true;
+
                 case "powerstability":
                 case "powerstabilitydb":
                     metricName = "功率稳定性";
@@ -305,6 +311,7 @@ namespace SelfDiagnostic.Services
                     defaultOperator = "lte";
                     defaultThreshold = req.PowerStabilityMaxDb;
                     return true;
+
                 default:
                     return false;
             }

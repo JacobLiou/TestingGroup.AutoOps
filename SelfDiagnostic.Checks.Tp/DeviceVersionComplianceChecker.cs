@@ -1,3 +1,6 @@
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using SelfDiagnostic.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,9 +9,6 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using SelfDiagnostic.Models;
 
 namespace SelfDiagnostic.Services
 {
@@ -19,6 +19,7 @@ namespace SelfDiagnostic.Services
     {
         private const string ActualVersionsConfigRelativePath = @"config\deviceActualVersions.json";
         private const string RequirementFallbackConfigRelativePath = @"config\deviceVersionRequirements.mock.json";
+
         private static readonly HttpClient HttpClient = new HttpClient()
         {
             Timeout = TimeSpan.FromSeconds(6)

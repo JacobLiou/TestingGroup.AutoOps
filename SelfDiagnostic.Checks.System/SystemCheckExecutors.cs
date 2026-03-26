@@ -1,3 +1,6 @@
+using Microsoft.Win32;
+using SelfDiagnostic.Models;
+using SelfDiagnostic.Services.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -5,9 +8,6 @@ using System.IO;
 using System.IO.Ports;
 using System.Linq;
 using System.Management;
-using Microsoft.Win32;
-using SelfDiagnostic.Models;
-using SelfDiagnostic.Services.Abstractions;
 
 namespace SelfDiagnostic.Services.Executors.System
 {

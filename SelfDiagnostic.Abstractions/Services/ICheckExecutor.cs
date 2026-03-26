@@ -1,6 +1,6 @@
+using SelfDiagnostic.Models;
 using System.Threading;
 using System.Threading.Tasks;
-using SelfDiagnostic.Models;
 
 namespace SelfDiagnostic.Services.Abstractions
 {

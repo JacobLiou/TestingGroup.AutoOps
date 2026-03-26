@@ -1,5 +1,5 @@
-using System.Xml.Linq;
 using SelfDiagnostic.Models;
+using System.Xml.Linq;
 
 namespace SelfDiagnostic.Services
 {

@@ -1,9 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using Newtonsoft.Json;
 using SelfDiagnostic.Models;
+using System;
+using System.IO;
+using System.Linq;
 
 namespace SelfDiagnostic.Services
 {
