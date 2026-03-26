@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
@@ -171,17 +172,12 @@ namespace SelfDiagnostic.UI
             var colBindDll = _gridView.Columns.AddVisible("BindDll", "BindDll");
             colBindDll.Width = 180;
             colBindDll.MinWidth = 100;
-            colBindDll.OptionsColumn.ReadOnly = true;
-            colBindDll.AppearanceCell.ForeColor = Color.Gray;
 
             var colBindMethod = _gridView.Columns.AddVisible("BindMethod", "BindMethod");
             colBindMethod.Width = 280;
             colBindMethod.MinWidth = 140;
-            colBindMethod.OptionsColumn.ReadOnly = true;
-            colBindMethod.AppearanceCell.ForeColor = Color.Gray;
             var bindMethodBtnEdit = new RepositoryItemButtonEdit();
             bindMethodBtnEdit.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.Standard;
-            bindMethodBtnEdit.ReadOnly = true;
             bindMethodBtnEdit.ButtonClick += BindMethodButtonEdit_ButtonClick;
             colBindMethod.ColumnEdit = bindMethodBtnEdit;
 
@@ -345,19 +341,20 @@ namespace SelfDiagnostic.UI
             using (var dlg = new XtraForm())
             {
                 dlg.Text = "Select Bind Method - " + row.CheckId;
-                dlg.Width = 1100;
-                dlg.Height = 560;
-                dlg.MinimumSize = new Size(800, 400);
+                dlg.Width = 1200;
+                dlg.Height = 620;
+                dlg.MinimumSize = new Size(900, 460);
                 dlg.StartPosition = FormStartPosition.CenterParent;
 
                 var layout = new TableLayoutPanel
                 {
                     Dock = DockStyle.Fill,
                     ColumnCount = 1,
-                    RowCount = 3,
+                    RowCount = 4,
                     Padding = new Padding(10)
                 };
                 layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 28F));
+                layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 36F));
                 layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
                 layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 44F));
                 dlg.Controls.Add(layout);
@@ -371,10 +368,50 @@ namespace SelfDiagnostic.UI
                 };
                 layout.Controls.Add(currentLabel, 0, 0);
 
+                var toolbarPanel = new FlowLayoutPanel
+                {
+                    Dock = DockStyle.Fill,
+                    FlowDirection = FlowDirection.LeftToRight,
+                    WrapContents = false,
+                    Padding = new Padding(0, 2, 0, 2)
+                };
+
+                var showAllCheck = new CheckEdit
+                {
+                    Text = "Show all methods from loaded DLLs",
+                    Checked = false,
+                    Width = 260,
+                    Height = 28
+                };
+                toolbarPanel.Controls.Add(showAllCheck);
+
+                var loadDllBtn = new SimpleButton
+                {
+                    Text = "Load External DLL...",
+                    Width = 150,
+                    Height = 28,
+                    Margin = new Padding(8, 0, 0, 0),
+                    Appearance = { BackColor = Color.FromArgb(52, 73, 94), ForeColor = Color.White, Options = { UseBackColor = true, UseForeColor = true } }
+                };
+                toolbarPanel.Controls.Add(loadDllBtn);
+
+                var methodCountLabel = new LabelControl
+                {
+                    AutoSizeMode = LabelAutoSizeMode.None,
+                    Width = 200,
+                    Height = 28,
+                    Margin = new Padding(12, 6, 0, 0),
+                    Appearance = { ForeColor = Color.Gray }
+                };
+                toolbarPanel.Controls.Add(methodCountLabel);
+
+                layout.Controls.Add(toolbarPanel, 0, 1);
+
                 var pickerGrid = new GridControl { Dock = DockStyle.Fill };
                 var pickerView = new GridView(pickerGrid);
                 pickerGrid.MainView = pickerView;
                 pickerGrid.DataSource = _executorInfos;
+                methodCountLabel.Text = _executorInfos.Count + " registered executors";
 
                 pickerView.OptionsView.ShowGroupPanel = false;
                 pickerView.OptionsView.ShowIndicator = false;
@@ -384,11 +421,63 @@ namespace SelfDiagnostic.UI
 
                 pickerView.Columns.Clear();
                 var pColDll = pickerView.Columns.AddVisible("BindDll", "DLL");
-                pColDll.Width = 280;
+                pColDll.Width = 220;
                 var pColMethod = pickerView.Columns.AddVisible("BindMethod", "Method");
-                pColMethod.Width = 500;
+                pColMethod.Width = 420;
+                var pColDesc = pickerView.Columns.AddVisible("Description", "Signature / Description");
+                pColDesc.Width = 320;
 
-                layout.Controls.Add(pickerGrid, 0, 1);
+                IReadOnlyList<CheckExecutorInfo> allMethodsCache = null;
+
+                showAllCheck.CheckedChanged += (s2, e2) =>
+                {
+                    if (showAllCheck.Checked)
+                    {
+                        if (allMethodsCache == null)
+                            allMethodsCache = DiagnosticEngine.BrowseAllLoadedMethods();
+                        pickerGrid.DataSource = allMethodsCache;
+                        methodCountLabel.Text = allMethodsCache.Count + " methods (all loaded DLLs)";
+                    }
+                    else
+                    {
+                        pickerGrid.DataSource = _executorInfos;
+                        methodCountLabel.Text = _executorInfos.Count + " registered executors";
+                    }
+                    pickerView.RefreshData();
+                };
+
+                loadDllBtn.Click += (s2, e2) =>
+                {
+                    using (var ofd = new OpenFileDialog())
+                    {
+                        ofd.Filter = "DLL files (*.dll)|*.dll|All files (*.*)|*.*";
+                        ofd.Title = "Select a .NET Assembly to scan";
+                        if (ofd.ShowDialog(dlg) == DialogResult.OK)
+                        {
+                            try
+                            {
+                                var methods = DiagnosticEngine.LoadExternalDll(ofd.FileName);
+                                if (methods.Count == 0)
+                                {
+                                    methodCountLabel.Text = "No callable methods found in DLL";
+                                    return;
+                                }
+                                allMethodsCache = null;
+                                showAllCheck.Checked = true;
+                                allMethodsCache = DiagnosticEngine.BrowseAllLoadedMethods();
+                                pickerGrid.DataSource = allMethodsCache;
+                                methodCountLabel.Text = allMethodsCache.Count + " methods (incl. " + System.IO.Path.GetFileName(ofd.FileName) + ")";
+                                pickerView.RefreshData();
+                            }
+                            catch (Exception ex2)
+                            {
+                                methodCountLabel.Text = "Load failed: " + ex2.Message;
+                            }
+                        }
+                    }
+                };
+
+                layout.Controls.Add(pickerGrid, 0, 2);
 
                 var btnPanel = new FlowLayoutPanel
                 {
@@ -410,10 +499,7 @@ namespace SelfDiagnostic.UI
                 okBtn.Click += (s2, e2) =>
                 {
                     var focusedRow = pickerView.FocusedRowHandle;
-                    if (focusedRow < 0)
-                    {
-                        return;
-                    }
+                    if (focusedRow < 0) return;
                     selectedInfo = pickerView.GetRow(focusedRow) as CheckExecutorInfo;
                     if (selectedInfo != null)
                     {
@@ -438,7 +524,7 @@ namespace SelfDiagnostic.UI
                 };
 
                 btnPanel.Controls.AddRange(new Control[] { cancelBtn, okBtn });
-                layout.Controls.Add(btnPanel, 0, 2);
+                layout.Controls.Add(btnPanel, 0, 3);
 
                 dlg.AcceptButton = okBtn;
                 dlg.CancelButton = cancelBtn;

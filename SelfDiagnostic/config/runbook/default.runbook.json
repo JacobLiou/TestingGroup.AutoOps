@@ -443,6 +443,29 @@
       "TimeoutMs": 5000,
       "Enabled": true,
       "Params": {}
+    },
+    {
+      "CheckId": "DEMO_01",
+      "DisplayName": "Demo - 无参方法调用",
+      "Category": "SystemCheck",
+      "BindDll": "SelfDiagnostic.Checks.System.dll",
+      "BindMethod": "SelfDiagnostic.DemoClass.DemoMethod",
+      "TimeoutMs": 5000,
+      "Enabled": true,
+      "Params": {}
+    },
+    {
+      "CheckId": "DEMO_02",
+      "DisplayName": "Demo - 带参数加法计算",
+      "Category": "SystemCheck",
+      "BindDll": "SelfDiagnostic.Checks.System.dll",
+      "BindMethod": "SelfDiagnostic.DemoClass.DemoMethodAdd",
+      "TimeoutMs": 5000,
+      "Enabled": true,
+      "Params": {
+        "a": "10",
+        "b": "25"
+      }
     }
   ]
 }

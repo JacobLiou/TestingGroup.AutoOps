@@ -81,6 +81,8 @@
   <ItemGroup>
     <Compile Include="Services\CheckExecutorRegistry.cs" />
     <Compile Include="Services\DiagnosticEngine.cs" />
+    <Compile Include="Services\GenericMethodInvoker.cs" />
+    <Compile Include="Services\PluginAssemblyLoader.cs" />
     <Compile Include="Services\MimsConfigXmlParser.cs" />
     <Compile Include="Services\MimsGrpcClient.cs" />
     <Compile Include="Services\MimsPowerSupplyParser.cs" />

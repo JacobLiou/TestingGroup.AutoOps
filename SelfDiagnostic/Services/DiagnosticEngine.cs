@@ -13,6 +13,8 @@ namespace SelfDiagnostic.Services
     public static class DiagnosticEngine
     {
         private static readonly RunbookProvider RunbookProvider = new RunbookProvider();
+        private static readonly PluginAssemblyLoader AssemblyLoader = PluginAssemblyLoader.Default;
+        private static readonly GenericMethodInvoker GenericInvoker = new GenericMethodInvoker(AssemblyLoader);
         private static readonly CheckExecutorRegistry ExecutorRegistry = BuildExecutorRegistry();
         private static readonly Random Rng = new Random();
 
@@ -21,6 +23,10 @@ namespace SelfDiagnostic.Services
             RunbookStepDefinition step,
             DiagnosticRunContext runContext,
             CancellationToken ct);
+
+        // ──────────────────────────────────────────────────────────────
+        //  Public API
+        // ──────────────────────────────────────────────────────────────
 
         public static RunbookDefinition LoadRunbook()
         {
@@ -42,6 +48,26 @@ namespace SelfDiagnostic.Services
             return ExecutorRegistry.GetExecutorInfo(checkId);
         }
 
+        /// <summary>
+        /// Browse all callable methods from all loaded non-framework assemblies.
+        /// Used by the RunbookEditor to show available binding targets beyond [CheckExecutor] methods.
+        /// </summary>
+        public static IReadOnlyList<CheckExecutorInfo> BrowseAllLoadedMethods()
+        {
+            return GenericInvoker.BrowseAllLoadedMethods();
+        }
+
+        /// <summary>
+        /// Load an external DLL into the assembly cache and return all its callable methods.
+        /// Used by the RunbookEditor "Load DLL..." button.
+        /// </summary>
+        public static IReadOnlyList<CheckExecutorInfo> LoadExternalDll(string dllPath)
+        {
+            var assembly = AssemblyLoader.LoadFromFile(dllPath);
+            if (assembly == null) return new List<CheckExecutorInfo>();
+            return GenericMethodInvoker.BrowseAssemblyMethods(assembly);
+        }
+
         public static List<DiagnosticItem> BuildCheckList(RunbookDefinition runbook = null)
         {
             runbook = runbook ?? LoadRunbook();
@@ -56,6 +82,13 @@ namespace SelfDiagnostic.Services
                 .ToList();
         }
 
+        // ──────────────────────────────────────────────────────────────
+        //  Core execution — three-tier resolution:
+        //    1. Registered executor by BindMethod (fast delegate path)
+        //    2. Registered executor by CheckId  (fast delegate path)
+        //    3. GenericMethodInvoker via BindDll + BindMethod (reflection)
+        // ──────────────────────────────────────────────────────────────
+
         public static async Task<CheckExecutionOutcome> RunCheckAsync(
             DiagnosticItem item,
             RunbookStepDefinition step,
@@ -64,18 +97,6 @@ namespace SelfDiagnostic.Services
         {
             item.Status = CheckStatus.Scanning;
             await Task.Delay(Rng.Next(200, 450), ct);
-
-            var executor = ExecutorRegistry.ResolveByMethod(step.BindMethod)
-                          ?? ExecutorRegistry.Resolve(step.CheckId);
-            if (executor == null)
-            {
-                item.Status = CheckStatus.Warning;
-                item.Detail = string.IsNullOrWhiteSpace(step.BindMethod)
-                    ? string.Format("Unregistered check: {0}", step.CheckId)
-                    : string.Format("Unbound method: {0}", step.BindMethod);
-                item.Score = 95;
-                return new CheckExecutionOutcome { Success = false };
-            }
 
             using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(ct))
             {
@@ -86,7 +107,30 @@ namespace SelfDiagnostic.Services
 
                 try
                 {
-                    return await executor.ExecuteAsync(item, step, runContext, linkedCts.Token);
+                    // Tier 1 & 2: Registered executor (backward-compatible fast path)
+                    var executor = ExecutorRegistry.ResolveByMethod(step.BindMethod)
+                                  ?? ExecutorRegistry.Resolve(step.CheckId);
+
+                    if (executor != null)
+                    {
+                        return await executor.ExecuteAsync(item, step, runContext, linkedCts.Token);
+                    }
+
+                    // Tier 3: Generic reflection invocation via BindDll + BindMethod
+                    if (!string.IsNullOrWhiteSpace(step.BindDll) && !string.IsNullOrWhiteSpace(step.BindMethod))
+                    {
+                        return await GenericInvoker.InvokeAsync(
+                            step.BindDll, step.BindMethod, item, step, runContext, linkedCts.Token);
+                    }
+
+                    // Unresolvable
+                    item.Status = CheckStatus.Warning;
+                    item.Detail = string.IsNullOrWhiteSpace(step.BindMethod)
+                        ? string.Format("Unregistered check: {0}", step.CheckId)
+                        : string.Format("Unbound method: {0} (DLL: {1})", step.BindMethod,
+                            string.IsNullOrWhiteSpace(step.BindDll) ? "not specified" : step.BindDll);
+                    item.Score = 95;
+                    return new CheckExecutionOutcome { Success = false };
                 }
                 catch (OperationCanceledException) when (!ct.IsCancellationRequested)
                 {
@@ -109,10 +153,21 @@ namespace SelfDiagnostic.Services
             }
         }
 
+        // ──────────────────────────────────────────────────────────────
+        //  Registry bootstrap — [CheckExecutor] attribute scanning
+        // ──────────────────────────────────────────────────────────────
+
         private static CheckExecutorRegistry BuildExecutorRegistry()
         {
+            var assemblies = DiscoverExecutorAssemblies().ToList();
+
+            foreach (var asm in assemblies)
+            {
+                AssemblyLoader.Seed(asm);
+            }
+
             var registry = new CheckExecutorRegistry();
-            RegisterAttributedExecutors(registry, DiscoverExecutorAssemblies());
+            RegisterAttributedExecutors(registry, assemblies);
             return registry;
         }
 

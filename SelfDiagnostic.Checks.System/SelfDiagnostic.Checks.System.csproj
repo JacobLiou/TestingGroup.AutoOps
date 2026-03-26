@@ -44,6 +44,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DemoClass.cs" />
     <Compile Include="SystemCheckExecutors.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
