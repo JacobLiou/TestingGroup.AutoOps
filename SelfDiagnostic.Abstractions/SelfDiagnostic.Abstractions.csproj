@@ -51,9 +51,9 @@
     <Compile Include="Models\MimsMessageModels.cs" />
     <Compile Include="Models\RunbookModels.cs" />
     <Compile Include="Models\TpConnectivityModels.cs" />
-    <Compile Include="Services\Abstractions\CheckExecutorAttribute.cs" />
-    <Compile Include="Services\Abstractions\ICheckExecutor.cs" />
-    <Compile Include="Services\Abstractions\IExternalSystemClient.cs" />
+    <Compile Include="Services\CheckExecutorAttribute.cs" />
+    <Compile Include="Services\ICheckExecutor.cs" />
+    <Compile Include="Services\IExternalSystemClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
