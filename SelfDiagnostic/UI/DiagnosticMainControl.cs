@@ -57,6 +57,7 @@ namespace SelfDiagnostic.UI
         private GridControl _gridControl;
         private GridView _gridView;
         private ScoreRingControl _scoreRing;
+        private ContextMenuStrip _gridContextMenu;
 
         public DiagnosticMainControl() : this(null) { }
 
@@ -217,6 +218,18 @@ namespace SelfDiagnostic.UI
             _gridView.RowStyle += GridView_RowStyle;
 
             // =====================================================
+            //  Grid context menu (right-click debug actions)
+            // =====================================================
+            _gridContextMenu = new ContextMenuStrip();
+            _gridContextMenu.Items.Add("Run This Step", null, async (s, ev) => await DebugRunSingleStepAsync());
+            _gridContextMenu.Items.Add("Run From Here", null, async (s, ev) => await DebugRunFromHereAsync());
+            _gridContextMenu.Items.Add(new ToolStripSeparator());
+            _gridContextMenu.Items.Add("Reset This Step", null, (s, ev) => ResetSingleStep());
+            _gridContextMenu.Items.Add("Reset All Steps", null, (s, ev) => ResetAllSteps());
+            _gridContextMenu.Opening += GridContextMenu_Opening;
+            _gridControl.ContextMenuStrip = _gridContextMenu;
+
+            // =====================================================
             //  Assemble: add Fill first, then Top panels last
             // =====================================================
             Controls.Add(_gridControl);
@@ -225,6 +238,28 @@ namespace SelfDiagnostic.UI
 
             ResumeLayout(true);
         }
+
+        // ──────────────────────────────────────────────────────────────
+        //  Context menu
+        // ──────────────────────────────────────────────────────────────
+
+        private void GridContextMenu_Opening(object sender, CancelEventArgs e)
+        {
+            var handle = _gridView.FocusedRowHandle;
+            bool hasRow = handle >= 0 && handle < _diagnosticItems.Count;
+            bool canRun = hasRow && !_isScanning;
+
+            _gridContextMenu.Items[0].Enabled = canRun;
+            _gridContextMenu.Items[1].Enabled = canRun;
+            _gridContextMenu.Items[3].Enabled = hasRow && !_isScanning;
+            _gridContextMenu.Items[4].Enabled = !_isScanning;
+
+            if (!hasRow) e.Cancel = true;
+        }
+
+        // ──────────────────────────────────────────────────────────────
+        //  Row styling
+        // ──────────────────────────────────────────────────────────────
 
         private void GridView_RowStyle(object sender, DevExpress.XtraGrid.Views.Grid.RowStyleEventArgs e)
         {
@@ -267,6 +302,10 @@ namespace SelfDiagnostic.UI
             return btn;
         }
 
+        // ──────────────────────────────────────────────────────────────
+        //  State management
+        // ──────────────────────────────────────────────────────────────
+
         private void ResetState()
         {
             _activeRunbook = DiagnosticEngine.LoadRunbook();
@@ -293,22 +332,69 @@ namespace SelfDiagnostic.UI
             _gridView.RefreshData();
         }
 
+        private void ResetItemState(DiagnosticItem item)
+        {
+            item.Status = CheckStatus.Pending;
+            item.Detail = string.Empty;
+            item.FixSuggestion = string.Empty;
+            item.Score = 100;
+        }
+
+        private void ResetSingleStep()
+        {
+            var handle = _gridView.FocusedRowHandle;
+            if (handle < 0 || handle >= _diagnosticItems.Count) return;
+
+            ResetItemState(_diagnosticItems[handle]);
+            _gridView.RefreshData();
+            RefreshCountersAndScore();
+            _statusLabel.Text = string.Format("Reset step: {0}", _diagnosticItems[handle].Id);
+        }
+
+        private void ResetAllSteps()
+        {
+            foreach (var item in _diagnosticItems)
+            {
+                ResetItemState(item);
+            }
+
+            _gridView.RefreshData();
+            RefreshCountersAndScore();
+            _currentScanLabel.Text = "Ready";
+            _statusLabel.Text = "All steps reset";
+        }
+
+        // ──────────────────────────────────────────────────────────────
+        //  Execution — shared core
+        // ──────────────────────────────────────────────────────────────
+
         private bool _isScanning;
 
-        private async Task StartScanAsync()
+        /// <summary>
+        /// Acquires the scan lock and runs steps [startIndex .. startIndex+count).
+        /// If resetTargetItems is true, resets only the items in that range before running.
+        /// </summary>
+        private async Task RunStepsAsync(int startIndex, int count, bool resetTargetItems)
         {
             lock (_scanLock)
             {
-                if (_isScanning)
-                    return;
+                if (_isScanning) return;
                 _isScanning = true;
                 _cts = new CancellationTokenSource();
             }
 
             SetButtonsEnabled(true);
-            ResetState();
             var token = _cts.Token;
-            _statusLabel.Text = "Scanning...";
+            var endIndex = Math.Min(startIndex + count, _enabledSteps.Count);
+
+            if (resetTargetItems)
+            {
+                for (int i = startIndex; i < endIndex; i++)
+                {
+                    ResetItemState(_diagnosticItems[i]);
+                }
+                _gridView.RefreshData();
+            }
 
             try
             {
@@ -321,10 +407,12 @@ namespace SelfDiagnostic.UI
                 else
                 {
                     _externalConfigLabel.Text = string.Format("Config unavailable: {0}", runContext.ConfigError);
-                    _statusLabel.Text = "MIMS config unavailable. External checks will be skipped";
                 }
 
-                for (int i = 0; i < _enabledSteps.Count; i++)
+                var label = count == 1 ? "Debug step" : (startIndex == 0 && endIndex == _enabledSteps.Count ? "Scanning" : "Debug from step " + (startIndex + 1));
+                _statusLabel.Text = label + "...";
+
+                for (int i = startIndex; i < endIndex; i++)
                 {
                     if (token.IsCancellationRequested) break;
 
@@ -339,7 +427,7 @@ namespace SelfDiagnostic.UI
                     RefreshCountersAndScore();
                 }
 
-                _currentScanLabel.Text = "Scan complete";
+                _currentScanLabel.Text = count == 1 ? "Step complete" : "Scan complete";
                 _statusLabel.Text = string.Format("Finished! Pass {0} | Warning {1} | Fail {2}",
                     _passCount, _warningCount, _failCount);
             }
@@ -358,6 +446,30 @@ namespace SelfDiagnostic.UI
                 }
                 SetButtonsEnabled(false);
             }
+        }
+
+        // ──────────────────────────────────────────────────────────────
+        //  Public execution entry points
+        // ──────────────────────────────────────────────────────────────
+
+        private async Task StartScanAsync()
+        {
+            ResetState();
+            await RunStepsAsync(0, _enabledSteps.Count, false);
+        }
+
+        private async Task DebugRunSingleStepAsync()
+        {
+            var handle = _gridView.FocusedRowHandle;
+            if (handle < 0 || handle >= _enabledSteps.Count) return;
+            await RunStepsAsync(handle, 1, true);
+        }
+
+        private async Task DebugRunFromHereAsync()
+        {
+            var handle = _gridView.FocusedRowHandle;
+            if (handle < 0 || handle >= _enabledSteps.Count) return;
+            await RunStepsAsync(handle, _enabledSteps.Count - handle, true);
         }
 
         private void StopScan()
@@ -386,6 +498,10 @@ namespace SelfDiagnostic.UI
                 ResetState();
             }
         }
+
+        // ──────────────────────────────────────────────────────────────
+        //  Context helpers
+        // ──────────────────────────────────────────────────────────────
 
         private async Task<DiagnosticRunContext> BuildRunContextAsync(CancellationToken cancellationToken)
         {

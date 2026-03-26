@@ -66,8 +66,12 @@ namespace SelfDiagnostic.Services
             var type = ResolveType(assembly, typeName);
             if (type == null)
             {
+                type = ResolveTypeAcrossLoadedAssemblies(typeName);
+            }
+            if (type == null)
+            {
                 item.Status = CheckStatus.Fail;
-                item.Detail = string.Format("Type not found: {0} in {1}", typeName, assembly.GetName().Name);
+                item.Detail = string.Format("Type not found: {0} in {1} (also searched all loaded assemblies)", typeName, assembly.GetName().Name);
                 return new CheckExecutionOutcome { Success = false };
             }
 
@@ -212,6 +216,28 @@ namespace SelfDiagnostic.Services
 
             return SafeGetTypes(assembly).FirstOrDefault(t =>
                 string.Equals(t.FullName, typeName, StringComparison.OrdinalIgnoreCase));
+        }
+
+        /// <summary>
+        /// Fallback: search all assemblies in the current AppDomain for the type.
+        /// Handles cases where BindDll doesn't match the assembly that actually contains the type,
+        /// or the DLL in plugins/ is stale but the type was loaded from the build output.
+        /// </summary>
+        private static Type ResolveTypeAcrossLoadedAssemblies(string typeName)
+        {
+            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                var name = asm.GetName().Name ?? string.Empty;
+                if (IsFrameworkAssembly(name)) continue;
+
+                var type = asm.GetType(typeName, throwOnError: false, ignoreCase: true);
+                if (type != null) return type;
+
+                type = SafeGetTypes(asm).FirstOrDefault(t =>
+                    string.Equals(t.FullName, typeName, StringComparison.OrdinalIgnoreCase));
+                if (type != null) return type;
+            }
+            return null;
         }
 
         private static MethodInfo FindMethod(Type type, string methodName)
