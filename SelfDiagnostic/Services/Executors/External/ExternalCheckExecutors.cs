@@ -6,6 +6,9 @@ using SelfDiagnostic.Services.Abstractions;
 
 namespace SelfDiagnostic.Services.Executors.External
 {
+    /// <summary>
+    /// 外部依赖检查执行器集合（主项目副本）— HTTP POST 探测外部系统。
+    /// </summary>
     internal static class ExternalCheckExecutors
     {
         private static readonly ExternalDependencyHttpChecker ExternalChecker = new ExternalDependencyHttpChecker();

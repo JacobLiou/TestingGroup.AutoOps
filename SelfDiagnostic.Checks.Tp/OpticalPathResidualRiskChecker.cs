@@ -11,11 +11,17 @@ using SelfDiagnostic.Models;
 
 namespace SelfDiagnostic.Services
 {
+    /// <summary>
+    /// 光路残余风险检查器 — 分析 RTS 后光路残余异常风险。
+    /// </summary>
     public sealed class OpticalPathResidualRiskChecker
     {
         private const string FallbackRelativePath = @"config\opticalResidualRisk.mock.json";
         private static readonly HttpClient HttpClient = new HttpClient() { Timeout = TimeSpan.FromSeconds(6) };
 
+        /// <summary>
+        /// 从 TMS 或本地兜底 JSON 获取 RTS 完成情况及残余问题列表，汇总为指标并判定风险是否可接受。
+        /// </summary>
         public async Task<OpticalResidualRiskResult> CheckAsync(
             RunbookStepDefinition step,
             DiagnosticRunContext runContext,

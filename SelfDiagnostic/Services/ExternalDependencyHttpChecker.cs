@@ -9,6 +9,9 @@ using SelfDiagnostic.Models;
 
 namespace SelfDiagnostic.Services
 {
+    /// <summary>
+    /// 外部依赖 HTTP 探测器 — 对配置的各个端点执行 HTTP POST，验证其可达性与响应状态。
+    /// </summary>
     public sealed class ExternalDependencyHttpChecker
     {
         private static readonly HttpClient HttpClient = new HttpClient
@@ -25,6 +28,9 @@ namespace SelfDiagnostic.Services
             [ExternalDependencyIds.Lan] = "{\"source\":\"selfDiagnostic\",\"check\":\"lan\"}"
         };
 
+        /// <summary>
+        /// 对指定依赖 ID 的端点发起 JSON POST 探测，返回是否成功及耗时、状态码等信息。
+        /// </summary>
         public async Task<ExternalDependencyCheckResult> CheckAsync(string dependencyId, ExternalDependencyConfig config, CancellationToken cancellationToken)
         {
             ExternalDependencyEndpoint endpoint;

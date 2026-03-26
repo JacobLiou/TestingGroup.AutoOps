@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace SelfDiagnostic.Models
 {
+    /// <summary>
+    /// 诊断结果等级
+    /// </summary>
     public enum ResultLevel
     {
         OK,
@@ -10,6 +13,9 @@ namespace SelfDiagnostic.Models
         Error
     }
 
+    /// <summary>
+    /// 规则严重级别
+    /// </summary>
     public enum RuleSeverity
     {
         S0,
@@ -17,6 +23,9 @@ namespace SelfDiagnostic.Models
         S2
     }
 
+    /// <summary>
+    /// 诊断结果摘要
+    /// </summary>
     public sealed class DiagnosticSummary
     {
         public int OkCount { get; set; }
@@ -25,6 +34,9 @@ namespace SelfDiagnostic.Models
         public List<string> TopIssues { get; set; } = new List<string>();
     }
 
+    /// <summary>
+    /// 单条诊断规则执行结果
+    /// </summary>
     public sealed class DiagnosticRuleResult
     {
         public string RuleCode { get; set; } = string.Empty;
@@ -42,6 +54,9 @@ namespace SelfDiagnostic.Models
         public int Score { get; set; }
     }
 
+    /// <summary>
+    /// 完整诊断运行结果文档
+    /// </summary>
     public sealed class DiagnosticResultDocument
     {
         public string SchemaVersion { get; set; } = "1.0.0";
@@ -59,6 +74,9 @@ namespace SelfDiagnostic.Models
         public List<DiagnosticRuleResult> Results { get; set; } = new List<DiagnosticRuleResult>();
     }
 
+    /// <summary>
+    /// 规则元数据定义
+    /// </summary>
     public sealed class RuleMetadata
     {
         public string CheckId { get; set; } = string.Empty;

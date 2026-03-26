@@ -9,6 +9,9 @@ using SelfDiagnostic.Models;
 
 namespace SelfDiagnostic.Services
 {
+    /// <summary>
+    /// 外部依赖 HTTP 探测器 — 对配置的各个端点执行 HTTP POST，验证其可达性与响应状态。
+    /// </summary>
     public sealed class ExternalDependencyHttpChecker
     {
         private static readonly HttpClient HttpClient = new HttpClient
@@ -16,6 +19,7 @@ namespace SelfDiagnostic.Services
             Timeout = TimeSpan.FromSeconds(5)
         };
 
+        /// <summary>各依赖项 ID 对应的探测请求体</summary>
         private static readonly Dictionary<string, string> RequestBodies = new Dictionary<string, string>
         {
             [ExternalDependencyIds.Mes] = "{\"source\":\"selfDiagnostic\",\"check\":\"mes\"}",
@@ -25,7 +29,13 @@ namespace SelfDiagnostic.Services
             [ExternalDependencyIds.Lan] = "{\"source\":\"selfDiagnostic\",\"check\":\"lan\"}"
         };
 
-        public async Task<ExternalDependencyCheckResult> CheckAsync(string dependencyId, ExternalDependencyConfig config, CancellationToken cancellationToken)
+        /// <summary>
+        /// 对指定依赖项执行 HTTP POST 探测，返回探测结果（含状态码、耗时等）。
+        /// </summary>
+        public async Task<ExternalDependencyCheckResult> CheckAsync(
+            string dependencyId,
+            ExternalDependencyConfig config,
+            CancellationToken cancellationToken)
         {
             ExternalDependencyEndpoint endpoint;
             if (!config.Endpoints.TryGetValue(dependencyId, out endpoint))

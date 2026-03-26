@@ -6,8 +6,14 @@ using SelfDiagnostic.Models;
 
 namespace SelfDiagnostic.Services
 {
+    /// <summary>
+    /// MIMS 配置 XML 解析器 — 从 MIMS 返回的 XML 中提取外部依赖端点配置。
+    /// </summary>
     public sealed class MimsConfigXmlParser
     {
+        /// <summary>
+        /// 解析 XML 为外部依赖配置；若为空或解析失败则返回内置默认端点配置。
+        /// </summary>
         public ExternalDependencyConfig ParseOrDefault(string xml)
         {
             if (string.IsNullOrWhiteSpace(xml))

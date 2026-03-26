@@ -2,6 +2,9 @@ using System.Collections.Generic;
 
 namespace SelfDiagnostic.Models
 {
+    /// <summary>
+    /// 外部依赖系统 ID 常量
+    /// </summary>
     public static class ExternalDependencyIds
     {
         public const string Mes = "EXT_MES";
@@ -11,6 +14,9 @@ namespace SelfDiagnostic.Models
         public const string Lan = "EXT_LAN";
     }
 
+    /// <summary>
+    /// 外部依赖端点配置
+    /// </summary>
     public sealed class ExternalDependencyEndpoint
     {
         public string Id { get; set; } = string.Empty;
@@ -18,12 +24,18 @@ namespace SelfDiagnostic.Models
         public string Url { get; set; } = string.Empty;
     }
 
+    /// <summary>
+    /// 外部依赖完整配置
+    /// </summary>
     public sealed class ExternalDependencyConfig
     {
         public Dictionary<string, ExternalDependencyEndpoint> Endpoints { get; set; }
             = new Dictionary<string, ExternalDependencyEndpoint>();
     }
 
+    /// <summary>
+    /// 外部依赖探测结果
+    /// </summary>
     public sealed class ExternalDependencyCheckResult
     {
         public bool Success { get; set; }
@@ -34,6 +46,9 @@ namespace SelfDiagnostic.Models
         public string EndpointName { get; set; } = string.Empty;
     }
 
+    /// <summary>
+    /// 诊断运行上下文
+    /// </summary>
     public sealed class DiagnosticRunContext
     {
         public bool ExternalChecksEnabled { get; set; }

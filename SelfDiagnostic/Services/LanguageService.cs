@@ -5,15 +5,23 @@ using Newtonsoft.Json;
 
 namespace SelfDiagnostic.Services
 {
+    /// <summary>
+    /// 多语言服务 — 管理 UI 语言切换（中文/英文）。
+    /// </summary>
     public sealed class LanguageService
     {
+        /// <summary>简体中文区域标识。</summary>
         public const string ZhCn = "zh-CN";
+        /// <summary>美式英语区域标识。</summary>
         public const string EnUs = "en-US";
         private const string DefaultLanguage = ZhCn;
 
         private static LanguageService _instance;
         private static readonly object InstanceLock = new object();
 
+        /// <summary>
+        /// 线程安全的单例实例。
+        /// </summary>
         public static LanguageService Instance
         {
             get
@@ -37,7 +45,13 @@ namespace SelfDiagnostic.Services
         private Dictionary<string, string> _strings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         private string _currentLanguage = DefaultLanguage;
 
+        /// <summary>
+        /// 当前 UI 语言代码（规范化后的 zh-CN 或 en-US）。
+        /// </summary>
         public string CurrentLanguage => _currentLanguage;
+        /// <summary>
+        /// 语言切换后触发，参数为新的语言代码。
+        /// </summary>
         public event Action<string> LanguageChanged;
 
         private LanguageService()
@@ -46,12 +60,18 @@ namespace SelfDiagnostic.Services
             _settingsPath = Path.Combine(appData, "SelfDiagnostic", "settings.json");
         }
 
+        /// <summary>
+        /// 从本地设置加载已保存语言并应用对应字符串资源。
+        /// </summary>
         public void Initialize()
         {
             var language = NormalizeLanguage(LoadSavedLanguage());
             SetLanguage(language);
         }
 
+        /// <summary>
+        /// 设置当前语言、重新加载 i18n 字典并持久化到用户设置文件。
+        /// </summary>
         public void SetLanguage(string language)
         {
             var normalized = NormalizeLanguage(language);
@@ -65,6 +85,9 @@ namespace SelfDiagnostic.Services
             LanguageChanged?.Invoke(normalized);
         }
 
+        /// <summary>
+        /// 按键获取本地化字符串；缺失或为空时返回 <paramref name="fallback"/>。
+        /// </summary>
         public string Get(string key, string fallback = "")
         {
             lock (_sync)
@@ -77,6 +100,9 @@ namespace SelfDiagnostic.Services
             }
         }
 
+        /// <summary>
+        /// 获取本地化格式字符串后执行 <see cref="string.Format(string, object[])"/>；格式化失败时返回 <paramref name="fallbackFormat"/>。
+        /// </summary>
         public string Format(string key, string fallbackFormat, params object[] args)
         {
             var format = Get(key, fallbackFormat);

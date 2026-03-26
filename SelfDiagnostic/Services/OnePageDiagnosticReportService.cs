@@ -8,8 +8,14 @@ using SelfDiagnostic.Models;
 
 namespace SelfDiagnostic.Services
 {
+    /// <summary>
+    /// 一页式诊断报告服务 — 将诊断结果汇总生成结构化的 DiagnosticResultDocument。
+    /// </summary>
     public sealed class OnePageDiagnosticReportService
     {
+        /// <summary>
+        /// 根据诊断项与 Step 映射构建 <see cref="DiagnosticResultDocument"/>，并同时写入 JSON 与 Markdown 报告文件。
+        /// </summary>
         public Tuple<string, string, DiagnosticResultDocument> CreateAndSave(
             IReadOnlyCollection<DiagnosticItem> items,
             IReadOnlyDictionary<string, RunbookStepDefinition> stepLookup,

@@ -11,6 +11,9 @@ using SelfDiagnostic.Services.Abstractions;
 
 namespace SelfDiagnostic.Services.Executors.System
 {
+    /// <summary>
+    /// 系统级检查执行器集合（主项目副本）— 操作系统、磁盘、安全、性能等检查。
+    /// </summary>
     internal static class SystemCheckExecutors
     {
         [CheckExecutor("SYS_01")]

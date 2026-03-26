@@ -7,6 +7,9 @@ using SelfDiagnostic.Models;
 
 namespace SelfDiagnostic.Services
 {
+    /// <summary>
+    /// RunBook 文件服务 — 负责 RunBook JSON 文件的读取、保存和列表查询。
+    /// </summary>
     public sealed class RunbookFileService
     {
         private const string RunbookDirRelativePath = @"config\runbook";
@@ -16,11 +19,17 @@ namespace SelfDiagnostic.Services
             Formatting = Formatting.Indented
         };
 
+        /// <summary>
+        /// 返回 RunBook 目录的绝对路径（应用程序基目录下 config\runbook）。
+        /// </summary>
         public string GetRunbookDirectory()
         {
             return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, RunbookDirRelativePath);
         }
 
+        /// <summary>
+        /// 根据 RunBook Id 构建 JSON 文件的完整路径。
+        /// </summary>
         public string BuildRunbookPath(string runbookId)
         {
             if (string.IsNullOrWhiteSpace(runbookId))
@@ -31,12 +40,18 @@ namespace SelfDiagnostic.Services
             return Path.Combine(GetRunbookDirectory(), runbookId + ".runbook.json");
         }
 
+        /// <summary>
+        /// 按 Id 从标准目录加载 RunBook 并校验。
+        /// </summary>
         public RunbookDefinition Load(string runbookId)
         {
             var path = BuildRunbookPath(runbookId);
             return LoadFromPath(path);
         }
 
+        /// <summary>
+        /// 从指定文件路径读取并反序列化 RunBook，并进行完整性校验。
+        /// </summary>
         public RunbookDefinition LoadFromPath(string path)
         {
             if (!File.Exists(path))
@@ -55,6 +70,9 @@ namespace SelfDiagnostic.Services
             return runbook;
         }
 
+        /// <summary>
+        /// 校验后将 RunBook 序列化为 JSON 并写入磁盘（目录不存在时自动创建）。
+        /// </summary>
         public void Save(RunbookDefinition runbook, string runbookId)
         {
             Validate(runbook);
@@ -73,6 +91,9 @@ namespace SelfDiagnostic.Services
             File.WriteAllText(path, json);
         }
 
+        /// <summary>
+        /// 校验 RunBook 至少包含一个 Step、至少一个已启用 Step，且启用项具备 CheckId 与 BindMethod。
+        /// </summary>
         public static void Validate(RunbookDefinition runbook)
         {
             if (runbook.Steps.Count == 0)

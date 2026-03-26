@@ -4,10 +4,16 @@ using SelfDiagnostic.Models;
 
 namespace SelfDiagnostic.Services
 {
+    /// <summary>
+    /// 规则目录 — 注册诊断规则元数据，用于生成结构化报告。
+    /// </summary>
     public static class RuleCatalog
     {
         private static readonly Dictionary<string, RuleMetadata> Entries = BuildEntries();
 
+        /// <summary>
+        /// 根据 CheckId 解析规则元数据；未维护时返回通用占位元数据。
+        /// </summary>
         public static RuleMetadata Resolve(string checkId)
         {
             if (Entries.TryGetValue(checkId, out var metadata))

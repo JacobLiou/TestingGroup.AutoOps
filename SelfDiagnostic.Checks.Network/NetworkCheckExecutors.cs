@@ -6,8 +6,12 @@ using SelfDiagnostic.Services.Abstractions;
 
 namespace SelfDiagnostic.Services.Executors.Network
 {
+    /// <summary>
+    /// 网络检查执行器集合 — 检测本机网络连通性、DNS 解析、互联网可达性。
+    /// </summary>
     internal static class NetworkCheckExecutors
     {
+        /// <summary>检查本机网络是否可用（活动适配器数量）</summary>
         [CheckExecutor("NET_01", DisplayName = "Network Connectivity", Description = "Check if network is available and count active adapters", DefaultCategory = "StationCheck")]
         private static void CheckNetworkAvailable(DiagnosticItem item)
         {
@@ -30,6 +34,7 @@ namespace SelfDiagnostic.Services.Executors.Network
             }
         }
 
+        /// <summary>验证 DNS 解析功能（解析 www.baidu.com）</summary>
         [CheckExecutor("NET_02", DisplayName = "DNS Resolution", Description = "Verify DNS resolution works by resolving a known host", DefaultCategory = "StationCheck")]
         private static void CheckDns(DiagnosticItem item)
         {
@@ -49,6 +54,7 @@ namespace SelfDiagnostic.Services.Executors.Network
             }
         }
 
+        /// <summary>通过 Ping 8.8.8.8 验证互联网可达性</summary>
         [CheckExecutor("NET_03", DisplayName = "Internet Connectivity", Description = "Ping external host to verify internet access", DefaultCategory = "StationCheck")]
         private static void CheckInternet(DiagnosticItem item)
         {

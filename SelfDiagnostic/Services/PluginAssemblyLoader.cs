@@ -8,14 +8,16 @@ using System.Reflection;
 namespace SelfDiagnostic.Services
 {
     /// <summary>
-    /// Thread-safe on-demand assembly loader with caching.
-    /// Resolves DLLs from: plugins/ directory, AppDomain base directory, or absolute path.
+    /// 插件程序集加载器 — 线程安全的按需加载 DLL，支持从 plugins/ 目录、应用程序根目录及 AppDomain 已加载程序集中查找。
     /// </summary>
     public sealed class PluginAssemblyLoader
     {
         private static readonly Lazy<PluginAssemblyLoader> LazyDefault =
             new Lazy<PluginAssemblyLoader>(() => new PluginAssemblyLoader());
 
+        /// <summary>
+        /// 进程内单例默认加载器实例。
+        /// </summary>
         public static PluginAssemblyLoader Default => LazyDefault.Value;
 
         private readonly ConcurrentDictionary<string, Assembly> _cache =
@@ -24,6 +26,9 @@ namespace SelfDiagnostic.Services
         private static readonly string BaseDir = AppDomain.CurrentDomain.BaseDirectory;
         private static readonly string PluginsDir = Path.Combine(BaseDir, "plugins");
 
+        /// <summary>
+        /// 将已加载程序集按短名称加入缓存，避免重复解析（动态程序集会被忽略）。
+        /// </summary>
         public void Seed(Assembly assembly)
         {
             if (assembly == null || assembly.IsDynamic) return;
@@ -33,8 +38,7 @@ namespace SelfDiagnostic.Services
         }
 
         /// <summary>
-        /// Load or retrieve a cached assembly by DLL name or path.
-        /// Returns null if the assembly cannot be resolved.
+        /// 按 DLL 名称或路径加载或从缓存获取程序集；无法解析时返回 null。
         /// </summary>
         public Assembly Load(string bindDll)
         {
@@ -57,8 +61,7 @@ namespace SelfDiagnostic.Services
         }
 
         /// <summary>
-        /// Load a DLL from an explicit file path (used by "Browse DLL" UI).
-        /// Returns the loaded assembly, or null on failure.
+        /// 从绝对路径加载 DLL 并写入缓存；失败时返回 null（供浏览 DLL 等 UI 使用）。
         /// </summary>
         public Assembly LoadFromFile(string fullPath)
         {
@@ -75,6 +78,9 @@ namespace SelfDiagnostic.Services
             return assembly;
         }
 
+        /// <summary>
+        /// 返回当前缓存中已加载程序集的去重列表。
+        /// </summary>
         public IReadOnlyList<Assembly> GetLoadedAssemblies()
         {
             return _cache.Values.Distinct().ToList();

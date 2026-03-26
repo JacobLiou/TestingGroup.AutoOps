@@ -11,11 +11,17 @@ using SelfDiagnostic.Models;
 
 namespace SelfDiagnostic.Services
 {
+    /// <summary>
+    /// 硬件状态分组检查器 — 按功能组（光学 / 控制存储 / 接口通信）检查各硬件设备状态。
+    /// </summary>
     public sealed class HwStatusGroupedChecker
     {
         private const string FallbackRelativePath = @"config\hwStatusGrouped.mock.json";
         private static readonly HttpClient HttpClient = new HttpClient() { Timeout = TimeSpan.FromSeconds(6) };
 
+        /// <summary>
+        /// 按步骤中的分组键从 TMS 或本地兜底 JSON 加载该组硬件状态指标并汇总通过情况。
+        /// </summary>
         public async Task<HwStatusGroupedResult> CheckAsync(
             RunbookStepDefinition step,
             DiagnosticRunContext runContext,

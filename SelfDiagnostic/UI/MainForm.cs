@@ -4,11 +4,13 @@ using DevExpress.XtraEditors;
 namespace SelfDiagnostic.UI
 {
     /// <summary>
-    /// Standalone form wrapper for the DiagnosticMainControl.
-    /// When embedding into MIMS, use DiagnosticMainControl directly instead.
+    /// 主窗体 — 应用程序入口窗口，承载 DiagnosticMainControl。
     /// </summary>
     public sealed class MainForm : XtraForm
     {
+        /// <summary>
+        /// 创建主窗体并填充 <see cref="DiagnosticMainControl"/>。
+        /// </summary>
         public MainForm()
         {
             Text = "Auto Diagnostic Tool - SelfDiagnostic";

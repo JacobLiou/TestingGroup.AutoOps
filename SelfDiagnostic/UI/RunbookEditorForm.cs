@@ -15,6 +15,9 @@ using SelfDiagnostic.Services;
 
 namespace SelfDiagnostic.UI
 {
+    /// <summary>
+    /// RunBook 编辑器窗体 — 提供 RunBook 步骤的可视化编辑、方法绑定选择和保存功能。
+    /// </summary>
     public sealed class RunbookEditorForm : XtraForm
     {
         private readonly RunbookFileService _runbookFileService = new RunbookFileService();
@@ -30,8 +33,14 @@ namespace SelfDiagnostic.UI
         private LabelControl _statusLabel;
         private LabelControl _filePathLabel;
 
+        /// <summary>
+        /// RunBook 保存成功后引发。
+        /// </summary>
         public event EventHandler RunbookSaved;
 
+        /// <summary>
+        /// 按指定 RunBook 标识加载并初始化编辑器界面。
+        /// </summary>
         public RunbookEditorForm(string runbookId = "default")
         {
             Width = 1400;
@@ -735,6 +744,9 @@ namespace SelfDiagnostic.UI
         }
     }
 
+    /// <summary>
+    /// RunBook 编辑器网格中的一行，对应一条步骤定义的可编辑视图。
+    /// </summary>
     public sealed class RunbookStepRow
     {
         public string CheckId { get; set; } = string.Empty;
@@ -748,6 +760,9 @@ namespace SelfDiagnostic.UI
         public bool IsParamsJsonValid { get; private set; } = true;
         public string ParamsJsonError { get; private set; } = string.Empty;
 
+        /// <summary>
+        /// 从 <see cref="RunbookStepDefinition"/> 创建行模型。
+        /// </summary>
         public static RunbookStepRow FromDefinition(RunbookStepDefinition def)
         {
             return new RunbookStepRow
@@ -763,6 +778,9 @@ namespace SelfDiagnostic.UI
             };
         }
 
+        /// <summary>
+        /// 将当前行转换为 RunBook 步骤定义（会先校验 ParamsJson）。
+        /// </summary>
         public RunbookStepDefinition ToDefinition()
         {
             ValidateJson();
@@ -788,6 +806,9 @@ namespace SelfDiagnostic.UI
             };
         }
 
+        /// <summary>
+        /// 校验 <see cref="ParamsJson"/> 是否为合法 JSON。
+        /// </summary>
         public void ValidateJson()
         {
             if (string.IsNullOrWhiteSpace(ParamsJson))

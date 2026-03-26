@@ -9,6 +9,9 @@ using SelfDiagnostic.Models;
 
 namespace SelfDiagnostic.Services
 {
+    /// <summary>
+    /// 工站能力合规性检查器 — 将工站实测指标（GRR/GDS/光功率/SNR 等）与 MIMS 下发的基线要求进行对比。
+    /// </summary>
     public sealed class StationCapabilityComplianceChecker
     {
         private const string ActualMetricsConfigRelativePath = @"config\stationActualMetrics.json";
@@ -41,11 +44,17 @@ namespace SelfDiagnostic.Services
             public string StationMetricsRelativePath { get; set; } = string.Empty;
         }
 
+        /// <summary>
+        /// 在无步骤参数时使用运行上下文加载实测值，与 MIMS 工站能力要求做全量指标对比。
+        /// </summary>
         public StationCapabilityComplianceResult Check(DiagnosticRunContext runContext)
         {
             return CheckCore(null, runContext);
         }
 
+        /// <summary>
+        /// 根据步骤参数（含自定义光学规则）加载实测值，与 MIMS 要求对比或按 metricKey 执行单指标规则。
+        /// </summary>
         public StationCapabilityComplianceResult Check(RunbookStepDefinition step, DiagnosticRunContext runContext)
         {
             return CheckCore(step, runContext);

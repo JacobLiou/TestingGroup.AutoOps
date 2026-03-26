@@ -12,6 +12,9 @@ using SelfDiagnostic.Models;
 
 namespace SelfDiagnostic.Services
 {
+    /// <summary>
+    /// 设备版本合规性检查器 — 从 TMS 获取版本要求，与本地实际版本做对比，输出不匹配项列表。
+    /// </summary>
     public sealed class DeviceVersionComplianceChecker
     {
         private const string ActualVersionsConfigRelativePath = @"config\deviceActualVersions.json";
@@ -32,6 +35,9 @@ namespace SelfDiagnostic.Services
             public string ActualVersion { get; set; } = string.Empty;
         }
 
+        /// <summary>
+        /// 从 TMS 请求版本要求并与本地配置的实际版本比对，失败时可回退本地兜底要求文件。
+        /// </summary>
         public async Task<DeviceVersionComplianceResult> CheckAsync(
             RunbookStepDefinition step,
             DiagnosticRunContext runContext,

@@ -9,6 +9,9 @@ using SelfDiagnostic.Models;
 
 namespace SelfDiagnostic.Services
 {
+    /// <summary>
+    /// 工站能力合规性检查器。
+    /// </summary>
     public sealed class StationCapabilityComplianceChecker
     {
         private const string ActualMetricsConfigRelativePath = @"config\stationActualMetrics.json";
@@ -41,11 +44,17 @@ namespace SelfDiagnostic.Services
             public string StationMetricsRelativePath { get; set; } = string.Empty;
         }
 
+        /// <summary>
+        /// 根据运行上下文中的 MIMS 要求与实际指标，执行完整工站能力合规比对（无步骤定制规则）。
+        /// </summary>
         public StationCapabilityComplianceResult Check(DiagnosticRunContext runContext)
         {
             return CheckCore(null, runContext);
         }
 
+        /// <summary>
+        /// 根据剧本步骤参数（如自定义 metricKey 规则）与运行上下文执行工站能力合规比对。
+        /// </summary>
         public StationCapabilityComplianceResult Check(RunbookStepDefinition step, DiagnosticRunContext runContext)
         {
             return CheckCore(step, runContext);

@@ -2,6 +2,9 @@ using System.Collections.Generic;
 
 namespace SelfDiagnostic.Models
 {
+    /// <summary>
+    /// TP（测试平台）相关检查项 ID 常量
+    /// </summary>
     public static class TpCheckIds
     {
         public const string PathAndConfig = "TP_01";
@@ -20,6 +23,9 @@ namespace SelfDiagnostic.Models
         public const string OpticalCustomSnrRule = "TP_14";
     }
 
+    /// <summary>
+    /// TP 安装路径、串口与网络等连通性探测快照
+    /// </summary>
     public sealed class TpConnectivitySnapshot
     {
         public string TpRootPath { get; set; } = string.Empty;
@@ -32,6 +38,9 @@ namespace SelfDiagnostic.Models
         public string Error { get; set; } = string.Empty;
     }
 
+    /// <summary>
+    /// 单个 TP 网络端点的可达性与耗时状态
+    /// </summary>
     public sealed class TpNetworkEndpointStatus
     {
         public string Endpoint { get; set; } = string.Empty;
@@ -40,18 +49,27 @@ namespace SelfDiagnostic.Models
         public string Error { get; set; } = string.Empty;
     }
 
+    /// <summary>
+    /// 设备版本合规检查中的单设备版本要求
+    /// </summary>
     public sealed class DeviceVersionRequirement
     {
         public string DeviceKey { get; set; } = string.Empty;
         public string RequiredVersion { get; set; } = string.Empty;
     }
 
+    /// <summary>
+    /// 设备版本合规检查中的单设备实际版本
+    /// </summary>
     public sealed class DeviceVersionActual
     {
         public string DeviceKey { get; set; } = string.Empty;
         public string ActualVersion { get; set; } = string.Empty;
     }
 
+    /// <summary>
+    /// 要求版本与实际版本不一致（或缺失实际版本）的记录
+    /// </summary>
     public sealed class DeviceVersionMismatch
     {
         public string DeviceKey { get; set; } = string.Empty;
@@ -60,6 +78,9 @@ namespace SelfDiagnostic.Models
         public bool MissingActual { get; set; }
     }
 
+    /// <summary>
+    /// 设备版本合规检查的汇总结果
+    /// </summary>
     public sealed class DeviceVersionComplianceResult
     {
         public bool ApiSuccess { get; set; }
@@ -71,6 +92,9 @@ namespace SelfDiagnostic.Models
         public List<DeviceVersionMismatch> Mismatches { get; set; } = new List<DeviceVersionMismatch>();
     }
 
+    /// <summary>
+    /// 工位能力（光学与工艺指标等）的阈值要求
+    /// </summary>
     public sealed class StationCapabilityRequirements
     {
         public double GrrMaxPercent { get; set; } = 10.0;
@@ -82,6 +106,9 @@ namespace SelfDiagnostic.Models
         public string ChannelPlanRequired { get; set; } = "100G-4CH";
     }
 
+    /// <summary>
+    /// 工位能力检查中读取到的实际指标值
+    /// </summary>
     public sealed class StationCapabilityActual
     {
         public double GrrPercent { get; set; }
@@ -93,6 +120,9 @@ namespace SelfDiagnostic.Models
         public string ChannelPlanActual { get; set; } = string.Empty;
     }
 
+    /// <summary>
+    /// 工位能力检查中单项指标的对比结果
+    /// </summary>
     public sealed class StationCapabilityMetricResult
     {
         public string Metric { get; set; } = string.Empty;
@@ -101,6 +131,9 @@ namespace SelfDiagnostic.Models
         public bool Pass { get; set; }
     }
 
+    /// <summary>
+    /// 工位能力合规检查的汇总结果
+    /// </summary>
     public sealed class StationCapabilityComplianceResult
     {
         public bool Success { get; set; }
@@ -109,6 +142,9 @@ namespace SelfDiagnostic.Models
         public List<string> FailReasons { get; set; } = new List<string>();
     }
 
+    /// <summary>
+    /// 电源质量探测的电压、纹波与采样参数等要求
+    /// </summary>
     public sealed class PowerSupplyRequirements
     {
         public double TargetVoltageV { get; set; } = 12.0;
@@ -121,12 +157,18 @@ namespace SelfDiagnostic.Models
         public string TpVoltageApiUrl { get; set; } = string.Empty;
     }
 
+    /// <summary>
+    /// 电源电压单次采样数据点
+    /// </summary>
     public sealed class PowerVoltageSample
     {
         public System.DateTime Timestamp { get; set; }
         public double VoltageV { get; set; }
     }
 
+    /// <summary>
+    /// 电源质量检查的统计结果与失败原因
+    /// </summary>
     public sealed class PowerSupplyQualityResult
     {
         public bool Success { get; set; }
@@ -142,6 +184,9 @@ namespace SelfDiagnostic.Models
         public List<string> FailReasons { get; set; } = new List<string>();
     }
 
+    /// <summary>
+    /// 默认信息与 LUT 下载/校验类检查的汇总结果
+    /// </summary>
     public sealed class DefaultInfoAndLutResult
     {
         public bool Success { get; set; }
@@ -153,6 +198,9 @@ namespace SelfDiagnostic.Models
         public List<string> FailReasons { get; set; } = new List<string>();
     }
 
+    /// <summary>
+    /// 分组检查中的一条指标（期望值、实际值与是否通过）
+    /// </summary>
     public sealed class GroupedCheckMetric
     {
         public string Name { get; set; } = string.Empty;
@@ -161,6 +209,9 @@ namespace SelfDiagnostic.Models
         public bool Pass { get; set; }
     }
 
+    /// <summary>
+    /// 硬件/软件/固件配置完整性检查的汇总结果
+    /// </summary>
     public sealed class HwSwFwConfigIntegrityResult
     {
         public bool Success { get; set; }
@@ -169,6 +220,9 @@ namespace SelfDiagnostic.Models
         public List<string> FailReasons { get; set; } = new List<string>();
     }
 
+    /// <summary>
+    /// 按组汇总的硬件状态检查结果
+    /// </summary>
     public sealed class HwStatusGroupedResult
     {
         public bool Success { get; set; }
@@ -178,6 +232,9 @@ namespace SelfDiagnostic.Models
         public List<string> FailReasons { get; set; } = new List<string>();
     }
 
+    /// <summary>
+    /// 光学残余风险相关检查的汇总结果
+    /// </summary>
     public sealed class OpticalResidualRiskResult
     {
         public bool Success { get; set; }

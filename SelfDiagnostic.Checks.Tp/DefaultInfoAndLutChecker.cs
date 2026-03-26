@@ -11,6 +11,9 @@ using SelfDiagnostic.Models;
 
 namespace SelfDiagnostic.Services
 {
+    /// <summary>
+    /// 默认信息与 LUT 查找表完整性检查器 — 从 TMS API 获取默认信息和 LUT 数据并校验字段完整性。
+    /// </summary>
     public sealed class DefaultInfoAndLutChecker
     {
         private static readonly HttpClient HttpClient = new HttpClient()
@@ -20,6 +23,9 @@ namespace SelfDiagnostic.Services
 
         private const string LocalLutFallbackRelativePath = @"config\lut\default_station.lut";
 
+        /// <summary>
+        /// 从 TMS 拉取默认信息与 LUT，校验关键字段与 LUT 结构完整性并返回结果。
+        /// </summary>
         public async Task<DefaultInfoAndLutResult> CheckAsync(
             RunbookStepDefinition step,
             DiagnosticRunContext runContext,

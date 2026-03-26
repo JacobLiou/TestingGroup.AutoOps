@@ -2,6 +2,9 @@ using System.Collections.Generic;
 
 namespace SelfDiagnostic.Models
 {
+    /// <summary>
+    /// RunBook 定义
+    /// </summary>
     public sealed class RunbookDefinition
     {
         public string Id { get; set; } = "default";
@@ -10,6 +13,9 @@ namespace SelfDiagnostic.Models
         public List<RunbookStepDefinition> Steps { get; set; } = new List<RunbookStepDefinition>();
     }
 
+    /// <summary>
+    /// RunBook 步骤定义
+    /// </summary>
     public sealed class RunbookStepDefinition
     {
         public string StepId { get; set; } = string.Empty;
@@ -23,6 +29,9 @@ namespace SelfDiagnostic.Models
         public Dictionary<string, string> Params { get; set; } = new Dictionary<string, string>();
     }
 
+    /// <summary>
+    /// 检查执行结果
+    /// </summary>
     public sealed class CheckExecutionOutcome
     {
         public bool Success { get; set; }

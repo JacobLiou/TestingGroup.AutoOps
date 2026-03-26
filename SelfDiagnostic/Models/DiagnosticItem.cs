@@ -5,6 +5,9 @@ using SelfDiagnostic.Services;
 
 namespace SelfDiagnostic.Models
 {
+    /// <summary>
+    /// 单个诊断检查项的运行时数据模型
+    /// </summary>
     public class DiagnosticItem : INotifyPropertyChanged
     {
         private CheckStatus _status = CheckStatus.Pending;
@@ -12,10 +15,22 @@ namespace SelfDiagnostic.Models
         private string _fixSuggestion = string.Empty;
         private int _score = 100;
 
+        /// <summary>
+        /// 检查项唯一标识
+        /// </summary>
         public string Id { get; set; } = string.Empty;
+        /// <summary>
+        /// 检查项显示名称
+        /// </summary>
         public string Name { get; set; } = string.Empty;
+        /// <summary>
+        /// 检查项所属分类
+        /// </summary>
         public CheckCategory Category { get; set; }
 
+        /// <summary>
+        /// 分类对应的简短图标或标签文本
+        /// </summary>
         public string CategoryIcon
         {
             get
@@ -32,6 +47,9 @@ namespace SelfDiagnostic.Models
             }
         }
 
+        /// <summary>
+        /// 分类的本地化显示名称
+        /// </summary>
         public string CategoryName
         {
             get
@@ -54,6 +72,9 @@ namespace SelfDiagnostic.Models
             }
         }
 
+        /// <summary>
+        /// 当前检查执行状态
+        /// </summary>
         public CheckStatus Status
         {
             get => _status;
@@ -68,24 +89,36 @@ namespace SelfDiagnostic.Models
             }
         }
 
+        /// <summary>
+        /// 检查结果详情说明
+        /// </summary>
         public string Detail
         {
             get => _detail;
-            set { if (_detail != value) { _detail = value; OnPropertyChanged(); } }
+            set { if (_detail != value) { _detail = value; OnPropertyChanged(); }             }
         }
 
+        /// <summary>
+        /// 修复或处理建议
+        /// </summary>
         public string FixSuggestion
         {
             get => _fixSuggestion;
-            set { if (_fixSuggestion != value) { _fixSuggestion = value; OnPropertyChanged(); } }
+            set { if (_fixSuggestion != value) { _fixSuggestion = value; OnPropertyChanged(); }             }
         }
 
+        /// <summary>
+        /// 检查项评分
+        /// </summary>
         public int Score
         {
             get => _score;
-            set { if (_score != value) { _score = value; OnPropertyChanged(); } }
+            set { if (_score != value) { _score = value; OnPropertyChanged(); }             }
         }
 
+        /// <summary>
+        /// 状态的本地化显示文本
+        /// </summary>
         public string StatusText
         {
             get

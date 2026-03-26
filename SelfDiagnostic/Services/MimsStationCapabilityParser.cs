@@ -5,8 +5,14 @@ using SelfDiagnostic.Models;
 
 namespace SelfDiagnostic.Services
 {
+    /// <summary>
+    /// MIMS 工站能力要求解析器 — 从 MIMS 配置 XML 中提取 GRR/GDS/光功率/SNR 等基线要求。
+    /// </summary>
     public sealed class MimsStationCapabilityParser
     {
+        /// <summary>
+        /// 解析 XML 为工站能力要求；若为空或解析失败则返回默认要求对象。
+        /// </summary>
         public StationCapabilityRequirements ParseOrDefault(string xml)
         {
             if (string.IsNullOrWhiteSpace(xml))

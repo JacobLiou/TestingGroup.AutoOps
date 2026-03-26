@@ -17,8 +17,7 @@ using SelfDiagnostic.UI.Controls;
 namespace SelfDiagnostic.UI
 {
     /// <summary>
-    /// Main diagnostic UserControl, designed to be embedded into the MIMS WinForm host.
-    /// Usage: var ctrl = new DiagnosticMainControl(); hostPanel.Controls.Add(ctrl); ctrl.Dock = DockStyle.Fill;
+    /// 诊断主控件 — 嵌入 MIMS 宿主窗体的核心 UserControl，包含 Grid 表格、扫描控制、右键调试菜单与评分环。
     /// </summary>
     public sealed class DiagnosticMainControl : XtraUserControl
     {
@@ -59,8 +58,14 @@ namespace SelfDiagnostic.UI
         private ScoreRingControl _scoreRing;
         private ContextMenuStrip _gridContextMenu;
 
+        /// <summary>
+        /// 使用默认的外部系统客户端（MIMS gRPC）创建控件。
+        /// </summary>
         public DiagnosticMainControl() : this(null) { }
 
+        /// <summary>
+        /// 使用指定的外部系统客户端创建控件。
+        /// </summary>
         public DiagnosticMainControl(IExternalSystemClient externalSystemClient)
         {
             _externalSystemClient = externalSystemClient

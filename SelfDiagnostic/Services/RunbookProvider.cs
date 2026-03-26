@@ -5,10 +5,16 @@ using SelfDiagnostic.Models;
 
 namespace SelfDiagnostic.Services
 {
+    /// <summary>
+    /// RunBook 提供者 — 加载默认 RunBook 配置。
+    /// </summary>
     public sealed class RunbookProvider
     {
         private const string DefaultRunbookRelativePath = @"config\runbook\default.runbook.json";
 
+        /// <summary>
+        /// 从应用程序基目录下的默认路径加载 RunBook，并调用 <see cref="RunbookFileService.Validate"/> 校验。
+        /// </summary>
         public RunbookDefinition Load()
         {
             var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, DefaultRunbookRelativePath);

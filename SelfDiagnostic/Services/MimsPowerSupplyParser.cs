@@ -5,8 +5,14 @@ using SelfDiagnostic.Models;
 
 namespace SelfDiagnostic.Services
 {
+    /// <summary>
+    /// MIMS 电源质量要求解析器 — 从 MIMS 配置 XML 中提取电源电压相关的基线要求。
+    /// </summary>
     public sealed class MimsPowerSupplyParser
     {
+        /// <summary>
+        /// 解析 XML 为电源质量要求；若为空或解析失败则返回默认要求对象。
+        /// </summary>
         public PowerSupplyRequirements ParseOrDefault(string xml)
         {
             if (string.IsNullOrWhiteSpace(xml))

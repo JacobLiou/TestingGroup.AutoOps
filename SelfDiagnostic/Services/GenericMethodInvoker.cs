@@ -11,9 +11,7 @@ using SelfDiagnostic.Models;
 namespace SelfDiagnostic.Services
 {
     /// <summary>
-    /// Universal method invoker that can call ANY .NET method via reflection.
-    /// Supports arbitrary method signatures by auto-mapping parameters from step.Params
-    /// and well-known context objects (DiagnosticItem, RunbookStepDefinition, etc.).
+    /// 通用方法调用器 — 通过反射调用任意 .NET 方法，自动映射参数（从 RunBook Params 字典 + 注入上下文对象），适配多种返回值类型。
     /// </summary>
     public sealed class GenericMethodInvoker
     {
@@ -30,15 +28,16 @@ namespace SelfDiagnostic.Services
             "System", "mscorlib", "Microsoft", "DevExpress", "Newtonsoft", "netstandard"
         };
 
+        /// <summary>
+        /// 使用指定的程序集加载器创建调用器（用于解析 BindDll）。
+        /// </summary>
         public GenericMethodInvoker(PluginAssemblyLoader assemblyLoader)
         {
             _assemblyLoader = assemblyLoader ?? throw new ArgumentNullException(nameof(assemblyLoader));
         }
 
         /// <summary>
-        /// Invoke an arbitrary method identified by BindDll + BindMethod.
-        /// Parameters are auto-mapped from context objects and step.Params.
-        /// Return values are automatically adapted to CheckExecutionOutcome.
+        /// 根据 BindDll + BindMethod 反射调用目标方法；参数从上下文与 step.Params 自动映射，返回值适配为 <see cref="CheckExecutionOutcome"/>。
         /// </summary>
         public async Task<CheckExecutionOutcome> InvokeAsync(
             string bindDll,
@@ -130,8 +129,7 @@ namespace SelfDiagnostic.Services
         // ──────────────────────────────────────────────────────────────
 
         /// <summary>
-        /// Scan an assembly and return CheckExecutorInfo for every callable method.
-        /// Skips framework base methods, property accessors, and event accessors.
+        /// 扫描程序集，为每个可调用方法生成 <see cref="CheckExecutorInfo"/>（跳过基类杂项、属性/事件访问器等）。
         /// </summary>
         public static IReadOnlyList<CheckExecutorInfo> BrowseAssemblyMethods(Assembly assembly)
         {
@@ -167,7 +165,7 @@ namespace SelfDiagnostic.Services
         }
 
         /// <summary>
-        /// Browse all non-framework assemblies currently loaded in the PluginAssemblyLoader.
+        /// 浏览 <see cref="PluginAssemblyLoader"/> 中当前已加载的非框架程序集内的全部可调用方法。
         /// </summary>
         public IReadOnlyList<CheckExecutorInfo> BrowseAllLoadedMethods()
         {
@@ -474,6 +472,9 @@ namespace SelfDiagnostic.Services
             catch { return null; }
         }
 
+        /// <summary>
+        /// 安全获取程序集类型列表；遇 <see cref="ReflectionTypeLoadException"/> 时仅返回成功加载的类型。
+        /// </summary>
         internal static IEnumerable<Type> SafeGetTypes(Assembly assembly)
         {
             try { return assembly.GetTypes(); }
@@ -487,8 +488,7 @@ namespace SelfDiagnostic.Services
         }
 
         /// <summary>
-        /// Format a human-readable method signature for the UI picker.
-        /// Example: "static Task&lt;bool&gt; (string port, int baudRate)"
+        /// 格式化人类可读的方法签名，供 RunBook 编辑器等 UI 选择器展示。
         /// </summary>
         internal static string FormatSignature(MethodInfo method)
         {

@@ -10,6 +10,9 @@ using SelfDiagnostic.Services.Abstractions;
 
 namespace SelfDiagnostic.Services
 {
+    /// <summary>
+    /// 诊断引擎 — 核心调度器，负责加载 RunBook、构建检查列表、按三级策略（注册的执行器 → CheckId 查找 → GenericMethodInvoker 通用调用）执行每个 Step。
+    /// </summary>
     public static class DiagnosticEngine
     {
         private static readonly RunbookProvider RunbookProvider = new RunbookProvider();
@@ -28,29 +31,40 @@ namespace SelfDiagnostic.Services
         //  Public API
         // ──────────────────────────────────────────────────────────────
 
+        /// <summary>
+        /// 通过默认 <see cref="RunbookProvider"/> 加载 RunBook 定义。
+        /// </summary>
         public static RunbookDefinition LoadRunbook()
         {
             return RunbookProvider.Load();
         }
 
+        /// <summary>
+        /// 获取启动时已注册的全部 CheckId。
+        /// </summary>
         public static IReadOnlyList<string> GetRegisteredCheckIds()
         {
             return ExecutorRegistry.GetAllCheckIds();
         }
 
+        /// <summary>
+        /// 获取启动时已注册的全部执行器元信息。
+        /// </summary>
         public static IReadOnlyList<CheckExecutorInfo> GetRegisteredExecutorInfos()
         {
             return ExecutorRegistry.GetAllExecutorInfos();
         }
 
+        /// <summary>
+        /// 根据 CheckId 查询已注册执行器的元信息。
+        /// </summary>
         public static CheckExecutorInfo GetExecutorInfo(string checkId)
         {
             return ExecutorRegistry.GetExecutorInfo(checkId);
         }
 
         /// <summary>
-        /// Browse all callable methods from all loaded non-framework assemblies.
-        /// Used by the RunbookEditor to show available binding targets beyond [CheckExecutor] methods.
+        /// 浏览当前已加载的非框架程序集中所有可调用方法；供 RunBook 编辑器展示除 [CheckExecutor] 外的绑定目标。
         /// </summary>
         public static IReadOnlyList<CheckExecutorInfo> BrowseAllLoadedMethods()
         {
@@ -58,8 +72,7 @@ namespace SelfDiagnostic.Services
         }
 
         /// <summary>
-        /// Load an external DLL into the assembly cache and return all its callable methods.
-        /// Used by the RunbookEditor "Load DLL..." button.
+        /// 将外部 DLL 载入程序集缓存并返回其中可调用方法列表；供 RunBook 编辑器「加载 DLL」使用。
         /// </summary>
         public static IReadOnlyList<CheckExecutorInfo> LoadExternalDll(string dllPath)
         {
@@ -68,6 +81,9 @@ namespace SelfDiagnostic.Services
             return GenericMethodInvoker.BrowseAssemblyMethods(assembly);
         }
 
+        /// <summary>
+        /// 根据 RunBook 中已启用的 Step 构建诊断项列表；runbook 为 null 时加载默认 RunBook。
+        /// </summary>
         public static List<DiagnosticItem> BuildCheckList(RunbookDefinition runbook = null)
         {
             runbook = runbook ?? LoadRunbook();
@@ -89,6 +105,9 @@ namespace SelfDiagnostic.Services
         //    3. GenericMethodInvoker via BindDll + BindMethod (reflection)
         // ──────────────────────────────────────────────────────────────
 
+        /// <summary>
+        /// 异步执行单个检查：先尝试注册执行器（BindMethod / CheckId），再回退到 GenericMethodInvoker（BindDll + BindMethod）。
+        /// </summary>
         public static async Task<CheckExecutionOutcome> RunCheckAsync(
             DiagnosticItem item,
             RunbookStepDefinition step,

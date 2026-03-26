@@ -6,60 +6,59 @@ using SelfDiagnostic.Services.Abstractions;
 
 namespace SelfDiagnostic.Services.Executors.External
 {
+    /// <summary>
+    /// 外部依赖检查执行器集合 — 通过 HTTP POST 探测 MES / TMS / TAS / 文件服务器 / 网关 等外部系统的可达性。
+    /// 每个方法标注 [CheckExecutor] 以便引擎自动发现并注册。
+    /// </summary>
     internal static class ExternalCheckExecutors
     {
         private static readonly ExternalDependencyHttpChecker ExternalChecker = new ExternalDependencyHttpChecker();
 
+        /// <summary>检查 MES API 连通性</summary>
         [CheckExecutor(ExternalDependencyIds.Mes, DisplayName = "MES API Connectivity", Description = "HTTP POST to MES endpoint and verify response", DefaultCategory = "StationCheck")]
         private static Task<CheckExecutionOutcome> CheckExternalMesAsync(
-            DiagnosticItem item,
-            RunbookStepDefinition step,
-            DiagnosticRunContext runContext,
-            CancellationToken ct)
+            DiagnosticItem item, RunbookStepDefinition step, DiagnosticRunContext runContext, CancellationToken ct)
         {
             return ExecuteExternalAsync(ExternalDependencyIds.Mes, item, step, runContext, ct);
         }
 
+        /// <summary>检查 TMS API 连通性</summary>
         [CheckExecutor(ExternalDependencyIds.Tms, DisplayName = "TMS API Connectivity", Description = "HTTP POST to TMS endpoint and verify response", DefaultCategory = "StationCheck")]
         private static Task<CheckExecutionOutcome> CheckExternalTmsAsync(
-            DiagnosticItem item,
-            RunbookStepDefinition step,
-            DiagnosticRunContext runContext,
-            CancellationToken ct)
+            DiagnosticItem item, RunbookStepDefinition step, DiagnosticRunContext runContext, CancellationToken ct)
         {
             return ExecuteExternalAsync(ExternalDependencyIds.Tms, item, step, runContext, ct);
         }
 
+        /// <summary>检查 TAS AOI API 连通性</summary>
         [CheckExecutor(ExternalDependencyIds.Tas, DisplayName = "TAS AOI API Connectivity", Description = "HTTP POST to TAS AOI endpoint and verify response", DefaultCategory = "StationCheck")]
         private static Task<CheckExecutionOutcome> CheckExternalTasAsync(
-            DiagnosticItem item,
-            RunbookStepDefinition step,
-            DiagnosticRunContext runContext,
-            CancellationToken ct)
+            DiagnosticItem item, RunbookStepDefinition step, DiagnosticRunContext runContext, CancellationToken ct)
         {
             return ExecuteExternalAsync(ExternalDependencyIds.Tas, item, step, runContext, ct);
         }
 
+        /// <summary>检查文件服务器连通性</summary>
         [CheckExecutor(ExternalDependencyIds.FileServer, DisplayName = "File Server Connectivity", Description = "HTTP POST to File Server endpoint and verify response", DefaultCategory = "StationCheck")]
         private static Task<CheckExecutionOutcome> CheckExternalFileServerAsync(
-            DiagnosticItem item,
-            RunbookStepDefinition step,
-            DiagnosticRunContext runContext,
-            CancellationToken ct)
+            DiagnosticItem item, RunbookStepDefinition step, DiagnosticRunContext runContext, CancellationToken ct)
         {
             return ExecuteExternalAsync(ExternalDependencyIds.FileServer, item, step, runContext, ct);
         }
 
+        /// <summary>检查 LAN 网关连通性</summary>
         [CheckExecutor(ExternalDependencyIds.Lan, DisplayName = "LAN Gateway Connectivity", Description = "HTTP POST to LAN gateway endpoint and verify response", DefaultCategory = "StationCheck")]
         private static Task<CheckExecutionOutcome> CheckExternalLanAsync(
-            DiagnosticItem item,
-            RunbookStepDefinition step,
-            DiagnosticRunContext runContext,
-            CancellationToken ct)
+            DiagnosticItem item, RunbookStepDefinition step, DiagnosticRunContext runContext, CancellationToken ct)
         {
             return ExecuteExternalAsync(ExternalDependencyIds.Lan, item, step, runContext, ct);
         }
 
+        /// <summary>
+        /// 执行外部依赖探测的共享逻辑：
+        /// 1. 优先从 step.Params["dependencyId"] 获取实际 ID，否则使用默认 dependencyId
+        /// 2. 调用 HTTP 探测器执行 POST 请求
+        /// </summary>
         private static async Task<CheckExecutionOutcome> ExecuteExternalAsync(
             string dependencyId,
             DiagnosticItem item,
@@ -75,6 +74,9 @@ namespace SelfDiagnostic.Services.Executors.External
             return new CheckExecutionOutcome { Success = IsSuccessful(item.Status) };
         }
 
+        /// <summary>
+        /// 对单个外部 API 端点执行 HTTP 探测并将结果写入 DiagnosticItem
+        /// </summary>
         private static async Task CheckExternalApiAsync(
             DiagnosticItem item,
             string dependencyId,

@@ -5,6 +5,9 @@ using System.Windows.Forms;
 
 namespace SelfDiagnostic.UI.Controls
 {
+    /// <summary>
+    /// 评分环控件 — 使用 GDI+ 绘制圆环进度条，直观展示诊断总评分（0-100）。
+    /// </summary>
     public sealed class ScoreRingControl : Control
     {
         private readonly Timer _animationTimer;
@@ -12,6 +15,9 @@ namespace SelfDiagnostic.UI.Controls
         private int _displayScore;
         private string _subtitle = "整体评分";
 
+        /// <summary>
+        /// 目标评分（0–100）；设置后通过动画过渡到该值。
+        /// </summary>
         public int Score
         {
             get => _targetScore;
@@ -25,12 +31,18 @@ namespace SelfDiagnostic.UI.Controls
             }
         }
 
+        /// <summary>
+        /// 环内副标题文本（默认「整体评分」）。
+        /// </summary>
         public string Subtitle
         {
             get => _subtitle;
             set { _subtitle = value ?? string.Empty; Invalidate(); }
         }
 
+        /// <summary>
+        /// 初始化评分环控件及动画计时器。
+        /// </summary>
         public ScoreRingControl()
         {
             SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);

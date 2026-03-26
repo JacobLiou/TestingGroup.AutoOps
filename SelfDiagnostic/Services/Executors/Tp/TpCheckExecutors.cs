@@ -7,6 +7,9 @@ using SelfDiagnostic.Services.Abstractions;
 
 namespace SelfDiagnostic.Services.Executors.Tp
 {
+    /// <summary>
+    /// TP 检查执行器集合（主项目副本）— TP 路径、串口、版本合规、工站能力等检查。
+    /// </summary>
     internal static class TpCheckExecutors
     {
         private static readonly DeviceVersionComplianceChecker VersionComplianceChecker = new DeviceVersionComplianceChecker();

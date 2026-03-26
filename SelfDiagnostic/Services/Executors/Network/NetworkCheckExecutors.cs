@@ -6,6 +6,9 @@ using SelfDiagnostic.Services.Abstractions;
 
 namespace SelfDiagnostic.Services.Executors.Network
 {
+    /// <summary>
+    /// 网络检查执行器集合（主项目副本）— 检测网络连通性、DNS、互联网可达性。
+    /// </summary>
     internal static class NetworkCheckExecutors
     {
         [CheckExecutor("NET_01")]

@@ -7,6 +7,9 @@ using SelfDiagnostic.Services.Abstractions;
 
 namespace SelfDiagnostic.Services.Executors.Tp
 {
+    /// <summary>
+    /// TP（测试程序）检查执行器集合 — 涵盖路径配置、串口、网络端点、版本合规、工站能力、电源质量、LUT、硬件状态分组、光学残留风险等检查。
+    /// </summary>
     internal static class TpCheckExecutors
     {
         private static readonly DeviceVersionComplianceChecker VersionComplianceChecker = new DeviceVersionComplianceChecker();
@@ -157,6 +160,9 @@ namespace SelfDiagnostic.Services.Executors.Tp
             return ExecuteTpAsync(TpCheckIds.OpticalCustomSnrRule, item, step, runContext, ct);
         }
 
+        /// <summary>
+        /// 根据 checkId 分发到不同的 TP 子检查逻辑。
+        /// </summary>
         private static async Task<CheckExecutionOutcome> ExecuteTpAsync(
             string checkId,
             DiagnosticItem item,

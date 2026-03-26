@@ -11,11 +11,17 @@ using SelfDiagnostic.Models;
 
 namespace SelfDiagnostic.Services
 {
+    /// <summary>
+    /// 硬件/软件/固件配置完整性检查器。
+    /// </summary>
     public sealed class HwSwFwConfigIntegrityChecker
     {
         private const string FallbackRelativePath = @"config\hwSwFwConfigIntegrity.mock.json";
         private static readonly HttpClient HttpClient = new HttpClient() { Timeout = TimeSpan.FromSeconds(6) };
 
+        /// <summary>
+        /// 从 TMS 或本地兜底 JSON 加载 HW/SW/FW 配置完整性指标并判断是否全部通过。
+        /// </summary>
         public async Task<HwSwFwConfigIntegrityResult> CheckAsync(
             RunbookStepDefinition step,
             DiagnosticRunContext runContext,

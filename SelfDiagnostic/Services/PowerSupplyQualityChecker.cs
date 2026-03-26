@@ -12,6 +12,9 @@ using SelfDiagnostic.Models;
 
 namespace SelfDiagnostic.Services
 {
+    /// <summary>
+    /// 电源质量检查器 — 采集电压序列并评估是否满足要求。
+    /// </summary>
     public sealed class PowerSupplyQualityChecker
     {
         private const string TpConnectivityConfigRelativePath = @"config\tpConnectivity.json";
@@ -59,6 +62,9 @@ namespace SelfDiagnostic.Services
             public List<PowerVoltageSample> Samples { get; set; } = new List<PowerVoltageSample>();
         }
 
+        /// <summary>
+        /// 按运行上下文中的要求采集多组电压样本，评估均值/纹波/标准差并可选落盘曲线文件。
+        /// </summary>
         public async Task<PowerSupplyQualityResult> CheckAsync(DiagnosticRunContext runContext, CancellationToken ct)
         {
             var requirements = runContext?.PowerSupplyRequirements ?? new PowerSupplyRequirements();

@@ -14,6 +14,9 @@ using SelfDiagnostic.Models;
 
 namespace SelfDiagnostic.Services
 {
+    /// <summary>
+    /// TP 连通性检测器 — 读取 TP 配置文件、检测串口与网络端点的可用性，生成连通性快照。
+    /// </summary>
     public sealed class TpConnectivityInspector
     {
         private const string ConfigRelativePath = @"config\tpConnectivity.json";
@@ -34,6 +37,9 @@ namespace SelfDiagnostic.Services
             public string TpRootPath { get; set; } = DefaultTpRootPath;
         }
 
+        /// <summary>
+        /// 执行 TP 连通性巡检（含短期缓存与并发去重），返回串口与网络端点状态快照。
+        /// </summary>
         public async Task<TpConnectivitySnapshot> InspectAsync(CancellationToken cancellationToken)
         {
             var tpRootPath = LoadConfigPath();
