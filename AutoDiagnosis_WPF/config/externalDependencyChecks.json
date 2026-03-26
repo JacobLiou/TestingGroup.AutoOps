@@ -1,0 +1,28 @@
+{
+  "items": [
+    {
+      "id": "EXT_01",
+      "name": "MES API",
+      "url": "http://127.0.0.1:7001/api/mes/health",
+      "bodyJson": "{\"source\":\"mockTool\",\"check\":\"mes\"}"
+    },
+    {
+      "id": "EXT_02",
+      "name": "TMS API",
+      "url": "http://127.0.0.1:7002/api/tms/health",
+      "bodyJson": "{\"source\":\"mockTool\",\"check\":\"tms\"}"
+    },
+    {
+      "id": "EXT_03",
+      "name": "TAS AOI API",
+      "url": "http://127.0.0.1:7003/api/tas/aoi/health",
+      "bodyJson": "{\"source\":\"mockTool\",\"check\":\"tas_aoi\"}"
+    },
+    {
+      "id": "EXT_04",
+      "name": "文件服务器 API",
+      "url": "http://127.0.0.1:7004/api/fileserver/health",
+      "bodyJson": "{\"source\":\"mockTool\",\"check\":\"file_server\"}"
+    }
+  ]
+}

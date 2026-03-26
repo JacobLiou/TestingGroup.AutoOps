@@ -1,0 +1,62 @@
+# 360-Style PC Diagnostic Tool — Walkthrough
+
+A standalone **C# WPF (.NET 8)** desktop app mimicking 360 Security Guard, built in `mockTool/`.
+
+## Architecture
+
+```mermaid
+graph TD
+    A["MainWindow.xaml<br/>360-style dark UI"] --> B["MainViewModel<br/>Scan lifecycle + score animation"]
+    B --> C["DiagnosticEngine<br/>20 real PC checks"]
+    B --> D["DiagnosticItem<br/>Observable model"]
+    A --> E["Converters<br/>Status → Color / Visibility"]
+```
+
+## Files Created
+
+| File | Purpose |
+|---|---|
+| [MockDiagTool.csproj](file:///c:/Users/menghl2/OneDrive%20-%20kochind.com/Desktop/自动诊断项目/mockTool/MockDiagTool.csproj) | .NET 8 WPF project |
+| [App.xaml](file:///c:/Users/menghl2/OneDrive%20-%20kochind.com/Desktop/自动诊断项目/mockTool/App.xaml) | Dark theme palette + button styles |
+| [MainWindow.xaml](file:///c:/Users/menghl2/OneDrive%20-%20kochind.com/Desktop/自动诊断项目/mockTool/MainWindow.xaml) | 360-style UI: score ring, category cards, result list |
+| [MainViewModel.cs](file:///c:/Users/menghl2/OneDrive%20-%20kochind.com/Desktop/自动诊断项目/mockTool/ViewModels/MainViewModel.cs) | Scan orchestration, animated score, fix commands |
+| [DiagnosticItem.cs](file:///c:/Users/menghl2/OneDrive%20-%20kochind.com/Desktop/自动诊断项目/mockTool/Models/DiagnosticItem.cs) | Observable model with status enum |
+| [DiagnosticEngine.cs](file:///c:/Users/menghl2/OneDrive%20-%20kochind.com/Desktop/自动诊断项目/mockTool/Services/DiagnosticEngine.cs) | 20 **real** Windows diagnostic checks |
+| [StatusToColorConverter.cs](file:///c:/Users/menghl2/OneDrive%20-%20kochind.com/Desktop/自动诊断项目/mockTool/Converters/StatusToColorConverter.cs) | 6 value converters for UI binding |
+
+## 20 Real Diagnostic Checks
+
+| Category | Checks |
+|---|---|
+| 🖥 系统 | OS版本, 运行时长, Windows更新, 时间同步 |
+| 💾 磁盘 | 系统盘空间, 所有驱动器, 临时文件夹 |
+| 🌐 网络 | 网络连接, DNS解析, 互联网连通 |
+| 🛡 安全 | 防火墙, 杀毒软件, UAC, 自动登录 |
+| 📦 软件 | 启动项, 已安装程序, COM串口 |
+| ⚡ 性能 | CPU使用率, 内存使用率, 进程数 |
+
+All checks use **real Windows APIs**: `DriveInfo`, `NetworkInterface`, `Ping`, `Registry`, `WMI (Win32_Processor/OperatingSystem/AntiVirusProduct)`, `SerialPort`.
+
+## How to Run
+
+```powershell
+dotnet run --project "c:\Users\menghl2\OneDrive - kochind.com\Desktop\自动诊断项目\mockTool\MockDiagTool.csproj"
+```
+
+## UI Features
+- **深色主题** — 类似360安全卫士的暗色调配色（#1A1A2E 背景 + #00C853 绿色强调）
+- **动画圆环** — 扫描时旋转 + 脉冲发光效果
+- **实时分数** — 0→100 逐帧动画
+- **分类统计** — ✅通过 / ⚠️风险 / ❌异常 实时计数卡片
+- **一键修复** — 对 Warning/Fail 项模拟修复动画
+- **逐项修复** — 每行结果旁有独立修复按钮
+
+## Verification
+
+Build succeeded with **0 warnings, 0 errors**:
+```
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+Time Elapsed 00:00:02.36
+```

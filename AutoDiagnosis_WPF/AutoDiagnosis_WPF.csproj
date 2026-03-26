@@ -1,0 +1,78 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <ApplicationIcon></ApplicationIcon>
+    <RootNamespace>MockDiagTool</RootNamespace>
+    <AssemblyName>MockDiagTool</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="Google.Protobuf" Version="3.32.0" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.71.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.71.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="HandyControl" Version="3.5.1" />
+    <PackageReference Include="System.IO.Ports" Version="8.0.0" />
+    <PackageReference Include="System.Management" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="Protos\mims_mock.proto" GrpcServices="Client" ProtoRoot="Protos" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="config\externalDependencyChecks.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config\runbook\default.runbook.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config\tpConnectivity.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config\deviceActualVersions.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config\deviceVersionRequirements.mock.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config\stationActualMetrics.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config\powerSupplyMock.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config\lut\default_station.lut">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config\hwSwFwConfigIntegrity.mock.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config\hwStatusGrouped.mock.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config\opticalResidualRisk.mock.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="MimsMockServer\**\*.cs" />
+    <Compile Remove="PluginSamples\**" />
+    <EmbeddedResource Remove="MimsMockServer\**\*" />
+    <EmbeddedResource Remove="PluginSamples\**" />
+    <None Remove="MimsMockServer\**\*" />
+    <None Remove="PluginSamples\**" />
+    <Content Remove="MimsMockServer\**\*" />
+    <Page Remove="PluginSamples\**" />
+  </ItemGroup>
+
+</Project>
