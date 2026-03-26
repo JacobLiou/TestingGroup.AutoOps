@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{A1B2C3D4-1111-2222-3333-444455556666}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>SelfDiagnostic</RootNamespace>
+    <AssemblyName>SelfDiagnostic</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <LangVersion>8.0</LangVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <!-- ============================================================ -->
+  <!--  Framework References                                        -->
+  <!-- ============================================================ -->
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+  <!-- ============================================================ -->
+  <!--  DevExpress v19.2 References                                 -->
+  <!-- ============================================================ -->
+  <ItemGroup>
+    <Reference Include="DevExpress.Data.v19.2" />
+    <Reference Include="DevExpress.Utils.v19.2" />
+    <Reference Include="DevExpress.XtraEditors.v19.2" />
+    <Reference Include="DevExpress.XtraGrid.v19.2" />
+    <Reference Include="DevExpress.XtraLayout.v19.2" />
+  </ItemGroup>
+  <!-- ============================================================ -->
+  <!--  NuGet Package References                                    -->
+  <!-- ============================================================ -->
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>13.0.3</Version>
+    </PackageReference>
+  </ItemGroup>
+  <!-- ============================================================ -->
+  <!--  Project References                                          -->
+  <!-- ============================================================ -->
+  <ItemGroup>
+    <ProjectReference Include="..\SelfDiagnostic.Abstractions\SelfDiagnostic.Abstractions.csproj">
+      <Project>{B0000001-0000-0000-0000-000000000001}</Project>
+      <Name>SelfDiagnostic.Abstractions</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <!-- ============================================================ -->
+  <!--  Services / Core                                             -->
+  <!-- ============================================================ -->
+  <ItemGroup>
+    <Compile Include="Services\CheckExecutorRegistry.cs" />
+    <Compile Include="Services\DiagnosticEngine.cs" />
+    <Compile Include="Services\GenericMethodInvoker.cs" />
+    <Compile Include="Services\PluginAssemblyLoader.cs" />
+    <Compile Include="Services\MimsConfigXmlParser.cs" />
+    <Compile Include="Services\MimsGrpcClient.cs" />
+    <Compile Include="Services\MimsPowerSupplyParser.cs" />
+    <Compile Include="Services\MimsStationCapabilityParser.cs" />
+    <Compile Include="Services\MimsXmlBuilder.cs" />
+    <Compile Include="Services\OnePageDiagnosticReportService.cs" />
+    <Compile Include="Services\RuleCatalog.cs" />
+    <Compile Include="Services\RunbookFileService.cs" />
+    <Compile Include="Services\RunbookProvider.cs" />
+    <Compile Include="Services\TpConnectivityInspector.cs" />
+  </ItemGroup>
+  <!-- ============================================================ -->
+  <!--  UI                                                          -->
+  <!-- ============================================================ -->
+  <ItemGroup>
+    <Compile Include="UI\Program.cs" />
+    <Compile Include="UI\MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\DiagnosticMainControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\RunbookEditorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Controls\ScoreRingControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+  </ItemGroup>
+  <!-- ============================================================ -->
+  <!--  Properties                                                  -->
+  <!-- ============================================================ -->
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <!-- ============================================================ -->
+  <!--  Config files (edit in-place, copy if newer to output)       -->
+  <!-- ============================================================ -->
+  <ItemGroup>
+    <Content Include="config\runbook\default.runbook.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\lut\default_station.lut">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\deviceActualVersions.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\deviceVersionRequirements.mock.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\externalDependencyChecks.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\hwStatusGrouped.mock.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\hwSwFwConfigIntegrity.mock.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\opticalResidualRisk.mock.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\powerSupplyMock.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\stationActualMetrics.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\tpConnectivity.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

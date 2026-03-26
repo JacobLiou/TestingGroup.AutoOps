@@ -1,0 +1,471 @@
+{
+  "Id": "default",
+  "Title": "全量诊断RunBook",
+  "Version": "1.0.0",
+  "Steps": [
+    {
+      "CheckId": "SYS_01",
+      "DisplayName": "操作系统版本",
+      "Category": "SystemCheck",
+      "BindDll": "SelfDiagnostic.Checks.System.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.System.SystemCheckExecutors.CheckOsVersion",
+      "TimeoutMs": 5000,
+      "Enabled": true,
+      "Params": {}
+    },
+    {
+      "CheckId": "SYS_02",
+      "DisplayName": "系统运行时长",
+      "Category": "SystemCheck",
+      "BindDll": "SelfDiagnostic.Checks.System.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.System.SystemCheckExecutors.CheckUptime",
+      "TimeoutMs": 5000,
+      "Enabled": true,
+      "Params": {}
+    },
+    {
+      "CheckId": "SYS_03",
+      "DisplayName": "Windows 更新状态",
+      "Category": "SystemCheck",
+      "BindDll": "SelfDiagnostic.Checks.System.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.System.SystemCheckExecutors.CheckWindowsUpdate",
+      "TimeoutMs": 5000,
+      "Enabled": true,
+      "Params": {}
+    },
+    {
+      "CheckId": "SYS_04",
+      "DisplayName": "系统时间同步",
+      "Category": "SystemCheck",
+      "BindDll": "SelfDiagnostic.Checks.System.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.System.SystemCheckExecutors.CheckTimeSync",
+      "TimeoutMs": 5000,
+      "Enabled": true,
+      "Params": {}
+    },
+    {
+      "CheckId": "DSK_01",
+      "DisplayName": "系统盘可用空间",
+      "Category": "HwStatusCheck",
+      "BindDll": "SelfDiagnostic.Checks.System.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.System.SystemCheckExecutors.CheckSystemDisk",
+      "TimeoutMs": 5000,
+      "Enabled": true,
+      "Params": {}
+    },
+    {
+      "CheckId": "DSK_02",
+      "DisplayName": "磁盘剩余空间（所有驱动器）",
+      "Category": "HwStatusCheck",
+      "BindDll": "SelfDiagnostic.Checks.System.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.System.SystemCheckExecutors.CheckAllDisks",
+      "TimeoutMs": 5000,
+      "Enabled": true,
+      "Params": {}
+    },
+    {
+      "CheckId": "DSK_03",
+      "DisplayName": "临时文件夹清理",
+      "Category": "HwStatusCheck",
+      "BindDll": "SelfDiagnostic.Checks.System.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.System.SystemCheckExecutors.CheckTempFolder",
+      "TimeoutMs": 5000,
+      "Enabled": true,
+      "Params": {}
+    },
+    {
+      "CheckId": "NET_01",
+      "DisplayName": "网络连接状态",
+      "Category": "StationCheck",
+      "BindDll": "SelfDiagnostic.Checks.Network.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.Network.NetworkCheckExecutors.CheckNetworkAvailable",
+      "TimeoutMs": 5000,
+      "Enabled": true,
+      "Params": {}
+    },
+    {
+      "CheckId": "NET_02",
+      "DisplayName": "DNS 解析",
+      "Category": "StationCheck",
+      "BindDll": "SelfDiagnostic.Checks.Network.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.Network.NetworkCheckExecutors.CheckDns",
+      "TimeoutMs": 5000,
+      "Enabled": true,
+      "Params": {}
+    },
+    {
+      "CheckId": "NET_03",
+      "DisplayName": "互联网连通性",
+      "Category": "StationCheck",
+      "BindDll": "SelfDiagnostic.Checks.Network.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.Network.NetworkCheckExecutors.CheckInternet",
+      "TimeoutMs": 5000,
+      "Enabled": true,
+      "Params": {}
+    },
+    {
+      "CheckId": "EXT_MES",
+      "DisplayName": "MES 接口连通性",
+      "Category": "StationCheck",
+      "BindDll": "SelfDiagnostic.Checks.External.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.External.ExternalCheckExecutors.CheckExternalMesAsync",
+      "TimeoutMs": 6000,
+      "Enabled": true,
+      "Params": {
+        "dependencyId": "EXT_MES"
+      }
+    },
+    {
+      "CheckId": "EXT_TMS",
+      "DisplayName": "TMS 接口连通性",
+      "Category": "StationCheck",
+      "BindDll": "SelfDiagnostic.Checks.External.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.External.ExternalCheckExecutors.CheckExternalTmsAsync",
+      "TimeoutMs": 6000,
+      "Enabled": true,
+      "Params": {
+        "dependencyId": "EXT_TMS"
+      }
+    },
+    {
+      "CheckId": "EXT_TAS",
+      "DisplayName": "TAS AOI 接口连通性",
+      "Category": "StationCheck",
+      "BindDll": "SelfDiagnostic.Checks.External.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.External.ExternalCheckExecutors.CheckExternalTasAsync",
+      "TimeoutMs": 6000,
+      "Enabled": true,
+      "Params": {
+        "dependencyId": "EXT_TAS"
+      }
+    },
+    {
+      "CheckId": "EXT_FILE_SERVER",
+      "DisplayName": "文件服务器接口连通性",
+      "Category": "StationCheck",
+      "BindDll": "SelfDiagnostic.Checks.External.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.External.ExternalCheckExecutors.CheckExternalFileServerAsync",
+      "TimeoutMs": 6000,
+      "Enabled": true,
+      "Params": {
+        "dependencyId": "EXT_FILE_SERVER"
+      }
+    },
+    {
+      "CheckId": "EXT_LAN",
+      "DisplayName": "局域网网关连通性",
+      "Category": "StationCheck",
+      "BindDll": "SelfDiagnostic.Checks.External.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.External.ExternalCheckExecutors.CheckExternalLanAsync",
+      "TimeoutMs": 6000,
+      "Enabled": true,
+      "Params": {
+        "dependencyId": "EXT_LAN"
+      }
+    },
+    {
+      "CheckId": "TP_01",
+      "DisplayName": "TP 路径与配置可读性",
+      "Category": "StationCheck",
+      "BindDll": "SelfDiagnostic.Checks.Tp.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.Tp.TpCheckExecutors.CheckTpPathAndConfigAsync",
+      "TimeoutMs": 4000,
+      "Enabled": true,
+      "Params": {}
+    },
+    {
+      "CheckId": "TP_02",
+      "DisplayName": "TP 串口映射连通性",
+      "Category": "HwStatusCheck",
+      "BindDll": "SelfDiagnostic.Checks.Tp.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.Tp.TpCheckExecutors.CheckTpSerialPortsAsync",
+      "TimeoutMs": 5000,
+      "Enabled": true,
+      "Params": {}
+    },
+    {
+      "CheckId": "TP_03",
+      "DisplayName": "TP 网口目标连通性",
+      "Category": "StationCheck",
+      "BindDll": "SelfDiagnostic.Checks.Tp.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.Tp.TpCheckExecutors.CheckTpNetworkEndpointsAsync",
+      "TimeoutMs": 6000,
+      "Enabled": true,
+      "Params": {}
+    },
+    {
+      "CheckId": "TP_04",
+      "DisplayName": "HW/FW 版本符合性（TMS 对比）",
+      "Category": "HwSwFwCheck",
+      "BindDll": "SelfDiagnostic.Checks.Tp.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.Tp.TpCheckExecutors.CheckTpVersionComplianceAsync",
+      "TimeoutMs": 7000,
+      "Enabled": true,
+      "Params": {
+        "requirementPath": "/api/tms/version-requirements",
+        "requirementFallbackFile": "config/deviceVersionRequirements.mock.json",
+        "stationId": "STATION-001",
+        "lineId": "LINE-001"
+      }
+    },
+    {
+      "CheckId": "TP_05",
+      "DisplayName": "GR&R/GDS/光学性能符合性（MIMS 对比）",
+      "Category": "OpticalPerformanceCheck",
+      "BindDll": "SelfDiagnostic.Checks.Tp.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.Tp.TpCheckExecutors.CheckTpStationCapabilityComplianceAsync",
+      "TimeoutMs": 7000,
+      "Enabled": true,
+      "Params": {}
+    },
+    {
+      "CheckId": "TP_06",
+      "DisplayName": "电源供应电压与电源质量稳定性（MIMS+TP）",
+      "Category": "HwStatusCheck",
+      "BindDll": "SelfDiagnostic.Checks.Tp.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.Tp.TpCheckExecutors.CheckTpPowerSupplyQualityAsync",
+      "TimeoutMs": 12000,
+      "Enabled": true,
+      "Params": {}
+    },
+    {
+      "CheckId": "TP_07",
+      "DisplayName": "默认信息与LUT表完整性（MIMS交互）",
+      "Category": "HwSwFwCheck",
+      "BindDll": "SelfDiagnostic.Checks.Tp.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.Tp.TpCheckExecutors.CheckTpDefaultInfoAndLutAsync",
+      "TimeoutMs": 10000,
+      "Enabled": true,
+      "Params": {
+        "defaultInfoPath": "/api/tms/default-info",
+        "lutDownloadPath": "/api/tms/lut/download/default",
+        "lutFallbackFile": "config/lut/default_station.lut",
+        "expectedStationId": "STATION-001",
+        "expectedLineId": "LINE-001"
+      }
+    },
+    {
+      "CheckId": "TP_08",
+      "DisplayName": "配置/损坏数据完整性检查",
+      "Category": "HwSwFwCheck",
+      "BindDll": "SelfDiagnostic.Checks.Tp.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.Tp.TpCheckExecutors.CheckTpHwSwFwConfigIntegrityAsync",
+      "TimeoutMs": 8000,
+      "Enabled": true,
+      "Params": {
+        "apiPath": "/api/tms/hw-config-integrity",
+        "fallbackFile": "config/hwSwFwConfigIntegrity.mock.json"
+      }
+    },
+    {
+      "CheckId": "TP_09",
+      "DisplayName": "HW状态-光学链路设备组（PD/VOA/SW/Pump/DFB/TEC/Heater）",
+      "Category": "HwStatusCheck",
+      "BindDll": "SelfDiagnostic.Checks.Tp.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.Tp.TpCheckExecutors.CheckTpHwStatusOpticalGroupAsync",
+      "TimeoutMs": 8000,
+      "Enabled": true,
+      "Params": {
+        "groupKey": "optical",
+        "apiPath": "/api/tms/hw-status-groups",
+        "fallbackFile": "config/hwStatusGrouped.mock.json"
+      }
+    },
+    {
+      "CheckId": "TP_10",
+      "DisplayName": "HW状态-控制与存储组（MCU/EEPROM/Flash/Sensor/Watchdog）",
+      "Category": "HwStatusCheck",
+      "BindDll": "SelfDiagnostic.Checks.Tp.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.Tp.TpCheckExecutors.CheckTpHwStatusControlStorageGroupAsync",
+      "TimeoutMs": 8000,
+      "Enabled": true,
+      "Params": {
+        "groupKey": "control_storage",
+        "apiPath": "/api/tms/hw-status-groups",
+        "fallbackFile": "config/hwStatusGrouped.mock.json"
+      }
+    },
+    {
+      "CheckId": "TP_11",
+      "DisplayName": "HW状态-接口与通信组（I/O/IO Port/DAC/ADC/SPI/I2C）",
+      "Category": "HwStatusCheck",
+      "BindDll": "SelfDiagnostic.Checks.Tp.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.Tp.TpCheckExecutors.CheckTpHwStatusInterfaceCommGroupAsync",
+      "TimeoutMs": 8000,
+      "Enabled": true,
+      "Params": {
+        "groupKey": "interface_comm",
+        "apiPath": "/api/tms/hw-status-groups",
+        "fallbackFile": "config/hwStatusGrouped.mock.json"
+      }
+    },
+    {
+      "CheckId": "TP_12",
+      "DisplayName": "光路问题残留风险分析（RTS后）",
+      "Category": "OpticalPerformanceCheck",
+      "BindDll": "SelfDiagnostic.Checks.Tp.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.Tp.TpCheckExecutors.CheckTpOpticalResidualRiskAsync",
+      "TimeoutMs": 8000,
+      "Enabled": true,
+      "Params": {
+        "apiPath": "/api/tms/optical-risk",
+        "fallbackFile": "config/opticalResidualRisk.mock.json"
+      }
+    },
+    {
+      "CheckId": "TP_13",
+      "DisplayName": "定制规则-光学GR&R阈值检查",
+      "Category": "OpticalPerformanceCheck",
+      "BindDll": "SelfDiagnostic.Checks.Tp.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.Tp.TpCheckExecutors.CheckTpOpticalCustomGrrRuleAsync",
+      "TimeoutMs": 6000,
+      "Enabled": true,
+      "Params": {
+        "ruleName": "光学GR&R定制阈值",
+        "metricKey": "grrPercent",
+        "operator": "lte",
+        "threshold": "8.50",
+        "failReasonTemplate": "{metric}超限: 实际{actual}, 规则{required}"
+      }
+    },
+    {
+      "CheckId": "TP_14",
+      "DisplayName": "定制规则-光学SNR阈值检查",
+      "Category": "OpticalPerformanceCheck",
+      "BindDll": "SelfDiagnostic.Checks.Tp.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.Tp.TpCheckExecutors.CheckTpOpticalCustomSnrRuleAsync",
+      "TimeoutMs": 6000,
+      "Enabled": true,
+      "Params": {
+        "ruleName": "光学SNR定制阈值",
+        "metricKey": "snrDb",
+        "operator": "gte",
+        "threshold": "31.50",
+        "failReasonTemplate": "{metric}不达标: 实际{actual}, 规则{required}"
+      }
+    },
+    {
+      "CheckId": "SEC_01",
+      "DisplayName": "Windows 防火墙",
+      "Category": "HwSwFwCheck",
+      "BindDll": "SelfDiagnostic.Checks.System.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.System.SystemCheckExecutors.CheckFirewall",
+      "TimeoutMs": 5000,
+      "Enabled": true,
+      "Params": {}
+    },
+    {
+      "CheckId": "SEC_02",
+      "DisplayName": "杀毒软件状态",
+      "Category": "HwSwFwCheck",
+      "BindDll": "SelfDiagnostic.Checks.System.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.System.SystemCheckExecutors.CheckAntivirus",
+      "TimeoutMs": 5000,
+      "Enabled": true,
+      "Params": {}
+    },
+    {
+      "CheckId": "SEC_03",
+      "DisplayName": "UAC (用户账户控制)",
+      "Category": "HwSwFwCheck",
+      "BindDll": "SelfDiagnostic.Checks.System.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.System.SystemCheckExecutors.CheckUac",
+      "TimeoutMs": 5000,
+      "Enabled": true,
+      "Params": {}
+    },
+    {
+      "CheckId": "SEC_04",
+      "DisplayName": "自动登录安全",
+      "Category": "HwSwFwCheck",
+      "BindDll": "SelfDiagnostic.Checks.System.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.System.SystemCheckExecutors.CheckAutoLogin",
+      "TimeoutMs": 5000,
+      "Enabled": true,
+      "Params": {}
+    },
+    {
+      "CheckId": "SFT_01",
+      "DisplayName": "开机启动项数量",
+      "Category": "HwSwFwCheck",
+      "BindDll": "SelfDiagnostic.Checks.System.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.System.SystemCheckExecutors.CheckStartupItems",
+      "TimeoutMs": 5000,
+      "Enabled": true,
+      "Params": {}
+    },
+    {
+      "CheckId": "SFT_02",
+      "DisplayName": "已安装程序数量",
+      "Category": "HwSwFwCheck",
+      "BindDll": "SelfDiagnostic.Checks.System.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.System.SystemCheckExecutors.CheckInstalledPrograms",
+      "TimeoutMs": 5000,
+      "Enabled": true,
+      "Params": {}
+    },
+    {
+      "CheckId": "SFT_03",
+      "DisplayName": "COM / 串口枚举",
+      "Category": "HwSwFwCheck",
+      "BindDll": "SelfDiagnostic.Checks.System.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.System.SystemCheckExecutors.CheckComPorts",
+      "TimeoutMs": 5000,
+      "Enabled": true,
+      "Params": {}
+    },
+    {
+      "CheckId": "PRF_01",
+      "DisplayName": "CPU 使用率",
+      "Category": "OpticalPerformanceCheck",
+      "BindDll": "SelfDiagnostic.Checks.System.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.System.SystemCheckExecutors.CheckCpu",
+      "TimeoutMs": 5000,
+      "Enabled": true,
+      "Params": {}
+    },
+    {
+      "CheckId": "PRF_02",
+      "DisplayName": "内存使用率",
+      "Category": "OpticalPerformanceCheck",
+      "BindDll": "SelfDiagnostic.Checks.System.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.System.SystemCheckExecutors.CheckMemory",
+      "TimeoutMs": 5000,
+      "Enabled": true,
+      "Params": {}
+    },
+    {
+      "CheckId": "PRF_03",
+      "DisplayName": "运行进程数",
+      "Category": "OpticalPerformanceCheck",
+      "BindDll": "SelfDiagnostic.Checks.System.dll",
+      "BindMethod": "SelfDiagnostic.Services.Executors.System.SystemCheckExecutors.CheckProcesses",
+      "TimeoutMs": 5000,
+      "Enabled": true,
+      "Params": {}
+    },
+    {
+      "CheckId": "DEMO_01",
+      "DisplayName": "Demo - 无参方法调用",
+      "Category": "SystemCheck",
+      "BindDll": "SelfDiagnostic.Checks.System.dll",
+      "BindMethod": "SelfDiagnostic.DemoClass.DemoMethod",
+      "TimeoutMs": 5000,
+      "Enabled": true,
+      "Params": {}
+    },
+    {
+      "CheckId": "DEMO_02",
+      "DisplayName": "Demo - 带参数加法计算",
+      "Category": "SystemCheck",
+      "BindDll": "SelfDiagnostic.Checks.System.dll",
+      "BindMethod": "SelfDiagnostic.DemoClass.DemoMethodAdd",
+      "TimeoutMs": 5000,
+      "Enabled": true,
+      "Params": {
+        "a": "10",
+        "b": "25"
+      }
+    }
+  ]
+}
